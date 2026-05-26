@@ -121,11 +121,14 @@
         try
         {
             _cameraModule ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/camera.module.js");
+            _gate?.ForceStatus("granted");
+            StateHasChanged();
+            await Task.Delay(50);
+
             var result = await _cameraModule.InvokeAsync<bool>("startCamera", "camera-stream", _frontCamera);
             if (result)
             {
                 _isStreaming = true;
-                _gate?.ForceStatus("granted");
                 ToastService.Success("Camera stream started successfully.");
             }
         }

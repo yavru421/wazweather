@@ -129,11 +129,14 @@
         {
             _mediaModule ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/media.module.js");
             _selfReference = DotNetObjectReference.Create(this);
+            _gate?.ForceStatus("granted");
+            StateHasChanged();
+            await Task.Delay(50);
+
             var result = await _mediaModule.InvokeAsync<bool>("startMic", "mic-canvas", _selfReference, nameof(UpdateVolumeCallback));
             if (result)
             {
                 _isListening = true;
-                _gate?.ForceStatus("granted");
                 ToastService.Success("Microphone active.");
             }
             else
