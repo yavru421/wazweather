@@ -382,11 +382,29 @@
     [JSInvokable]
     public void OnTunerReading(System.Text.Json.JsonElement data)
     {
-        _currentFrequency = data.GetProperty("frequency").GetDouble();
-        _currentNote = data.GetProperty("note").GetString() ?? "--";
-        _currentOctave = data.GetProperty("octave").GetInt32();
-        _cents = data.GetProperty("cents").GetInt32();
-        _rms = data.GetProperty("rms").GetDouble();
+        double nextFreq = data.GetProperty("frequency").GetDouble();
+        string nextNote = data.GetProperty("note").GetString() ?? "--";
+        int nextOctave = data.GetProperty("octave").GetInt32();
+        int nextCents = data.GetProperty("cents").GetInt32();
+        double nextRms = data.GetProperty("rms").GetDouble();
+
+        if (nextNote == "--" || _currentNote == "--" || nextNote != _currentNote || nextOctave != _currentOctave)
+        {
+            // Reset and jump immediately if the note name changes or falls silent
+            _currentNote = nextNote;
+            _currentOctave = nextOctave;
+            _cents = nextCents;
+            _currentFrequency = nextFreq;
+        }
+        else
+        {
+            // Exponential Moving Average (EMA) smoothing for cents and frequency to prevent rapid jittering
+            const double alpha = 0.25; // Smoothing factor (0.0 to 1.0) where lower is smoother
+            _cents = (int)Math.Round(_cents * (1.0 - alpha) + nextCents * alpha);
+            _currentFrequency = _currentFrequency * (1.0 - alpha) + nextFreq * alpha;
+        }
+
+        _rms = nextRms;
 
         if (data.TryGetProperty("targetFrequency", out var tf))
             _targetFrequency = tf.GetDouble();
