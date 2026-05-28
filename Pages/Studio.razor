@@ -2,156 +2,386 @@
 @inject IStudioService StudioService
 @inject IToastService ToastService
 @implements IAsyncDisposable
+@using BlazorPwaTemplate.Models
+@using System.Text.RegularExpressions
 
-<PageTitle>Beatmaker Studio — TunerPWA</PageTitle>
+<PageTitle>Beatmaker Studio — SQ-6 Tactile Console</PageTitle>
 
 <div class="studio-page">
-
-    <!-- ── Header ─────────────────────────────────────────── -->
+    <!-- Header -->
     <div class="studio-header">
         <div class="header-brand">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--signal)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--neon-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
-            <h1>Beatmaker Studio</h1>
+            <div>
+                <h1>Beatmaker Studio</h1>
+                <span class="sub-label">A&amp;H SQ-6 Tactile Loop Engine</span>
+            </div>
         </div>
         
         <div class="studio-global-controls">
-            <!-- Play/Pause -->
-            @if (!_isPlaying)
+            @if (_projectInitialized)
             {
-                <button id="btn-studio-play" class="btn-studio-control btn-play" @onclick="StartSequencerAsync">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
-                    Play
-                </button>
-            }
-            else
-            {
-                <button id="btn-studio-stop" class="btn-studio-control btn-stop" @onclick="StopSequencerAsync">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <rect x="4" y="4" width="16" height="16" rx="2"/>
-                    </svg>
-                    Stop
-                </button>
-            }
+                <div class="global-setting-pill">
+                    <span class="pill-label">BPM</span>
+                    <input type="number" min="60" max="200" class="bpm-input" @bind="_state.Bpm" @bind:after="UpdateAudioEngineState" />
+                </div>
+                <div class="global-setting-pill">
+                    <span class="pill-label">KEY</span>
+                    <select class="pill-select" @bind="_state.Key" @bind:after="OnKeyScaleChanged">
+                        @foreach (var k in _keys)
+                        {
+                            <option value="@k">@k</option>
+                        }
+                    </select>
+                </div>
+                <div class="global-setting-pill">
+                    <span class="pill-label">SCALE</span>
+                    <select class="pill-select" @bind="_state.Scale" @bind:after="OnKeyScaleChanged">
+                        <option value="Minor">Minor</option>
+                        <option value="Major">Major</option>
+                    </select>
+                </div>
 
-            <button id="btn-studio-clear" class="btn-studio-secondary" @onclick="ClearGrid">Clear</button>
-
-            <!-- Presets -->
-            <select id="preset-select" class="glass-select" @onchange="OnPresetChanged">
-                <option value="none">-- Select Preset Pattern --</option>
-                <option value="house">House Groove</option>
-                <option value="hiphop">Boom Bap Hip-Hop</option>
-                <option value="synthwave">Retro Synthwave</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- ── Settings Row ────────────────────────────────────── -->
-    <div class="studio-settings-row">
-        <div class="tempo-control">
-            <span class="control-label">BPM: <strong>@_bpm</strong></span>
-            <input type="range" min="60" max="200" step="1" class="glass-slider"
-                   @bind="_bpm" @bind:event="oninput" @onchange="OnBpmChanged" />
-        </div>
-        <div class="melody-pencil">
-            <span class="control-label">Lead Synth Pitch:</span>
-            <div class="note-selector-wrap">
-                @foreach (var note in _noteFrequencies.Keys)
+                @if (!_isPlaying)
                 {
-                    <button class="btn-note-picker @(note == _selectedMelodyNote ? "active" : "")"
-                            @onclick="() => SetPencilNote(note)">
-                        @note
+                    <button id="btn-studio-play" class="btn-studio-control btn-play" @onclick="StartSequencerAsync">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        Play
                     </button>
                 }
-            </div>
-        </div>
-    </div>
-
-    <!-- ── Sequencer Grid Matrix ──────────────────────────── -->
-    <div class="sequencer-card">
-        <!-- Visual Playhead Indicator Row -->
-        <div class="playhead-track">
-            <div class="track-info-spacer"></div>
-            <div class="steps-row">
-                @for (int s = 0; s < 16; s++)
+                else
                 {
-                    <div class="playhead-dot @(s == _currentStep && _isPlaying ? "active" : "")"></div>
+                    <button id="btn-studio-stop" class="btn-studio-control btn-stop" @onclick="StopSequencerAsync">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="4" y="4" width="16" height="16" rx="2"/>
+                        </svg>
+                        Stop
+                    </button>
                 }
-            </div>
-        </div>
-
-        <div class="grid-matrix">
-            @for (int t = 0; t < _tracks.Length; t++)
-            {
-                var trackIndex = t;
-                <div class="matrix-row">
-                    <div class="track-label">
-                        <span class="track-icon">@_tracks[trackIndex].Icon</span>
-                        <span class="track-name">@_tracks[trackIndex].Name</span>
-                    </div>
-                    <div class="steps-row">
-                        @for (int s = 0; s < 16; s++)
-                        {
-                            var stepIndex = s;
-                            var isActive = _grid[trackIndex][stepIndex];
-                            var isPlayhead = stepIndex == _currentStep && _isPlaying;
-                            
-                            <button class="step-btn @(isActive ? "active" : "") @(isPlayhead ? "playhead" : "")"
-                                    @onclick="() => ToggleStep(trackIndex, stepIndex)">
-                                @if (trackIndex == 4 && isActive)
-                                {
-                                    <span class="melody-label">@GetMelodyNoteName(stepIndex)</span>
-                                }
-                            </button>
-                        }
-                    </div>
-                </div>
+                <button id="btn-studio-clear" class="btn-studio-secondary" @onclick="ClearGrid">Clear</button>
+                <button class="btn-studio-secondary danger-text" @onclick="ShowNewProjectModal">New Project</button>
             }
         </div>
     </div>
 
+    @if (!_projectInitialized)
+    {
+        <!-- ── BUILDER / NEW PROJECT SETUP FLOW ────────────────── -->
+        <div class="studio-card builder-card animate-fade">
+            <div class="builder-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--neon-blue)" stroke-width="1.5">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+            </div>
+            <h2>Initialize New Beat Project</h2>
+            <p class="builder-subtitle">Choose a base vibe template to wire the mixer strips, or start completely clean.</p>
+
+            <div class="setup-sections">
+                <!-- Vibe Template Selection -->
+                <div class="setup-section">
+                    <h3>1. Select Vibe Template</h3>
+                    <div class="templates-grid">
+                        <div class="template-card @(_selectedTemplate == "dre" ? "active" : "")" @onclick='() => SelectTemplate("dre")'>
+                            <span class="template-icon">🎧</span>
+                            <span class="template-name">West Coast Boom</span>
+                            <span class="template-desc">Inspired by Dre. High whistle, crisp guitar stabs, punchy acoustic drums.</span>
+                        </div>
+                        <div class="template-card @(_selectedTemplate == "gorillaz" ? "active" : "")" @onclick='() => SelectTemplate("gorillaz")'>
+                            <span class="template-icon">🎸</span>
+                            <span class="template-name">Resonant Dub Vibe</span>
+                            <span class="template-desc">Inspired by Gorillaz. Melodica lead, sub-wobble bass, vintage drum rimshots.</span>
+                        </div>
+                        <div class="template-card @(_selectedTemplate == "blank" ? "active" : "")" @onclick='() => SelectTemplate("blank")'>
+                            <span class="template-icon">🎛️</span>
+                            <span class="template-name">Empty Slate</span>
+                            <span class="template-desc">Completely empty sequencer grid and default fader alignments.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parameters Setting -->
+                <div class="setup-section params-section">
+                    <h3>2. Project Pitch & Tempo</h3>
+                    <div class="params-row">
+                        <div class="param-input-group">
+                            <span class="control-label">BPM (Tempo):</span>
+                            <div class="bpm-slider-wrap">
+                                <input type="range" min="60" max="180" @bind="_builderBpm" @bind:event="oninput" class="glass-slider" />
+                                <span class="param-val">@_builderBpm BPM</span>
+                            </div>
+                        </div>
+
+                        <div class="param-input-group">
+                            <span class="control-label">Root Key:</span>
+                            <select class="glass-select" @bind="_builderKey">
+                                @foreach (var k in _keys)
+                                {
+                                    <option value="@k">@k</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="param-input-group">
+                            <span class="control-label">Scale:</span>
+                            <select class="glass-select" @bind="_builderScale">
+                                <option value="Minor">Natural Minor</option>
+                                <option value="Major">Natural Major</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="builder-footer">
+                <button class="btn-studio-control btn-play btn-large" @onclick="BuildProject">
+                    🚀 Load Console & Play
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- ── MASTER CONSOLE VIEW ────────────────────────────── -->
+        
+        <!-- Chords Selection Strip -->
+        <div class="studio-card chords-card animate-fade">
+            <div class="chords-header">
+                <h3>🎹 CHORD SEQUENCER BACKING</h3>
+                <span class="chords-subtitle">Chord auto-triggers on beats 1 &amp; 9. Click to audition &amp; lock next chord.</span>
+            </div>
+            <div class="chords-row">
+                @for (int i = 0; i < 8; i++)
+                {
+                    var idx = i;
+                    var chord = _state.Chords[idx];
+                    var isActive = _state.ActiveChordIndex == idx;
+
+                    <div class="chord-cell @(isActive ? "active" : "")">
+                        <button class="chord-btn" @onclick="() => TriggerChordPad(idx)">
+                            <span class="chord-label">STEP @(idx + 1)</span>
+                            <span class="chord-val">@(chord == "none" ? "--" : chord)</span>
+                        </button>
+                        <div class="chord-octaves">
+                            <button class="btn-oct" @onclick="() => AdjustOctave(idx, 1)">▲</button>
+                            <button class="btn-oct" @onclick="() => AdjustOctave(idx, -1)">▼</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- 5-Channel Tactile Mixer Console -->
+        <div class="studio-card mixer-card animate-fade">
+            <div class="mixer-console-desk">
+                @for (int t = 0; t < 5; t++)
+                {
+                    var trackIndex = t;
+                    var isArmed = _selectedTrack == trackIndex;
+                    var trackColor = _trackColors[trackIndex];
+                    var trackName = _trackNames[trackIndex];
+
+                    <div class="channel-strip @(isArmed ? "armed" : "")" style="--track-color: @trackColor">
+                        
+                        <!-- LCD Header Screen -->
+                        <div class="channel-lcd">
+                            <span class="lcd-number">CH 0@(trackIndex + 1)</span>
+                            <span class="lcd-name">@trackName.ToUpper()</span>
+                            <span class="lcd-preset">@GetPresetLabel(trackIndex, _state.TonePreset[trackIndex])</span>
+                        </div>
+
+                        <!-- Arm / Select Button -->
+                        <button class="btn-channel-arm @(isArmed ? "active" : "")" @onclick="() => SelectTrack(trackIndex)">
+                            SEL / ARM
+                        </button>
+
+                        <!-- Knobs/Sliders Area -->
+                        <div class="channel-knobs">
+                            <div class="knob-row">
+                                <span class="knob-label">TONE MORPH</span>
+                                <input type="range" min="0" max="1" step="0.01" class="strip-slider" 
+                                       @bind="_state.TonePreset[trackIndex]" @bind:event="oninput" @onchange="UpdateAudioEngineState" />
+                            </div>
+
+                            <div class="knob-row">
+                                <span class="knob-label">PITCH</span>
+                                <input type="range" min="0" max="1" step="0.01" class="strip-slider" 
+                                       @bind="_state.Pitch[trackIndex]" @bind:event="oninput" @onchange="UpdateAudioEngineState" />
+                            </div>
+
+                            <div class="knob-row">
+                                <span class="knob-label">DECAY</span>
+                                <input type="range" min="0" max="1" step="0.01" class="strip-slider" 
+                                       @bind="_state.Decay[trackIndex]" @bind:event="oninput" @onchange="UpdateAudioEngineState" />
+                            </div>
+                        </div>
+
+                        <!-- Volume Fader -->
+                        <div class="channel-fader-container">
+                            <div class="fader-db-scale">
+                                <span>+10</span>
+                                <span>0</span>
+                                <span>-6</span>
+                                <span>-12</span>
+                                <span>-24</span>
+                                <span>-∞</span>
+                            </div>
+                            <div class="fader-track-wrapper">
+                                <input type="range" min="0" max="1" step="0.01" class="strip-fader" 
+                                       @bind="_state.Volume[trackIndex]" @bind:event="oninput" @onchange="UpdateAudioEngineState" />
+                            </div>
+                        </div>
+
+                        <!-- Tap-Record Pad -->
+                        <div class="channel-pad-wrapper">
+                            <button class="btn-tap-pad @(_isPlaying && _currentStep % 4 == 0 ? "beat-flash" : "")" 
+                                    @onclick="() => TriggerTap(trackIndex)"
+                                    @onmousedown="() => TriggerTap(trackIndex)"
+                                    style="--pad-color: @trackColor">
+                                <span class="pad-txt">TAP</span>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Horizontal Ribbon Controller (Scale-Locked Pitch Slide) -->
+        <div class="studio-card ribbon-card @((_selectedTrack == 3 || _selectedTrack == 4) ? "visible" : "hidden") animate-fade">
+            <div class="ribbon-header">
+                <h3>🎛️ SCALE-LOCKED RIBBON PLAYPAD — @(_selectedTrack == 3 ? "BASS LINE" : "LEAD SYNTH")</h3>
+                <span class="ribbon-note-display">
+                    Active Scale: <strong>@_state.Key @_state.Scale</strong> | 
+                    Pitch: <strong style="color: var(--neon-blue)">@GetNoteNameFromFrequency(_selectedTrack == 3 ? _activeBassFrequency : _activeLeadFrequency)</strong> (@((_selectedTrack == 3 ? _activeBassFrequency : _activeLeadFrequency).ToString("0.0")) Hz)
+                </span>
+            </div>
+            
+            <div class="ribbon-strip-wrapper">
+                <div @ref="_ribbonRef" class="ribbon-strip">
+                    @{
+                        var currentFrequencies = _selectedTrack == 3 ? _bassScaleFrequencies : _leadScaleFrequencies;
+                        var activeFreq = _selectedTrack == 3 ? _activeBassFrequency : _activeLeadFrequency;
+                        if (currentFrequencies != null)
+                        {
+                            for (int i = 0; i < currentFrequencies.Count; i++)
+                            {
+                                var f = currentFrequencies[i];
+                                var name = GetNoteNameFromFrequency(f);
+                                var isCurrent = Math.Abs(activeFreq - f) < 1.0;
+                                <div class="ribbon-node @(isCurrent ? "active-node" : "")" style="width: @(100.0 / currentFrequencies.Count)%;">
+                                    <span class="node-label">@name</span>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+            <p class="ribbon-instruction">Drag, click, or slide across the bar to perform glide melodies with zero latency. While playing, it records notes onto the active sequencer grid step!</p>
+        </div>
+
+        <!-- 16-Step Grid Sequencer Dashboard -->
+        <div class="studio-card sequencer-card animate-fade">
+            <div class="sequencer-header">
+                <h3>🎛️ 16-STEP SEQUENCER DASHBOARD</h3>
+                <span class="sequencer-subtitle">Click blocks to override notes manually. Pinned items have solid colors; glowing playhead indicates sequence position.</span>
+            </div>
+
+            <!-- Playhead indicator row -->
+            <div class="playhead-track">
+                <div class="track-label-spacer"></div>
+                <div class="steps-row">
+                    @for (int s = 0; s < 16; s++)
+                    {
+                        var step = s;
+                        <div class="playhead-dot @(step == _currentStep && _isPlaying ? "active" : "")">
+                            <span class="step-tick-num">@(step + 1)</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Grid Matrix -->
+            <div class="grid-matrix">
+                @for (int t = 0; t < 5; t++)
+                {
+                    var trackIndex = t;
+                    var trackName = _trackNames[trackIndex];
+                    var trackColor = _trackColors[trackIndex];
+                    
+                    <div class="matrix-row">
+                        <div class="track-label">
+                            <span class="track-icon">@_trackIcons[trackIndex]</span>
+                            <span class="track-name">@trackName</span>
+                        </div>
+                        <div class="steps-row">
+                            @for (int s = 0; s < 16; s++)
+                            {
+                                var stepIndex = s;
+                                var isActive = _state.Grid[trackIndex][stepIndex];
+                                var isPinned = _pinned[trackIndex][stepIndex];
+                                var isPlayhead = stepIndex == _currentStep && _isPlaying;
+                                
+                                <button class="step-btn @(isActive ? "active" : "") @(isPinned ? "pinned" : "ghosted") @(isPlayhead ? "playhead" : "")"
+                                        style="--track-color: @trackColor"
+                                        @onclick="() => HandleStepClick(trackIndex, stepIndex)">
+                                    @if (isActive)
+                                    {
+                                        if (trackIndex == 3)
+                                        {
+                                            <span class="melody-label">@GetNoteNameFromFrequency(_state.BassNotes[stepIndex])</span>
+                                        }
+                                        else if (trackIndex == 4)
+                                        {
+                                            <span class="melody-label">@GetNoteNameFromFrequency(_state.Melody[stepIndex])</span>
+                                        }
+                                    }
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>
 
 @code {
+    private StudioAudioState _state = new();
+    private bool[][] _pinned = new bool[5][];
+    private bool _projectInitialized = false;
     private bool _isPlaying = false;
-    private int _bpm = 120;
     private int _currentStep = 0;
+    private int _selectedTrack = 4; // default to Lead Synth
 
-    // Track definition helper
-    private record TrackDef(string Name, string Icon);
-    private readonly TrackDef[] _tracks = {
-        new("Kick", "🥁"),
-        new("Snare", "⚡"),
-        new("Hi-Hat", "✨"),
-        new("Clap", "👏"),
-        new("Lead Synth", "🎹")
-    };
+    private string _selectedTemplate = "dre";
+    private int _builderBpm = 95;
+    private string _builderKey = "A";
+    private string _builderScale = "Minor";
 
-    // 16 steps grid matrix
-    private bool[][] _grid = new bool[5][];
-    private double[] _melodyPitches = new double[16];
+    private double _activeBassFrequency;
+    private double _activeLeadFrequency;
+    private List<double> _bassScaleFrequencies = new();
+    private List<double> _leadScaleFrequencies = new();
 
-    private string _selectedMelodyNote = "C4";
+    private readonly string[] _keys = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+    
+    private readonly string[] _trackNames = { "Kick", "Snare", "Hi-Hat", "Bass Line", "Lead Synth" };
+    private readonly string[] _trackIcons = { "🥁", "⚡", "✨", "🎸", "🎹" };
+    private readonly string[] _trackColors = { "#ff5e36", "#bd00ff", "#00d2ff", "#ffc837", "#00ff87" };
 
-    // Pitch dictionary mapping names to frequencies
-    private readonly Dictionary<string, double> _noteFrequencies = new()
-    {
-        { "C4", 261.63 },
-        { "D4", 293.66 },
-        { "E4", 329.63 },
-        { "G4", 392.00 },
-        { "A4", 440.00 },
-        { "C5", 523.25 }
-    };
-
+    private ElementReference _ribbonRef;
     private DotNetObjectReference<object>? _selfRef;
 
     protected override void OnInitialized()
     {
-        ClearGrid();
+        for (int i = 0; i < 5; i++)
+        {
+            _pinned[i] = new bool[16];
+        }
+        SelectTemplate("dre");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -159,29 +389,305 @@
         if (firstRender)
         {
             _selfRef = DotNetObjectReference.Create<object>(this);
-            await StudioService.InitStudioAsync(_selfRef, nameof(OnPlayheadTick));
+            await StudioService.InitStudioAsync(_selfRef, nameof(OnPlayheadTick), nameof(OnGridUpdated));
+            
+            // Connect Ribbon Controller
+            await Task.Delay(200);
+            await BindRibbon();
         }
     }
 
-    private void ClearGrid()
+    private async Task BindRibbon()
     {
+        try
+        {
+            if (_selfRef != null)
+            {
+                await StudioService.InitRibbonAsync(_ribbonRef, _selfRef, nameof(OnRibbonDragged));
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing ribbon: {ex.Message}");
+        }
+    }
+
+    private void SelectTemplate(string template)
+    {
+        _selectedTemplate = template;
+        if (template == "dre")
+        {
+            _builderBpm = 95;
+            _builderKey = "A";
+            _builderScale = "Minor";
+        }
+        else if (template == "gorillaz")
+        {
+            _builderBpm = 84;
+            _builderKey = "D#";
+            _builderScale = "Minor";
+        }
+        else
+        {
+            _builderBpm = 100;
+            _builderKey = "C";
+            _builderScale = "Minor";
+        }
+    }
+
+    private void ShowNewProjectModal()
+    {
+        _projectInitialized = false;
+        _isPlaying = false;
+        _ = StudioService.StopPlayAsync();
+    }
+
+    private async Task BuildProject()
+    {
+        _state = new StudioAudioState
+        {
+            Bpm = _builderBpm,
+            Key = _builderKey,
+            Scale = _builderScale,
+            Grid = new bool[5][],
+            Volume = new double[5] { 0.85, 0.75, 0.8, 0.8, 0.75 },
+            Pitch = new double[5] { 0.5, 0.5, 0.5, 0.5, 0.5 },
+            Decay = new double[5] { 0.5, 0.5, 0.5, 0.5, 0.5 },
+            TonePreset = new double[5] { 0.0, 0.0, 0.0, 0.0, 0.0 }
+        };
+
         for (int i = 0; i < 5; i++)
         {
-            _grid[i] = new bool[16];
+            _state.Grid[i] = new bool[16];
+            _pinned[i] = new bool[16];
         }
-        for (int i = 0; i < 16; i++)
+
+        UpdateScaleFrequencies();
+        GenerateChordProgression();
+
+        // Populate base templates
+        if (_selectedTemplate == "dre")
         {
-            _melodyPitches[i] = 261.63; // Default C4
+            _state.TonePreset[0] = 0.5;
+            _state.TonePreset[1] = 0.5;
+            _state.TonePreset[2] = 0.5;
+            _state.TonePreset[3] = 0.15;
+            _state.TonePreset[4] = 0.15;
+
+            // Setup beat
+            _state.Grid[0][0] = true; _pinned[0][0] = true;
+            _state.Grid[0][8] = true; _pinned[0][8] = true;
+            _state.Grid[0][11] = true; _pinned[0][11] = true;
+
+            _state.Grid[1][4] = true; _pinned[1][4] = true;
+            _state.Grid[1][12] = true; _pinned[1][12] = true;
+
+            for (int s = 0; s < 16; s += 2)
+            {
+                _state.Grid[2][s] = true;
+                _pinned[2][s] = true;
+            }
+
+            // High whistle melody: E6 = 1318.51, D6 = 1174.66, C6 = 1046.50, B5 = 987.77, A5 = 880.00
+            _state.Grid[4][1] = true; _pinned[4][1] = true; _state.Melody[1] = 1318.51;
+            _state.Grid[4][3] = true; _pinned[4][3] = true; _state.Melody[3] = 1174.66;
+            _state.Grid[4][5] = true; _pinned[4][5] = true; _state.Melody[5] = 1046.50;
+            _state.Grid[4][7] = true; _pinned[4][7] = true; _state.Melody[7] = 987.77;
+            _state.Grid[4][9] = true; _pinned[4][9] = true; _state.Melody[9] = 880.00;
+
+            _selectedTrack = 4;
         }
+        else if (_selectedTemplate == "gorillaz")
+        {
+            _state.TonePreset[0] = 0.1;
+            _state.TonePreset[1] = 0.1;
+            _state.TonePreset[2] = 0.1;
+            _state.TonePreset[3] = 0.5;
+            _state.TonePreset[4] = 0.5;
+
+            // Setup beat
+            _state.Grid[0][0] = true; _pinned[0][0] = true;
+            _state.Grid[0][8] = true; _pinned[0][8] = true;
+            _state.Grid[0][12] = true; _pinned[0][12] = true;
+
+            _state.Grid[1][4] = true; _pinned[1][4] = true;
+            _state.Grid[1][12] = true; _pinned[1][12] = true;
+
+            for (int s = 0; s < 16; s += 2)
+            {
+                _state.Grid[2][s] = true;
+                _pinned[2][s] = true;
+            }
+
+            // Clint Eastwood bassline: Eb2 = 77.78, Gb2 = 92.50, Ab2 = 103.83
+            _state.Grid[3][0] = true; _pinned[3][0] = true; _state.BassNotes[0] = 77.78;
+            _state.Grid[3][2] = true; _pinned[3][2] = true; _state.BassNotes[2] = 77.78;
+            _state.Grid[3][4] = true; _pinned[3][4] = true; _state.BassNotes[4] = 92.50;
+            _state.Grid[3][6] = true; _pinned[3][6] = true; _state.BassNotes[6] = 103.83;
+            _state.Grid[3][8] = true; _pinned[3][8] = true; _state.BassNotes[8] = 92.50;
+            _state.Grid[3][10] = true; _pinned[3][10] = true; _state.BassNotes[10] = 77.78;
+
+            // Clint Eastwood melodica melody: Ab4 = 415.30, Bb4 = 466.16, B4 = 493.88, Db5 = 554.37
+            _state.Grid[4][2] = true; _pinned[4][2] = true; _state.Melody[2] = 415.30;
+            _state.Grid[4][4] = true; _pinned[4][4] = true; _state.Melody[4] = 466.16;
+            _state.Grid[4][6] = true; _pinned[4][6] = true; _state.Melody[6] = 493.88;
+            _state.Grid[4][8] = true; _pinned[4][8] = true; _state.Melody[8] = 554.37;
+            _state.Grid[4][10] = true; _pinned[4][10] = true; _state.Melody[10] = 466.16;
+
+            _selectedTrack = 3;
+        }
+        else
+        {
+            _selectedTrack = 4;
+        }
+
+        _projectInitialized = true;
+        await UpdateAudioEngineState();
+        await StartSequencerAsync();
+        ToastService.Success("Mixer console initialized and playing!");
+        
+        // Rebind ribbon touch handler on next tick
+        _ = Task.Delay(150).ContinueWith(_ => InvokeAsync(BindRibbon));
+    }
+
+    private void OnKeyScaleChanged()
+    {
+        UpdateScaleFrequencies();
+        GenerateChordProgression();
+        UpdateAudioEngineState();
         StateHasChanged();
+    }
+
+    private void UpdateScaleFrequencies()
+    {
+        _bassScaleFrequencies = GetScaleFrequencies(_state.Key, _state.Scale, 2);
+        _leadScaleFrequencies = GetScaleFrequencies(_state.Key, _state.Scale, 4);
+
+        if (_bassScaleFrequencies.Count > 0) _activeBassFrequency = _bassScaleFrequencies[0];
+        if (_leadScaleFrequencies.Count > 0) _activeLeadFrequency = _leadScaleFrequencies[0];
+    }
+
+    private List<double> GetScaleFrequencies(string key, string scale, int startOctave)
+    {
+        string[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+        int rootIdx = Array.IndexOf(noteNames, key);
+        if (rootIdx == -1) rootIdx = 0;
+
+        int[] intervals = scale == "Major" 
+            ? new[] { 0, 2, 4, 5, 7, 9, 11 } 
+            : new[] { 0, 2, 3, 5, 7, 8, 10 };
+
+        var list = new List<double>();
+        for (int oct = 0; oct < 2; oct++)
+        {
+            foreach (var interval in intervals)
+            {
+                int noteIdx = (rootIdx + interval) % 12;
+                int octaveShift = (rootIdx + interval) / 12;
+                int currentOctave = startOctave + oct + octaveShift;
+                
+                int semitones = noteIdx + (currentOctave + 1) * 12;
+                double freq = 440.0 * Math.Pow(2.0, (double)(semitones - 69) / 12.0);
+                list.Add(freq);
+            }
+        }
+        int capNoteIdx = rootIdx;
+        int capOctave = startOctave + 2;
+        int capSemitones = capNoteIdx + (capOctave + 1) * 12;
+        double capFreq = 440.0 * Math.Pow(2.0, (double)(capSemitones - 69) / 12.0);
+        list.Add(capFreq);
+
+        return list;
+    }
+
+    private string GetNoteNameFromFrequency(double frequency)
+    {
+        if (frequency <= 0) return "--";
+        double midiDouble = 69.0 + 12.0 * Math.Log(frequency / 440.0) / Math.Log(2.0);
+        int midi = (int)Math.Round(midiDouble);
+        
+        string[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+        int octave = (midi / 12) - 1;
+        int noteIdx = midi % 12;
+        if (noteIdx < 0) noteIdx = 0;
+        
+        return $"{noteNames[noteIdx]}{octave}";
+    }
+
+    private void GenerateChordProgression()
+    {
+        string key = _state.Key;
+        string scale = _state.Scale;
+        
+        string[] notes = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+        int rootIdx = Array.IndexOf(notes, key);
+        if (rootIdx == -1) rootIdx = 0;
+
+        if (scale == "Minor")
+        {
+            _state.Chords[0] = $"{notes[rootIdx]}min7";
+            _state.Chords[1] = $"{notes[(rootIdx + 8) % 12]}maj7";
+            _state.Chords[2] = $"{notes[(rootIdx + 3) % 12]}maj7";
+            _state.Chords[3] = $"{notes[(rootIdx + 10) % 12]}7";
+            _state.Chords[4] = $"{notes[(rootIdx + 5) % 12]}min7";
+            _state.Chords[5] = $"{notes[(rootIdx + 7) % 12]}min7";
+            _state.Chords[6] = $"{notes[(rootIdx + 1) % 12]}maj7";
+            _state.Chords[7] = $"{notes[(rootIdx + 7) % 12]}7";
+        }
+        else // Major
+        {
+            _state.Chords[0] = $"{notes[rootIdx]}maj7";
+            _state.Chords[1] = $"{notes[(rootIdx + 2) % 12]}min7";
+            _state.Chords[2] = $"{notes[(rootIdx + 4) % 12]}min7";
+            _state.Chords[3] = $"{notes[(rootIdx + 5) % 12]}maj7";
+            _state.Chords[4] = $"{notes[(rootIdx + 7) % 12]}7";
+            _state.Chords[5] = $"{notes[(rootIdx + 9) % 12]}min7";
+            _state.Chords[6] = $"{notes[(rootIdx + 11) % 12]}dim";
+            _state.Chords[7] = $"{notes[rootIdx]}maj9";
+        }
+    }
+
+    private string GetPresetLabel(int trackIndex, double val)
+    {
+        if (trackIndex == 0)
+        {
+            return val < 0.35 ? "Vintage" : val < 0.7 ? "West Coast" : "808 Sub";
+        }
+        if (trackIndex == 1)
+        {
+            return val < 0.35 ? "Rimshot" : val < 0.7 ? "Snappy" : "808 Snare";
+        }
+        if (trackIndex == 2)
+        {
+            return val < 0.35 ? "Analog" : val < 0.7 ? "Crisp" : "Trap";
+        }
+        if (trackIndex == 3)
+        {
+            return val < 0.35 ? "Deep Sub" : val < 0.7 ? "Reso Dub" : "Acid Saw";
+        }
+        if (trackIndex == 4)
+        {
+            return val < 0.35 ? "Whistle" : val < 0.7 ? "Melodica" : "Pluck";
+        }
+        return "--";
+    }
+
+    private void SelectTrack(int trackIndex)
+    {
+        _selectedTrack = trackIndex;
+        _ = Task.Delay(100).ContinueWith(_ => InvokeAsync(BindRibbon));
+    }
+
+    private async Task TriggerTap(int trackIndex)
+    {
+        await StudioService.TriggerLiveTapAsync(trackIndex);
     }
 
     private async Task StartSequencerAsync()
     {
         _isPlaying = true;
-        await StudioService.StartPlayAsync(_grid, _melodyPitches, _bpm);
+        await StudioService.StartPlayAsync(_state);
         ToastService.Success("Sequencer playing!");
-        StateHasChanged();
     }
 
     private async Task StopSequencerAsync()
@@ -189,7 +695,22 @@
         _isPlaying = false;
         await StudioService.StopPlayAsync();
         _currentStep = 0;
-        StateHasChanged();
+    }
+
+    private void ClearGrid()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            _state.Grid[i] = new bool[16];
+            _pinned[i] = new bool[16];
+        }
+        for (int i = 0; i < 16; i++)
+        {
+            _state.Melody[i] = 261.63;
+            _state.BassNotes[i] = 65.41;
+        }
+        UpdateAudioEngineState();
+        ToastService.Success("Grid cleared!");
     }
 
     [JSInvokable]
@@ -199,118 +720,159 @@
         StateHasChanged();
     }
 
-    private async Task ToggleStep(int trackIndex, int stepIndex)
+    [JSInvokable]
+    public void OnGridUpdated(bool[][] newGrid, double[] newMelody)
     {
-        if (trackIndex == 4) // Melody lead track
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnLiveTapRecorded(int trackIndex, int step)
+    {
+        _state.Grid[trackIndex][step] = true;
+        _pinned[trackIndex][step] = true;
+
+        if (trackIndex == 3)
         {
-            // If active and clicked, toggle off
-            if (_grid[trackIndex][stepIndex])
-            {
-                _grid[trackIndex][stepIndex] = false;
-            }
-            else
-            {
-                // Toggle on and apply active pencil pitch
-                _grid[trackIndex][stepIndex] = true;
-                _melodyPitches[stepIndex] = _noteFrequencies[_selectedMelodyNote];
-            }
+            _state.BassNotes[step] = _activeBassFrequency;
+        }
+        else if (trackIndex == 4)
+        {
+            _state.Melody[step] = _activeLeadFrequency;
+        }
+
+        UpdateAudioEngineState();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnRibbonDragged(double pct)
+    {
+        var scaleFreqs = _selectedTrack == 3 ? _bassScaleFrequencies : _leadScaleFrequencies;
+        if (scaleFreqs == null || scaleFreqs.Count == 0) return;
+
+        int idx = (int)(pct * scaleFreqs.Count);
+        idx = Math.Max(0, Math.Min(scaleFreqs.Count - 1, idx));
+        double freq = scaleFreqs[idx];
+
+        if (_selectedTrack == 3)
+        {
+            _activeBassFrequency = freq;
         }
         else
         {
-            _grid[trackIndex][stepIndex] = !_grid[trackIndex][stepIndex];
+            _activeLeadFrequency = freq;
         }
+
+        await StudioService.PlayFrequencyAsync(_selectedTrack, freq);
 
         if (_isPlaying)
         {
-            await StudioService.UpdateStateAsync(_grid, _melodyPitches, _bpm);
+            _state.Grid[_selectedTrack][_currentStep] = true;
+            _pinned[_selectedTrack][_currentStep] = true;
+            if (_selectedTrack == 3)
+            {
+                _state.BassNotes[_currentStep] = freq;
+            }
+            else
+            {
+                _state.Melody[_currentStep] = freq;
+            }
+            await StudioService.UpdateStateAsync(_state);
         }
+
         StateHasChanged();
     }
 
-    private void SetPencilNote(string note)
+    private void HandleStepClick(int trackIndex, int stepIndex)
     {
-        _selectedMelodyNote = note;
-    }
+        bool isActive = _state.Grid[trackIndex][stepIndex];
+        bool isPinned = _pinned[trackIndex][stepIndex];
 
-    private string GetMelodyNoteName(int stepIndex)
-    {
-        var freq = _melodyPitches[stepIndex];
-        return _noteFrequencies.FirstOrDefault(x => Math.Abs(x.Value - freq) < 1.0).Key ?? "--";
-    }
-
-    private async void OnBpmChanged(ChangeEventArgs e)
-    {
-        if (_isPlaying)
+        if (isActive && isPinned)
         {
-            await StudioService.UpdateStateAsync(_grid, _melodyPitches, _bpm);
+            _state.Grid[trackIndex][stepIndex] = false;
+            _pinned[trackIndex][stepIndex] = false;
         }
-    }
-
-    private async void OnPresetChanged(ChangeEventArgs e)
-    {
-        var preset = e.Value?.ToString() ?? "none";
-        ClearGrid();
-
-        if (preset == "house")
+        else if (isActive && !isPinned)
         {
-            _bpm = 124;
-            // Kick on 0, 4, 8, 12 (four on floor)
-            _grid[0][0] = _grid[0][4] = _grid[0][8] = _grid[0][12] = true;
-            // Clap on 4, 12
-            _grid[3][4] = _grid[3][12] = true;
-            // Offbeat hats on 2, 6, 10, 14
-            _grid[2][2] = _grid[2][6] = _grid[2][10] = _grid[2][14] = true;
-            // Melody line
-            _grid[4][0] = _grid[4][3] = _grid[4][7] = _grid[4][10] = _grid[4][14] = true;
-            _melodyPitches[0] = _noteFrequencies["E4"];
-            _melodyPitches[3] = _noteFrequencies["G4"];
-            _melodyPitches[7] = _noteFrequencies["A4"];
-            _melodyPitches[10] = _noteFrequencies["C5"];
-            _melodyPitches[14] = _noteFrequencies["D4"];
+            _pinned[trackIndex][stepIndex] = true;
         }
-        else if (preset == "hiphop")
+        else
         {
-            _bpm = 90;
-            // Kick on 0, 10, 11
-            _grid[0][0] = _grid[0][10] = _grid[0][11] = true;
-            // Snare on 4, 12
-            _grid[1][4] = _grid[1][12] = true;
-            // Regular hats
-            for (int h = 0; h < 16; h += 2) _grid[2][h] = true;
-            // Melody line
-            _grid[4][0] = _grid[4][2] = _grid[4][8] = _grid[4][10] = _grid[4][12] = true;
-            _melodyPitches[0] = _noteFrequencies["C4"];
-            _melodyPitches[2] = _noteFrequencies["D4"];
-            _melodyPitches[8] = _noteFrequencies["E4"];
-            _melodyPitches[10] = _noteFrequencies["G4"];
-            _melodyPitches[12] = _noteFrequencies["A4"];
-        }
-        else if (preset == "synthwave")
-        {
-            _bpm = 115;
-            // Kick on 0, 4, 8, 12
-            _grid[0][0] = _grid[0][4] = _grid[0][8] = _grid[0][12] = true;
-            // Snare on 4, 12
-            _grid[1][4] = _grid[1][12] = true;
-            // Continuous hats
-            for (int h = 0; h < 16; h++) _grid[2][h] = true;
-            // Melodic synth arpeggio
-            for (int s = 0; s < 16; s += 2) _grid[4][s] = true;
-            _melodyPitches[0] = _noteFrequencies["A4"];
-            _melodyPitches[2] = _noteFrequencies["C5"];
-            _melodyPitches[4] = _noteFrequencies["E4"];
-            _melodyPitches[6] = _noteFrequencies["G4"];
-            _melodyPitches[8] = _noteFrequencies["A4"];
-            _melodyPitches[10] = _noteFrequencies["C5"];
-            _melodyPitches[12] = _noteFrequencies["E4"];
-            _melodyPitches[14] = _noteFrequencies["G4"];
+            _state.Grid[trackIndex][stepIndex] = true;
+            _pinned[trackIndex][stepIndex] = true;
+            
+            if (trackIndex == 3)
+            {
+                _state.BassNotes[stepIndex] = _activeBassFrequency;
+            }
+            else if (trackIndex == 4)
+            {
+                _state.Melody[stepIndex] = _activeLeadFrequency;
+            }
         }
 
-        if (_isPlaying)
-        {
-            await StudioService.UpdateStateAsync(_grid, _melodyPitches, _bpm);
-        }
+        UpdateAudioEngineState();
         StateHasChanged();
+    }
+
+    private async Task TriggerChordPad(int idx)
+    {
+        _state.ActiveChordIndex = idx;
+        await UpdateAudioEngineState();
+
+        try
+        {
+            var jsService = (StudioService)StudioService;
+            var field = jsService.GetType().GetField("_moduleTask", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (field != null)
+            {
+                var m = field.GetValue(jsService) as Lazy<Task<IJSObjectReference>>;
+                if (m != null)
+                {
+                    var mod = await m.Value;
+                    await mod.InvokeVoidAsync("playActiveChordBacking", 0);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void AdjustOctave(int chordIdx, int val)
+    {
+        string currentChord = _state.Chords[chordIdx];
+        if (currentChord == "none") return;
+
+        var match = Regex.Match(currentChord, @"\d");
+        int octave = 3;
+        string baseName = currentChord;
+
+        if (match.Success)
+        {
+            octave = int.Parse(match.Value);
+            baseName = currentChord.Remove(match.Index, 1);
+        }
+
+        octave = Math.Max(2, Math.Min(5, octave + val));
+        
+        var rootMatch = Regex.Match(baseName, @"^[A-G]#?|[A-G]b?");
+        if (rootMatch.Success)
+        {
+            string root = rootMatch.Value;
+            string type = baseName.Substring(root.Length);
+            _state.Chords[chordIdx] = $"{root}{octave}{type}";
+        }
+
+        UpdateAudioEngineState();
+    }
+
+    private async Task UpdateAudioEngineState()
+    {
+        await StudioService.UpdateStateAsync(_state);
     }
 
     public async ValueTask DisposeAsync()

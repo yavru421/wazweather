@@ -1,4 +1,6 @@
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components;
+using BlazorPwaTemplate.Models;
 
 namespace BlazorPwaTemplate.Services;
 
@@ -12,16 +14,22 @@ public class StudioService : IStudioService, IAsyncDisposable
             "import", "./js/studio.module.js").AsTask());
     }
 
-    public async Task InitStudioAsync(DotNetObjectReference<object> helper, string callbackName)
+    public async Task InitStudioAsync(DotNetObjectReference<object> helper, string callbackName, string gridCallbackName)
     {
         var m = await _moduleTask.Value;
-        await m.InvokeVoidAsync("initStudio", helper, callbackName);
+        await m.InvokeVoidAsync("initStudio", helper, callbackName, gridCallbackName);
     }
 
-    public async Task StartPlayAsync(bool[][] grid, double[] melody, int bpm)
+    public async Task InitRibbonAsync(ElementReference ribbon, DotNetObjectReference<object> helper, string callbackName)
     {
         var m = await _moduleTask.Value;
-        await m.InvokeVoidAsync("startPlay", grid, melody, bpm);
+        await m.InvokeVoidAsync("initRibbon", ribbon, helper, callbackName);
+    }
+
+    public async Task StartPlayAsync(StudioAudioState state)
+    {
+        var m = await _moduleTask.Value;
+        await m.InvokeVoidAsync("startPlay", state);
     }
 
     public async Task StopPlayAsync()
@@ -30,10 +38,22 @@ public class StudioService : IStudioService, IAsyncDisposable
         await m.InvokeVoidAsync("stopPlay");
     }
 
-    public async Task UpdateStateAsync(bool[][] grid, double[] melody, int bpm)
+    public async Task UpdateStateAsync(StudioAudioState state)
     {
         var m = await _moduleTask.Value;
-        await m.InvokeVoidAsync("updateState", grid, melody, bpm);
+        await m.InvokeVoidAsync("updateState", state);
+    }
+
+    public async Task TriggerLiveTapAsync(int trackIndex)
+    {
+        var m = await _moduleTask.Value;
+        await m.InvokeVoidAsync("triggerLivePad", trackIndex);
+    }
+
+    public async Task PlayFrequencyAsync(int trackIndex, double frequency)
+    {
+        var m = await _moduleTask.Value;
+        await m.InvokeVoidAsync("playFrequency", trackIndex, frequency);
     }
 
     public async ValueTask DisposeAsync()
