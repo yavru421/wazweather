@@ -137,6 +137,20 @@ function initAudioContext() {
     if (audioCtx) return;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContextClass();
+
+    // iOS Foreground/Background Audio Patch
+    if (!window._silentAudioEl) {
+        window._silentAudioEl = document.createElement('audio');
+        window._silentAudioEl.loop = true;
+        window._silentAudioEl.crossOrigin = 'anonymous';
+        // A minimal valid base64 silent WAV
+        window._silentAudioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'; 
+        window._silentAudioEl.play().catch(() => {});
+        
+        // Ensure iOS doesn't sleep the audio context
+        const source = audioCtx.createMediaElementSource(window._silentAudioEl);
+        source.connect(audioCtx.destination);
+    }
 }
 
 function schedulerLoop() {
@@ -150,7 +164,10 @@ function advanceNote() {
     const secondsPerStep = (60.0 / audioState.tempo) / 4.0;
     nextNoteTime += secondsPerStep;
     if (dotNetHelper && playheadCallback) {
-        try { dotNetHelper.invokeMethodAsync(playheadCallback, currentStep); } catch (_) {}
+        const stepToInvoke = currentStep;
+        requestAnimationFrame(() => {
+            try { dotNetHelper.invokeMethodAsync(playheadCallback, stepToInvoke); } catch (_) {}
+        });
     }
     currentStep = (currentStep + 1) % 16;
 }
@@ -294,11 +311,13 @@ function generatePatterns() {
 
     // Notify Blazor UI
     if (dotNetHelper && gridCallback) {
-        try {
-            dotNetHelper.invokeMethodAsync(gridCallback, audioState.grid, audioState.melodyNotes);
-        } catch (e) {
-            console.error("Failed to invoke grid callback:", e);
-        }
+        requestAnimationFrame(() => {
+            try {
+                dotNetHelper.invokeMethodAsync(gridCallback, audioState.grid, audioState.melodyNotes);
+            } catch (e) {
+                console.error("Failed to invoke grid callback:", e);
+            }
+        });
     }
 }
 
@@ -345,6 +364,11 @@ function createTrackDSP(trackIndex, time, saturationAmt) {
     shaper.curve = getTubeToneCurve(saturationAmt);
     shaper.oversample = '4x';
     
+    // DC Blocker (15Hz highpass to strip structural offsets)
+    const dcBlocker = audioCtx.createBiquadFilter();
+    dcBlocker.type = 'highpass';
+    dcBlocker.frequency.value = 15;
+
     // Filter
     const filter = audioCtx.createBiquadFilter();
     filter.type = 'lowpass';
@@ -359,7 +383,8 @@ function createTrackDSP(trackIndex, time, saturationAmt) {
     outputGain.gain.setValueAtTime(0.0001, time);
     
     inputGain.connect(shaper);
-    shaper.connect(filter);
+    shaper.connect(dcBlocker);
+    dcBlocker.connect(filter);
     filter.connect(outputGain);
     outputGain.connect(audioCtx.destination);
     

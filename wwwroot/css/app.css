@@ -22,6 +22,49 @@ html, body {
         radial-gradient(circle at top right, rgba(255, 184, 43, 0.1), transparent 22%),
         linear-gradient(180deg, var(--bg-top), var(--bg));
     font-family: "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    /* Prevents pull-to-refresh behavior or canvas shifting on touch swipe */
+    overscroll-behavior: none; 
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 1. Strip Safari default styling on the base element */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* 2. Style the Slider Track for Safari */
+input[type="range"]::-webkit-slider-runnable-track {
+    background: #111827; /* Dark charcoal */
+    border: 1px solid #1f2937;
+    height: 6px;
+    border-radius: 4px;
+}
+
+/* 3. Style the Actual Knob Thumb for Safari (Crucial Step) */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Strips Safari's silver bubble */
+    appearance: none;
+    margin-top: -6px; /* Centers thumb vertically on track */
+    background: #ef4444; /* Neon accents matching your UI colors */
+    border: 2px solid #ffffff;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+    transition: transform 0.1s ease;
+}
+
+/* 4. Boost touch targets for iOS without breaking visual scale */
+input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(1.2);
 }
 
 body {
