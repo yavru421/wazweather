@@ -6,76 +6,72 @@
 
 <PageTitle>AmpliLoop Beat Studio — Algorithmic Rap Beatmaker</PageTitle>
 
-<div class="studio-page" @onpointermove="OnPointerMove" @onpointerup="OnPointerUp" @onpointerleave="OnPointerUp">
+<div class="studio-page">
     <!-- ── Hardware Amp Head ───────────────────────── -->
     <div class="amp-head">
         <!-- Left Side: Vibe Select Dial & LCD Screen -->
         <div class="amp-section left-control-panel">
-            <div class="knob-container">
-                <div class="knob-dial vibe-dial" 
-                     @onpointerdown='e => StartKnobDrag(e, "VibeIndex")'
-                     style="transform: rotate(@((_state.VibeIndex / 49.0) * 300 - 150)deg)">
-                    <div class="knob-indicator"></div>
+            <div class="lcd-container" style="display:flex; align-items:center; gap: 10px;">
+                <button class="btn-vibe-nav" @onclick="PrevVibe" style="background:transparent; border:none; color:var(--signal); font-size:2rem; cursor:pointer;">&lt;</button>
+                
+                <!-- Glowing LCD Screen -->
+                <div class="lcd-screen">
+                    <div class="lcd-header">
+                        <span class="lcd-index">@((_state.VibeIndex + 1).ToString("D2"))</span>
+                        <span class="lcd-name">@_vibes[_state.VibeIndex].Name.ToUpper()</span>
+                    </div>
+                    <div class="lcd-meta">
+                        <span>STYLE: @_vibes[_state.VibeIndex].Style.ToUpper()</span>
+                        <span>TEMPO: @(_state.Tempo.ToString("F0")) BPM</span>
+                    </div>
+                    <div class="lcd-body">
+                        @_vibes[_state.VibeIndex].Description
+                    </div>
                 </div>
-                <span class="knob-label">VIBE SELECT</span>
-            </div>
 
-            <!-- Glowing LCD Screen -->
-            <div class="lcd-screen">
-                <div class="lcd-header">
-                    <span class="lcd-index">@((_state.VibeIndex + 1).ToString("D2"))</span>
-                    <span class="lcd-name">@_vibes[_state.VibeIndex].Name.ToUpper()</span>
-                </div>
-                <div class="lcd-meta">
-                    <span>STYLE: @_vibes[_state.VibeIndex].Style.ToUpper()</span>
-                    <span>TEMPO: @(_state.Tempo.ToString("F0")) BPM</span>
-                </div>
-                <div class="lcd-body">
-                    @_vibes[_state.VibeIndex].Description
-                </div>
+                <button class="btn-vibe-nav" @onclick="NextVibe" style="background:transparent; border:none; color:var(--signal); font-size:2rem; cursor:pointer;">&gt;</button>
             </div>
+            <span class="knob-label" style="text-align:center; margin-top: 10px;">VIBE SELECT</span>
         </div>
 
         <!-- Center: Right Knobs (5 Complexities) -->
         <div class="amp-section amp-controls">
-            <div class="knob-container">
-                <div class="knob-dial" @onpointerdown='e => StartKnobDrag(e, "Kick")' style="transform: rotate(@((_state.KickComplexity * 300) - 150)deg)">
-                    <div class="knob-indicator"></div>
+            <div class="slider-container" style="display:flex; flex-direction:column; gap:12px; width: 100%;">
+                <div class="slider-group">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span class="knob-label" style="font-size:0.75rem;">KICK</span>
+                        <span class="knob-value" style="font-size:0.8rem;">@((_state.KickComplexity * 100).ToString("F0"))%</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.01" @bind="_state.KickComplexity" @bind:after="UpdateAudioEngineState" />
                 </div>
-                <span class="knob-label">KICK</span>
-                <span class="knob-value">@((_state.KickComplexity * 100).ToString("F0"))%</span>
-            </div>
-
-            <div class="knob-container">
-                <div class="knob-dial" @onpointerdown='e => StartKnobDrag(e, "Snare")' style="transform: rotate(@((_state.SnareComplexity * 300) - 150)deg)">
-                    <div class="knob-indicator"></div>
+                <div class="slider-group">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span class="knob-label" style="font-size:0.75rem;">SNARE</span>
+                        <span class="knob-value" style="font-size:0.8rem;">@((_state.SnareComplexity * 100).ToString("F0"))%</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.01" @bind="_state.SnareComplexity" @bind:after="UpdateAudioEngineState" />
                 </div>
-                <span class="knob-label">SNARE</span>
-                <span class="knob-value">@((_state.SnareComplexity * 100).ToString("F0"))%</span>
-            </div>
-
-            <div class="knob-container">
-                <div class="knob-dial" @onpointerdown='e => StartKnobDrag(e, "Hat")' style="transform: rotate(@((_state.HatComplexity * 300) - 150)deg)">
-                    <div class="knob-indicator"></div>
+                <div class="slider-group">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span class="knob-label" style="font-size:0.75rem;">HI-HAT</span>
+                        <span class="knob-value" style="font-size:0.8rem;">@((_state.HatComplexity * 100).ToString("F0"))%</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.01" @bind="_state.HatComplexity" @bind:after="UpdateAudioEngineState" />
                 </div>
-                <span class="knob-label">HI-HAT</span>
-                <span class="knob-value">@((_state.HatComplexity * 100).ToString("F0"))%</span>
-            </div>
-
-            <div class="knob-container">
-                <div class="knob-dial" @onpointerdown='e => StartKnobDrag(e, "Bass")' style="transform: rotate(@((_state.BassComplexity * 300) - 150)deg)">
-                    <div class="knob-indicator"></div>
+                <div class="slider-group">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span class="knob-label" style="font-size:0.75rem;">BASS</span>
+                        <span class="knob-value" style="font-size:0.8rem;">@((_state.BassComplexity * 100).ToString("F0"))%</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.01" @bind="_state.BassComplexity" @bind:after="UpdateAudioEngineState" />
                 </div>
-                <span class="knob-label">BASS</span>
-                <span class="knob-value">@((_state.BassComplexity * 100).ToString("F0"))%</span>
-            </div>
-
-            <div class="knob-container">
-                <div class="knob-dial" @onpointerdown='e => StartKnobDrag(e, "Melody")' style="transform: rotate(@((_state.MelodyComplexity * 300) - 150)deg)">
-                    <div class="knob-indicator"></div>
+                <div class="slider-group">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span class="knob-label" style="font-size:0.75rem;">MELODY</span>
+                        <span class="knob-value" style="font-size:0.8rem;">@((_state.MelodyComplexity * 100).ToString("F0"))%</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.01" @bind="_state.MelodyComplexity" @bind:after="UpdateAudioEngineState" />
                 </div>
-                <span class="knob-label">MELODY</span>
-                <span class="knob-value">@((_state.MelodyComplexity * 100).ToString("F0"))%</span>
             </div>
         </div>
 
@@ -163,11 +159,6 @@
     };
 
     private DotNetObjectReference<object>? _selfRef;
-
-    // Knob Dragging State
-    private string? _draggingKnob = null;
-    private double _dragStartY = 0;
-    private double _dragStartVal = 0;
 
     // Tap Tempo State
     private DateTime _lastTapTime = DateTime.MinValue;
@@ -339,60 +330,19 @@
         }
     }
 
-    // ── Knob Drag Logic ─────────────────────────────────────────────
-    private void StartKnobDrag(PointerEventArgs e, string knob)
+    private async Task PrevVibe()
     {
-        _draggingKnob = knob;
-        _dragStartY = e.ClientY;
-        _dragStartVal = knob switch
+        if (_state.VibeIndex > 0)
         {
-            "VibeIndex" => _state.VibeIndex / 49.0,
-            "Kick" => _state.KickComplexity,
-            "Snare" => _state.SnareComplexity,
-            "Hat" => _state.HatComplexity,
-            "Bass" => _state.BassComplexity,
-            "Melody" => _state.MelodyComplexity,
-            _ => 0.5
-        };
-    }
-    
-    private void OnPointerMove(PointerEventArgs e)
-    {
-        if (_draggingKnob != null)
-        {
-            double deltaY = _dragStartY - e.ClientY;
-            double newVal = _dragStartVal + (deltaY / 150.0);
-            if (newVal < 0) newVal = 0;
-            if (newVal > 1) newVal = 1;
-
-            if (_draggingKnob == "VibeIndex")
-            {
-                int index = (int)Math.Round(newVal * 49);
-                if (index != _state.VibeIndex)
-                {
-                    _ = OnVibeChanged(index);
-                }
-            }
-            else
-            {
-                switch (_draggingKnob)
-                {
-                    case "Kick": _state.KickComplexity = newVal; break;
-                    case "Snare": _state.SnareComplexity = newVal; break;
-                    case "Hat": _state.HatComplexity = newVal; break;
-                    case "Bass": _state.BassComplexity = newVal; break;
-                    case "Melody": _state.MelodyComplexity = newVal; break;
-                }
-            }
+            await OnVibeChanged(_state.VibeIndex - 1);
         }
     }
-    
-    private async Task OnPointerUp(PointerEventArgs e)
+
+    private async Task NextVibe()
     {
-        if (_draggingKnob != null)
+        if (_state.VibeIndex < _vibes.Count - 1)
         {
-            _draggingKnob = null;
-            await UpdateAudioEngineState();
+            await OnVibeChanged(_state.VibeIndex + 1);
         }
     }
 
