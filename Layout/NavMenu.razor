@@ -7,12 +7,15 @@
         <a href="" class="brand-link">
             <span class="brand-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--signal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 18V5l12-2v13"/>
-                    <circle cx="6" cy="18" r="3"/>
-                    <circle cx="18" cy="16" r="3"/>
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8" cy="8" r="1"/>
+                    <circle cx="16" cy="8" r="1"/>
+                    <circle cx="8" cy="16" r="1"/>
+                    <circle cx="16" cy="16" r="1"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
                 </svg>
             </span>
-            <span class="brand-text">Tuner<span class="text-accent">PWA</span></span>
+            <span class="brand-text">AmpliLoop<span class="text-accent">Studio</span></span>
         </a>
     </div>
 
@@ -21,6 +24,15 @@
             <div class="nav-section-title">Applications</div>
             
             <NavLink class="nav-item" href="" Match="NavLinkMatch.All">
+                <span class="item-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </span>
+                <span class="item-text">Beat Studio</span>
+            </NavLink>
+
+            <NavLink class="nav-item" href="tuner">
                 <span class="item-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
@@ -40,15 +52,6 @@
                     </svg>
                 </span>
                 <span class="item-text">Metronome</span>
-            </NavLink>
-
-            <NavLink class="nav-item" href="studio">
-                <span class="item-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
-                </span>
-                <span class="item-text">Beat Studio</span>
             </NavLink>
         </div>
     </nav>

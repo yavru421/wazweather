@@ -1,12 +1,12 @@
 {
-  "name": "Guitar & Instrument Tuner PWA",
-  "short_name": "TunerPWA",
+  "name": "AmpliLoop Studio Suite",
+  "short_name": "AmpliLoop",
   "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#11161d",
-  "theme_color": "#11161d",
+  "background_color": "#090a0f",
+  "theme_color": "#090a0f",
   "prefer_related_applications": false,
   "icons": [
     {
@@ -21,6 +21,5 @@
       "sizes": "192x192"
     }
   ],
-  "description": "Premium, glassmorphic Guitar & Instrument Tuner and Metronome PWA."
+  "description": "Premium Algorithmic Rap Beat Studio, Instrument Tuner, and Metronome PWA."
 }
-
