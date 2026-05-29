@@ -6,5 +6,8 @@ chmod +x dotnet-install.sh
 # Install .NET SDK 10.0 locally
 ./dotnet-install.sh -c 10.0 -InstallDir ./dotnet
 
+# Restore workloads for AOT compilation
+./dotnet/dotnet workload restore
+
 # Publish the application using the local SDK installation
 ./dotnet/dotnet publish -c Release -o output
