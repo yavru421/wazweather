@@ -1,0 +1,457 @@
+@page "/triangle"
+<PageTitle>Triangle Calculator — PourReady</PageTitle>
+
+<div class="triangle-page">
+    <div class="triangle-header">
+        <div class="header-title-wrap">
+            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--signal)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="3,21 3,3 21,21" />
+            </svg>
+            <h1>Triangle Calculator</h1>
+        </div>
+        <p class="header-subtitle">Pythagorean theorem hypotenuse calculator for precise contractor layout checks.</p>
+    </div>
+
+    <!-- ── Contractor Presets ──────────────────────────────── -->
+    <div class="presets-container">
+        <span class="presets-label">Contractor Presets:</span>
+        <div class="preset-buttons">
+            <button class="btn-preset" @onclick="() => ApplyPreset(3, 4)" type="button">3 - 4 - 5</button>
+            <button class="btn-preset" @onclick="() => ApplyPreset(6, 8)" type="button">6 - 8 - 10</button>
+            <button class="btn-preset" @onclick="() => ApplyPreset(9, 12)" type="button">9 - 12 - 15</button>
+        </div>
+    </div>
+
+    <div class="calculator-grid">
+        <!-- ── Inputs Side A (Rise) ─────────────────────────── -->
+        <div class="input-card side-a-card">
+            <div class="card-header">
+                <span class="card-indicator indicator-a"></span>
+                <h2>Side A (Rise)</h2>
+            </div>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="sideAFeet">Feet</label>
+                    <div class="numeric-input-wrap">
+                        <input id="sideAFeet" type="number" min="0" class="glass-input" @bind="SideAFeet" @bind:event="oninput" />
+                        <span class="unit-label">ft</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="sideAInches">Inches</label>
+                    <div class="numeric-input-wrap">
+                        <input id="sideAInches" type="number" min="0" max="11" class="glass-input" @bind="SideAInches" @bind:event="oninput" />
+                        <span class="unit-label">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fraction-row">
+                <div class="input-group">
+                    <label for="sideANumerator">Fraction</label>
+                    <div class="fraction-selects">
+                        <select id="sideANumerator" class="glass-select fraction-num" @bind="SideANumerator">
+                            @for (int i = 0; i < SideADenominator; i++)
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        </select>
+                        <span class="fraction-slash">/</span>
+                        <select id="sideADenominator" class="glass-select fraction-den" @bind="SideADenominator">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="4">4</option>
+                            <option value="8">8</option>
+                            <option value="16">16</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-total-readout">
+                Total: @FormatTotal(sideAInchesTotal)
+            </div>
+        </div>
+
+        <!-- ── Inputs Side B (Run) ──────────────────────────── -->
+        <div class="input-card side-b-card">
+            <div class="card-header">
+                <span class="card-indicator indicator-b"></span>
+                <h2>Side B (Run)</h2>
+            </div>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="sideBFeet">Feet</label>
+                    <div class="numeric-input-wrap">
+                        <input id="sideBFeet" type="number" min="0" class="glass-input" @bind="SideBFeet" @bind:event="oninput" />
+                        <span class="unit-label">ft</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="sideBInches">Inches</label>
+                    <div class="numeric-input-wrap">
+                        <input id="sideBInches" type="number" min="0" max="11" class="glass-input" @bind="SideBInches" @bind:event="oninput" />
+                        <span class="unit-label">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fraction-row">
+                <div class="input-group">
+                    <label for="sideBNumerator">Fraction</label>
+                    <div class="fraction-selects">
+                        <select id="sideBNumerator" class="glass-select fraction-num" @bind="SideBNumerator">
+                            @for (int i = 0; i < SideBDenominator; i++)
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        </select>
+                        <span class="fraction-slash">/</span>
+                        <select id="sideBDenominator" class="glass-select fraction-den" @bind="SideBDenominator">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="4">4</option>
+                            <option value="8">8</option>
+                            <option value="16">16</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-total-readout">
+                Total: @FormatTotal(sideBInchesTotal)
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Error display ───────────────────────────────────── -->
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="validation-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>@errorMessage</span>
+        </div>
+    }
+
+    <!-- ── Results Section ─────────────────────────────────── -->
+    <div class="results-card">
+        <div class="results-details">
+            <div class="result-item main-result">
+                <span class="result-label">Side C (Hypotenuse)</span>
+                <div class="result-value glow-text">@formattedResultC</div>
+            </div>
+            
+            <div class="result-decimals">
+                <div class="decimal-item">
+                    <span class="decimal-label">Decimal Feet</span>
+                    <span class="decimal-value">@decimalFeetC</span>
+                </div>
+                <div class="decimal-divider"></div>
+                <div class="decimal-item">
+                    <span class="decimal-label">Decimal Inches</span>
+                    <span class="decimal-value">@decimalInchesC</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Schematic SVG -->
+        <div class="schematic-container">
+            <svg class="triangle-schematic" viewBox="0 0 200 180" width="100%">
+                <!-- Defs for glow effects -->
+                <defs>
+                    <filter id="glow-a" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="var(--safety)" flood-opacity="0.6"/>
+                    </filter>
+                    <filter id="glow-b" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#a78bfa" flood-opacity="0.6"/>
+                    </filter>
+                    <filter id="glow-c" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="var(--signal)" flood-opacity="0.8"/>
+                    </filter>
+                </defs>
+
+                <!-- Grid helper background lines -->
+                <line x1="30" y1="150" x2="170" y2="150" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+                <line x1="30" y1="30" x2="30" y2="150" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+
+                <!-- Right-angle indicator -->
+                <path d="M 30,140 L 40,140 L 40,150" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" />
+
+                <!-- The Triangle Path -->
+                <path d="M 30,150 L 30,@(150 - aScale) L @(30 + bScale),150 Z" 
+                      fill="rgba(122, 209, 255, 0.03)" 
+                      stroke="rgba(255,255,255,0.1)" 
+                      stroke-width="2" />
+
+                <!-- Highlighted Sides -->
+                <!-- Side A (Rise) - vertical line -->
+                <line x1="30" y1="150" x2="30" y2="@(150 - aScale)" 
+                      stroke="var(--safety)" stroke-width="3.5" stroke-linecap="round" filter="url(#glow-a)" />
+
+                <!-- Side B (Run) - horizontal line -->
+                <line x1="30" y1="150" x2="@(30 + bScale)" y2="150" 
+                      stroke="#a78bfa" stroke-width="3.5" stroke-linecap="round" filter="url(#glow-b)" />
+
+                <!-- Side C (Hypotenuse) - diagonal line -->
+                <line x1="30" y1="@(150 - aScale)" x2="@(30 + bScale)" y2="150" 
+                      stroke="var(--signal)" stroke-width="4.5" stroke-linecap="round" filter="url(#glow-c)" />
+
+                <!-- Labels -->
+                <!-- A Label -->
+                <text x="15" y="@(150 - (aScale / 2))" fill="var(--safety)" font-size="11" font-weight="700" text-anchor="end" dominant-baseline="middle">A</text>
+                
+                <!-- B Label -->
+                <text x="@(30 + (bScale / 2))" y="166" fill="#a78bfa" font-size="11" font-weight="700" text-anchor="middle">B</text>
+
+                <!-- C Label -->
+                <text x="@(30 + (bScale / 2) + 12)" y="@(150 - (aScale / 2) - 10)" fill="var(--signal)" font-size="13" font-weight="800" text-anchor="start" dominant-baseline="auto">C</text>
+            </svg>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int _sideAFeet = 3;
+    private int SideAFeet
+    {
+        get => _sideAFeet;
+        set { _sideAFeet = Math.Max(0, value); Recalculate(); }
+    }
+
+    private int _sideAInches = 0;
+    private int SideAInches
+    {
+        get => _sideAInches;
+        set { _sideAInches = Math.Max(0, value); Recalculate(); }
+    }
+
+    private int _sideANumerator = 0;
+    private int SideANumerator
+    {
+        get => _sideANumerator;
+        set { _sideANumerator = Math.Max(0, value); Recalculate(); }
+    }
+
+    private int _sideADenominator = 16;
+    private int SideADenominator
+    {
+        get => _sideADenominator;
+        set
+        {
+            _sideADenominator = value;
+            if (_sideANumerator >= _sideADenominator)
+            {
+                _sideANumerator = 0;
+            }
+            Recalculate();
+        }
+    }
+
+    private int _sideBFeet = 4;
+    private int SideBFeet
+    {
+        get => _sideBFeet;
+        set { _sideBFeet = Math.Max(0, value); Recalculate(); }
+    }
+
+    private int _sideBInches = 0;
+    private int SideBInches
+    {
+        get => _sideBInches;
+        set { _sideBInches = Math.Max(0, value); Recalculate(); }
+    }
+
+    private int _sideBNumerator = 0;
+    private int SideBNumerator
+    {
+        get => _sideBNumerator;
+        set { _sideBNumerator = Math.Max(0, value); Recalculate(); }
+    }
+
+    private int _sideBDenominator = 16;
+    private int SideBDenominator
+    {
+        get => _sideBDenominator;
+        set
+        {
+            _sideBDenominator = value;
+            if (_sideBNumerator >= _sideBDenominator)
+            {
+                _sideBNumerator = 0;
+            }
+            Recalculate();
+        }
+    }
+
+    private string errorMessage = "";
+    private double sideAInchesTotal = 0;
+    private double sideBInchesTotal = 0;
+    private double sideCInchesTotal = 0;
+
+    private string formattedResultC = "5'-0\"";
+    private string decimalFeetC = "5.0000'";
+    private string decimalInchesC = "60.0000\"";
+
+    // SVG Drawing helpers
+    private double aScale = 90; // Default scaled heights
+    private double bScale = 120;
+
+    protected override void OnInitialized()
+    {
+        Recalculate();
+    }
+
+    private void ApplyPreset(int aFeet, int bFeet)
+    {
+        _sideAFeet = aFeet;
+        _sideAInches = 0;
+        _sideANumerator = 0;
+        _sideADenominator = 16;
+
+        _sideBFeet = bFeet;
+        _sideBInches = 0;
+        _sideBNumerator = 0;
+        _sideBDenominator = 16;
+
+        Recalculate();
+    }
+
+    private void Recalculate()
+    {
+        errorMessage = "";
+
+        if (_sideAFeet < 0 || _sideAInches < 0 || _sideBFeet < 0 || _sideBInches < 0)
+        {
+            errorMessage = "Values cannot be negative.";
+            ClearResults();
+            return;
+        }
+
+        if (_sideADenominator <= 0 || _sideBDenominator <= 0)
+        {
+            errorMessage = "Denominator must be greater than zero.";
+            ClearResults();
+            return;
+        }
+
+        // Calculate total inches
+        sideAInchesTotal = (_sideAFeet * 12.0) + _sideAInches + ((double)_sideANumerator / _sideADenominator);
+        sideBInchesTotal = (_sideBFeet * 12.0) + _sideBInches + ((double)_sideBNumerator / _sideBDenominator);
+
+        if (sideAInchesTotal <= 0 && sideBInchesTotal <= 0)
+        {
+            formattedResultC = "0\"";
+            decimalFeetC = "0.0000'";
+            decimalInchesC = "0.0000\"";
+            aScale = 5;
+            bScale = 5;
+            return;
+        }
+
+        // Pythagorean Theorem
+        sideCInchesTotal = Math.Sqrt((sideAInchesTotal * sideAInchesTotal) + (sideBInchesTotal * sideBInchesTotal));
+
+        // Format to nearest 1/16th inch
+        double roundedSixteenths = Math.Round(sideCInchesTotal * 16.0);
+        int totalSixteenths = (int)roundedSixteenths;
+
+        int feetPart = totalSixteenths / (12 * 16);
+        int remainingSixteenths = totalSixteenths % (12 * 16);
+        int inchesPart = remainingSixteenths / 16;
+        int sixteenthsPart = remainingSixteenths % 16;
+
+        string fractionStr = FormatFraction(sixteenthsPart, 16);
+
+        if (feetPart > 0)
+        {
+            formattedResultC = string.IsNullOrEmpty(fractionStr) 
+                ? $"{feetPart}'-{inchesPart}\"" 
+                : $"{feetPart}'-{inchesPart} {fractionStr}\"";
+        }
+        else
+        {
+            formattedResultC = string.IsNullOrEmpty(fractionStr) 
+                ? $"{inchesPart}\"" 
+                : $"{inchesPart} {fractionStr}\"";
+        }
+
+        decimalFeetC = $"{(sideCInchesTotal / 12.0):F4}'";
+        decimalInchesC = $"{sideCInchesTotal:F4}\"";
+
+        // Update SVG Scalings (max limits bounds to fit within viewBox bounds)
+        double maxInches = Math.Max(sideAInchesTotal, sideBInchesTotal);
+        if (maxInches > 0)
+        {
+            // scale so the larger side takes 130px, minimum size is 10px
+            aScale = Math.Max(10, (sideAInchesTotal / maxInches) * 120);
+            bScale = Math.Max(10, (sideBInchesTotal / maxInches) * 140);
+        }
+        else
+        {
+            aScale = 10;
+            bScale = 10;
+        }
+    }
+
+    private void ClearResults()
+    {
+        formattedResultC = "--";
+        decimalFeetC = "--";
+        decimalInchesC = "--";
+        aScale = 10;
+        bScale = 10;
+    }
+
+    private string FormatTotal(double totalInches)
+    {
+        int feet = (int)(totalInches / 12);
+        double remainingInches = totalInches % 12;
+        
+        // formats nicely to nearest 1/16th for visual feedback
+        double roundedSixteenths = Math.Round(remainingInches * 16.0);
+        int totalSixteenths = (int)roundedSixteenths;
+        int inchesPart = totalSixteenths / 16;
+        int sixteenthsPart = totalSixteenths % 16;
+        
+        string fractionStr = FormatFraction(sixteenthsPart, 16);
+        
+        if (feet > 0)
+        {
+            return string.IsNullOrEmpty(fractionStr) 
+                ? $"{feet}'-{inchesPart}\" ({totalInches:F2}\")" 
+                : $"{feet}'-{inchesPart} {fractionStr}\" ({totalInches:F2}\")";
+        }
+        else
+        {
+            return string.IsNullOrEmpty(fractionStr) 
+                ? $"{inchesPart}\" ({totalInches:F2}\")" 
+                : $"{inchesPart} {fractionStr}\" ({totalInches:F2}\")";
+        }
+    }
+
+    private string FormatFraction(int num, int den)
+    {
+        if (num == 0) return "";
+        int gcd = GCD(num, den);
+        return $"{num / gcd}/{den / gcd}";
+    }
+
+    private int GCD(int a, int b)
+    {
+        while (b != 0)
+        {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+}

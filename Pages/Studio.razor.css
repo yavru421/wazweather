@@ -438,3 +438,27 @@
         height: 14px;
     }
 }
+
+/* ── Triangle Shortcut Button ── */
+.btn-triangle-shortcut:hover {
+    background: rgba(122, 209, 255, 0.16) !important;
+    border-color: var(--signal) !important;
+    box-shadow: 0 0 15px rgba(122, 209, 255, 0.25);
+    transform: translateY(-1px);
+}
+.btn-triangle-shortcut:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .studio-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+        margin-bottom: 0.5rem !important;
+    }
+    .btn-triangle-shortcut {
+        width: 100%;
+        justify-content: center;
+    }
+}

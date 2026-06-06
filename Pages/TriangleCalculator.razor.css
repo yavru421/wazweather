@@ -1,0 +1,389 @@
+/* ============================================================
+   TriangleCalculator.razor.css — Glassmorphic Triangle Page Styles
+   ============================================================ */
+
+.triangle-page {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1.5rem 1rem 3rem;
+    max-width: 800px;
+    margin: 0 auto;
+    animation: fadeInPage 0.5s ease;
+}
+
+@keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.triangle-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.header-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-title-wrap h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--signal) 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.header-subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+/* ── Contractor Presets ──────────────────────────────── */
+.presets-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+}
+
+.presets-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.preset-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-preset {
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-preset:hover {
+    background: rgba(122, 209, 255, 0.12);
+    border-color: var(--signal);
+    color: var(--signal);
+    transform: translateY(-1px);
+}
+
+.btn-preset:active {
+    transform: translateY(0);
+}
+
+/* ── Calculator Grid ─────────────────────────────────── */
+.calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.input-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.5rem;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.card-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.indicator-a {
+    background-color: var(--safety);
+    box-shadow: 0 0 8px var(--safety);
+}
+
+.indicator-b {
+    background-color: #a78bfa;
+    box-shadow: 0 0 8px #a78bfa;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.input-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+}
+
+.numeric-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.glass-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 0.6rem 2.2rem 0.6rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.glass-input:focus {
+    border-color: var(--signal);
+    background: rgba(122, 209, 255, 0.05);
+    box-shadow: 0 0 10px rgba(122, 209, 255, 0.15);
+}
+
+.unit-label {
+    position: absolute;
+    right: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.fraction-row {
+    border-top: 1px dashed rgba(255, 255, 255, 0.06);
+    padding-top: 0.75rem;
+}
+
+.fraction-selects {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.glass-select {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 0.6rem 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.glass-select:focus {
+    border-color: var(--signal);
+    background: rgba(122, 209, 255, 0.05);
+}
+
+.glass-select option {
+    background-color: var(--bg-top);
+    color: var(--text);
+}
+
+.fraction-slash {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--muted);
+}
+
+.side-total-readout {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-align: right;
+    margin-top: 0.25rem;
+}
+
+/* ── Validation Error ─────────────────────────────────── */
+.validation-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 131, 112, 0.1);
+    border: 1px solid rgba(255, 131, 112, 0.2);
+    color: var(--danger);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ── Results Card ────────────────────────────────────── */
+.results-card {
+    background: rgba(122, 209, 255, 0.03);
+    border: 1.5px solid rgba(122, 209, 255, 0.15);
+    border-radius: 20px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    box-shadow: 0 12px 40px rgba(122, 209, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.results-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.result-item.main-result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.result-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.result-value {
+    font-size: 3rem;
+    font-weight: 850;
+    line-height: 1;
+    color: var(--signal);
+}
+
+.glow-text {
+    text-shadow: 0 0 20px rgba(122, 209, 255, 0.6);
+}
+
+.result-decimals {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 1rem;
+}
+
+.decimal-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.decimal-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.decimal-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    font-family: monospace;
+}
+
+.decimal-divider {
+    width: 1px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.schematic-container {
+    width: 200px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 0.5rem;
+}
+
+.triangle-schematic {
+    max-height: 100%;
+}
+
+/* ── Responsive overrides ────────────────────────────── */
+@media (max-width: 768px) {
+    .calculator-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .results-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+    
+    .schematic-container {
+        width: 100%;
+        height: 160px;
+    }
+    
+    .result-value {
+        font-size: 2.4rem;
+    }
+    
+    .presets-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
