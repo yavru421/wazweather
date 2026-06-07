@@ -12,6 +12,8 @@
     <RunAOTCompilation>false</RunAOTCompilation>
     <WasmStripILAfterAOT>true</WasmStripILAfterAOT>
     <BlazorCacheBootResources>false</BlazorCacheBootResources>
+    <WasmFingerprintAssets>false</WasmFingerprintAssets>
+    <DefaultItemExcludes>$(DefaultItemExcludes);output\**;publish_temp\**;dist\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
