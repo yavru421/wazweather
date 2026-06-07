@@ -6,11 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
-    <BlazorWebAssemblyPreserveCollationData>false</BlazorWebAssemblyPreserveCollationData>
-    <EmccMaximumHeapSize>268435456</EmccMaximumHeapSize>
     <RunAOTCompilation>false</RunAOTCompilation>
-    <WasmStripILAfterAOT>true</WasmStripILAfterAOT>
     <BlazorCacheBootResources>false</BlazorCacheBootResources>
     <DefaultItemExcludes>$(DefaultItemExcludes);output\**;publish_temp\**;dist\**</DefaultItemExcludes>
     <NuGetAudit>false</NuGetAudit>
