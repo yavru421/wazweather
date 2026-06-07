@@ -14,7 +14,11 @@
     <div id="app">
         <div class="shotstack-loader">
             <div class="spinner"></div>
-            <span>Mounting ShotStack Environment...</span>
+            <span class="loading-text">Mounting ShotStack Environment...</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: var(--blazor-load-percentage, 0%)"></div>
+            </div>
+            <span class="progress-text"></span>
         </div>
     </div>
 

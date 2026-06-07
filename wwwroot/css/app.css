@@ -345,8 +345,12 @@ body, html {
 }
 
 /* Custom System Hydration Animation View */
-.shotstack-loader { display: flex; flex-direction: column; align-items: center; gap: 16px; justify-content: center; height: 100vh; background: var(--bg-darker); }
+.shotstack-loader { display: flex; flex-direction: column; align-items: center; gap: 16px; justify-content: center; height: 100vh; background: var(--bg-darker); font-family: system-ui, -apple-system, sans-serif; color: var(--text-white); }
 .spinner { width: 40px; height: 40px; border: 4px solid var(--border-dim); border-top-color: var(--brand-accent); border-radius: 50%; animation: spin 1s linear infinite; }
+.shotstack-loader .loading-text { font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px; color: var(--text-white); }
+.shotstack-loader .progress-bar-container { width: 200px; height: 6px; background: var(--border-dim); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.shotstack-loader .progress-bar-fill { height: 100%; background: var(--brand-accent); width: var(--blazor-load-percentage, 0%); border-radius: 3px; transition: width 0.1s ease; }
+.shotstack-loader .progress-text::after { content: var(--blazor-load-percentage-text, "Loading..."); font-size: 0.85rem; color: var(--text-dark-muted); font-weight: 600; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 

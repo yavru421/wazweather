@@ -12,13 +12,16 @@
             </svg>
         </button>
         <div class="top-bar-title">Document Bundle</div>
-        <label class="compile-btn" style="cursor: pointer; margin: 0; padding: 6px 16px; @(IsCompiling ? "opacity:0.5; pointer-events:none;" : "")">
-            Add Files
-            @if (!IsCompiling)
-            {
-                <InputFile OnChange="LoadIncomingScreenshots" Multiple style="display:none;" />
-            }
-        </label>
+        <div class="top-bar-actions" style="display: flex; align-items: center; gap: 8px;">
+            <PwaInstallButton />
+            <label class="compile-btn" style="cursor: pointer; margin: 0; padding: 6px 16px; @(IsCompiling ? "opacity:0.5; pointer-events:none;" : "")">
+                Add Files
+                @if (!IsCompiling)
+                {
+                    <InputFile OnChange="LoadIncomingScreenshots" Multiple style="display:none;" />
+                }
+            </label>
+        </div>
     </div>
 
     <!-- Capacity Meter -->

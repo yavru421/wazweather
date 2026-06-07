@@ -1,0 +1,148 @@
+.pwa-install-container {
+    position: relative;
+    display: inline-block;
+}
+
+.pwa-install-button {
+    background: linear-gradient(135deg, var(--brand-accent), #1a6327);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.pwa-install-button:hover {
+    background: linear-gradient(135deg, var(--brand-accent-hover), #238636);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(35, 134, 54, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.pwa-install-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(35, 134, 54, 0.2);
+}
+
+.install-icon {
+    transition: transform 0.2s ease;
+}
+
+.pwa-install-button:hover .install-icon {
+    transform: translateY(1px);
+}
+
+/* iOS Instruction Tooltip */
+.pwa-ios-tooltip-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    background: transparent;
+}
+
+.pwa-ios-tooltip {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    right: 0;
+    width: 280px;
+    background: rgba(22, 27, 34, 0.95);
+    border: 1px solid var(--border-dim);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-white);
+    z-index: 1000;
+    animation: tooltipFadeIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    transform-origin: bottom right;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+}
+
+.tooltip-header strong {
+    font-size: 0.95rem;
+    color: var(--text-white);
+}
+
+.tooltip-close {
+    background: none;
+    border: none;
+    color: var(--text-dark-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.tooltip-close:hover {
+    color: var(--text-white);
+}
+
+.tooltip-body {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-white);
+}
+
+.tooltip-body p {
+    margin: 0 0 10px 0;
+}
+
+.tooltip-body ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.tooltip-body li {
+    margin-bottom: 8px;
+}
+
+.inline-icon {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 2px;
+    color: var(--brand-accent-hover);
+}
+
+.tooltip-arrow {
+    position: absolute;
+    top: 100%;
+    right: 24px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(22, 27, 34, 0.95);
+}
