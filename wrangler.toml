@@ -9,5 +9,5 @@ directory = "output/wwwroot"
 not_found_handling = "single-page-application"
 
 [[routes]]
-pattern = "blazorpwa.dondlingergc.com"
+pattern = "shotstack.dondlingergc.com"
 custom_domain = true

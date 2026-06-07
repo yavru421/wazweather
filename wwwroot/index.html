@@ -1,104 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AmpliLoop Studio — Algorithmic Beatmaker, Tuner & Metronome PWA</title>
+    <title>ShotStack Studio</title>
     <base href="/" />
-    <meta name="theme-color" content="#090a0f" />
-    <meta name="description" content="Premium Algorithmic Rap Beat Studio, Instrument Tuner, and Metronome PWA. Experience Line6 hardware vibes, algorithmic beat generation, and professional utility tools." />
-    <meta property="og:title" content="AmpliLoop Studio — Algorithmic Beatmaker, Tuner & Metronome PWA" />
-    <meta property="og:description" content="Premium Algorithmic Rap Beat Studio, Instrument Tuner, and Metronome PWA. Experience Line6 hardware vibes, algorithmic beat generation, and professional utility tools." />
-    <meta property="og:type" content="website" />
-    <link rel="preload" id="webassembly" />
-    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" type="image/png" href="icon-192.png" />
     <link href="BlazorPwaTemplate.styles.css" rel="stylesheet" />
     <link href="manifest.webmanifest" rel="manifest" />
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
-    <script type="importmap"></script>
 </head>
-
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div class="shotstack-loader">
+            <div class="spinner"></div>
+            <span>Mounting ShotStack Environment...</span>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="." class="reload">Reload</a>
-        <span class="dismiss">🗙</span>
+        An unhandled exception occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">✕</a>
     </div>
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script src="js/editorInteractions.js"></script>
+    
     <script>
-        // PWA install prompt capture
-        window._deferredInstallPrompt = null;
-        window.addEventListener('beforeinstallprompt', function (e) {
-            e.preventDefault();
-            window._deferredInstallPrompt = e;
-        });
-        window.pwaInstall = {
-            isAvailable: function () { return !!window._deferredInstallPrompt; },
-            prompt: async function () {
-                if (!window._deferredInstallPrompt) return false;
-                window._deferredInstallPrompt.prompt();
-                var choice = await window._deferredInstallPrompt.userChoice;
-                window._deferredInstallPrompt = null;
-                return choice.outcome === 'accepted';
+        // High-speed blob transmission stream bypass framework
+        window.shotStackSaver = {
+            saveAndDownloadFile: function (filename, byteBase64) {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = 'data:application/pdf;base64,' + byteBase64;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
         };
     </script>
-    <script>
-        // Self-healing for PWA cache traps and integrity mismatch errors
-        async function healPwaAndReload() {
-            console.warn('Self-healing PWA caches...');
-            try {
-                if ('serviceWorker' in navigator) {
-                    const regs = await navigator.serviceWorker.getRegistrations();
-                    for (const reg of regs) {
-                        await reg.unregister();
-                    }
-                }
-                if ('caches' in window) {
-                    const keys = await caches.keys();
-                    for (const key of keys) {
-                        await caches.delete(key);
-                    }
-                }
-                console.log('Cache cleared successfully. Reloading...');
-                window.location.reload(true);
-            } catch (err) {
-                console.error('Failed to self-heal:', err);
-                window.location.reload();
-            }
-        }
-
-        window.addEventListener('unhandledrejection', function (event) {
-            const msg = event.reason && event.reason.message ? event.reason.message : '';
-            if (msg.includes('Failed to start platform') || msg.includes('integrity') || msg.includes('dynamically imported module')) {
-                event.preventDefault();
-                healPwaAndReload();
-            }
-        });
-
-        window.addEventListener('error', function (event) {
-            const msg = event.message || '';
-            if (msg.includes('integrity') || msg.includes('Failed to load') || msg.includes('module script') || msg.includes('Unexpected error')) {
-                event.preventDefault();
-                healPwaAndReload();
-            }
-        }, true); // Use capture phase to catch script loading errors
-    </script>
 </body>
-
 </html>

@@ -1,0 +1,479 @@
+@page "/editor"
+@using ShotStack.Models
+@using System.IO
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<div class="editor-workspace">
+    <div class="top-bar">
+        <button class="back-btn" @onclick="GoBack" disabled="@IsCompiling" style="@(IsCompiling ? "opacity:0.5; pointer-events:none;" : "")">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <div class="top-bar-title">Document Bundle</div>
+        <label class="compile-btn" style="cursor: pointer; margin: 0; padding: 6px 16px; @(IsCompiling ? "opacity:0.5; pointer-events:none;" : "")">
+            Add Files
+            @if (!IsCompiling)
+            {
+                <InputFile OnChange="LoadIncomingScreenshots" Multiple style="display:none;" />
+            }
+        </label>
+    </div>
+
+    <!-- Capacity Meter -->
+    @if (ItemsList.Count > 0)
+    {
+        var totalBytes = TotalSizeBytes;
+        var limitBytes = 50 * 1024 * 1024; // 50MB capacity limit
+        var percent = Math.Min(100.0, (totalBytes / (double)limitBytes) * 100.0);
+        var statusClass = percent > 80 ? "critical" : (percent > 50 ? "warning" : "healthy");
+        
+        <div class="capacity-meter-container">
+            <div class="capacity-labels">
+                <span class="capacity-title">Staging Memory Capacity</span>
+                <span class="capacity-value @statusClass">@FormatSize(totalBytes) / 50.0 MB</span>
+            </div>
+            <div class="capacity-bar">
+                <div class="capacity-fill @statusClass" style="width: @(percent)%;"></div>
+            </div>
+            @if (percent > 80)
+            {
+                <span class="capacity-warning">
+                    ⚠️ Memory load high. Compiling huge portfolios may exceed WebAssembly heap limits.
+                </span>
+            }
+        </div>
+    }
+
+    <!-- Size Warning Banner -->
+    @if (ShowErrorAlert)
+    {
+        <div class="editor-alert-banner">
+            <div class="alert-content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; flex-shrink:0; margin-top:2px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>@ErrorMessage</span>
+            </div>
+            <button type="button" class="alert-close" @onclick="DismissErrorAlert">×</button>
+        </div>
+    }
+
+    <div class="preview-stage">
+        @if (ItemsList.Count == 0)
+        {
+            <div style="display:flex; flex-direction:column; align-items:center; opacity:0.5; margin-top:40px; text-align:center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <p>No snapshots selected.<br/>Import assets (max 15MB each) to begin portfolio generation.</p>
+            </div>
+        }
+        else
+        {
+            <div class="stack-scroller">
+                @foreach (var frame in ItemsList.OrderBy(i => i.OrderIndex))
+                {
+                    <div class="stack-card @(frame == CurrentFocusItem ? "active-frame" : "")" @onclick="() => SetFocus(frame)">
+                        <div class="frame-tag">
+                            <span>Page @(frame.OrderIndex + 1) - @frame.SourceName (@FormatSize(frame.SizeBytes))</span>
+                            <span class="edit-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;">
+                                    <path d="M12 20h9"></path>
+                                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                                </svg>
+                                Edit / Crop
+                            </span>
+                        </div>
+                        <div class="image-wrapper" style="clip-path: inset(@(frame.TopCropPercent)% 0% @(frame.BottomCropPercent)% 0%);">
+                            <img src="@frame.Base64Preview" />
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    @if (ItemsList.Count > 0)
+    {
+        <div class="sequence-strip">
+            @foreach (var frame in ItemsList.OrderBy(i => i.OrderIndex))
+            {
+                <div class="strip-thumb @(frame == CurrentFocusItem ? "active" : "")" @onclick="() => SetFocus(frame)" id="thumb-@frame.OrderIndex">
+                    <img src="@frame.Base64Preview" style="clip-path: inset(@(frame.TopCropPercent)% 0% @(frame.BottomCropPercent)% 0%);" />
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Persistent Floating Compile Button -->
+    @if (ItemsList.Count > 0 && !IsSheetOpen)
+    {
+        <div class="floating-compile-bar">
+            <button class="compile-btn" style="width: 90%; max-width: 400px; padding: 14px;" @onclick="CompilePortfolioAndDownload" disabled="@IsCompiling">
+                ⚡ Compile PDF
+            </button>
+        </div>
+    }
+
+    <!-- Bottom Sheet Modal -->
+    <div class="bottom-sheet @(IsSheetOpen ? "open" : "")">
+        <div class="sheet-handle" @onclick="ToggleSheet"></div>
+        <div class="sheet-content">
+            @if (CurrentFocusItem != null)
+            {
+                <div class="sheet-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h5 style="margin:0;">Frame Adjustments - Page @(CurrentFocusItem.OrderIndex + 1)</h5>
+                    <button type="button" class="close-sheet-btn" @onclick="ToggleSheet" style="background:none; border:none; color:var(--text-dark-muted); cursor:pointer; padding:4px; display:flex; align-items:center; justify-content:center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="range-group">
+                    <label>Top Crop: @CurrentFocusItem.TopCropPercent%</label>
+                    <input type="range" min="0" max="25" @bind-value="CurrentFocusItem.TopCropPercent" @bind-value:event="oninput" disabled="@IsCompiling" />
+                </div>
+
+                <div class="range-group">
+                    <label>Bottom Crop: @CurrentFocusItem.BottomCropPercent%</label>
+                    <input type="range" min="0" max="25" @bind-value="CurrentFocusItem.BottomCropPercent" @bind-value:event="oninput" disabled="@IsCompiling" />
+                </div>
+
+                <div class="sheet-actions">
+                    <button class="sheet-btn" @onclick="() => ChangePriority(CurrentFocusItem, -1)" disabled="@IsCompiling">◀ Move</button>
+                    <button class="sheet-btn danger" @onclick="() => StripElement(CurrentFocusItem)" disabled="@IsCompiling">Delete</button>
+                    <button class="sheet-btn" @onclick="() => ChangePriority(CurrentFocusItem, 1)" disabled="@IsCompiling">Move ▶</button>
+                </div>
+            }
+            <div class="sheet-actions" style="margin-top:20px;">
+                <button class="compile-btn" style="width: 100%; padding: 14px;" @onclick="CompilePortfolioAndDownload" disabled="@IsCompiling">
+                    ⚡ Compile PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compile Status Overlay -->
+    @if (IsCompiling)
+    {
+        <div class="compile-overlay">
+            <div class="compile-status-card">
+                <div class="spinner-modern"></div>
+                <h3>Compiling PDF</h3>
+                <p>@CompileStatus</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: @(CompileProgress)%;"></div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<StagedFrameItem> ItemsList = new();
+    private StagedFrameItem? CurrentFocusItem;
+    private bool IsSheetOpen = false;
+    private bool IsCompiling = false;
+    private string CompileStatus = string.Empty;
+    private int CompileProgress = 0;
+    
+    // Size limit alert state
+    private bool ShowErrorAlert = false;
+    private string ErrorMessage = string.Empty;
+
+    private long TotalSizeBytes => ItemsList.Sum(i => i.SizeBytes);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Register swipe interactions (to be implemented via JSInterop)
+            await JS.InvokeVoidAsync("editorInteractions.init", DotNetObjectReference.Create(this));
+            await CheckSharedFiles();
+        }
+    }
+
+    private void GoBack()
+    {
+        if (IsCompiling) return;
+        Navigation.NavigateTo("/");
+    }
+
+    private void SetFocus(StagedFrameItem item)
+    {
+        if (IsCompiling) return;
+        CurrentFocusItem = item;
+        IsSheetOpen = true;
+    }
+
+    private void ToggleSheet()
+    {
+        if (IsCompiling) return;
+        IsSheetOpen = !IsSheetOpen;
+    }
+
+    private void DismissErrorAlert()
+    {
+        ShowErrorAlert = false;
+        ErrorMessage = string.Empty;
+    }
+
+    private string FormatSize(long bytes)
+    {
+        double kb = bytes / 1024.0;
+        double mb = kb / 1024.0;
+        if (mb >= 1.0)
+            return $"{mb:F1} MB";
+        return $"{kb:F0} KB";
+    }
+
+    private async Task LoadIncomingScreenshots(InputFileChangeEventArgs e)
+    {
+        if (IsCompiling) return;
+        ShowErrorAlert = false;
+
+        var files = e.GetMultipleFiles(30);
+        var skippedFiles = new List<string>();
+        const long maxAllowedSize = 1024 * 1024 * 15; // 15 MB limit
+
+        foreach (var file in files)
+        {
+            if (file.Size > maxAllowedSize)
+            {
+                skippedFiles.Add($"{file.Name} ({FormatSize(file.Size)})");
+                continue;
+            }
+
+            try
+            {
+                using var stream = file.OpenReadStream(maxAllowedSize);
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                var buffer = ms.ToArray();
+                
+                var b64String = $"data:{file.ContentType};base64,{System.Convert.ToBase64String(buffer)}";
+                
+                ItemsList.Add(new StagedFrameItem {
+                    RawBytes = buffer,
+                    Base64Preview = b64String,
+                    SourceName = file.Name,
+                    SizeBytes = file.Size,
+                    OrderIndex = ItemsList.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading file {file.Name}: {ex.Message}");
+                skippedFiles.Add($"{file.Name} (Read error)");
+            }
+        }
+
+        if (skippedFiles.Count > 0)
+        {
+            ErrorMessage = "Skipped files exceeding the 15MB size limit: " + string.Join(", ", skippedFiles);
+            ShowErrorAlert = true;
+        }
+
+        if (CurrentFocusItem == null && ItemsList.Count > 0)
+        {
+            CurrentFocusItem = ItemsList.First();
+            IsSheetOpen = false;
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void ChangePriorityFromJs(int targetIndex, int delta)
+    {
+        if (IsCompiling) return;
+        var target = ItemsList.FirstOrDefault(i => i.OrderIndex == targetIndex);
+        if (target != null)
+        {
+            ChangePriority(target, delta);
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public void StripElementFromJs(int targetIndex)
+    {
+        if (IsCompiling) return;
+        var target = ItemsList.FirstOrDefault(i => i.OrderIndex == targetIndex);
+        if (target != null)
+        {
+            StripElement(target);
+            StateHasChanged();
+        }
+    }
+
+    private void ChangePriority(StagedFrameItem target, int delta)
+    {
+        if (IsCompiling) return;
+        int originalPos = target.OrderIndex;
+        int targetPos = originalPos + delta;
+        if (targetPos >= 0 && targetPos < ItemsList.Count)
+        {
+            var altItem = ItemsList.First(i => i.OrderIndex == targetPos);
+            altItem.OrderIndex = originalPos;
+            target.OrderIndex = targetPos;
+            
+            // Haptic feedback
+            JS.InvokeVoidAsync("navigator.vibrate", 50);
+        }
+    }
+
+    private void StripElement(StagedFrameItem target)
+    {
+        if (IsCompiling) return;
+        ItemsList.Remove(target);
+        int idx = 0;
+        foreach (var item in ItemsList.OrderBy(i => i.OrderIndex))
+        {
+            item.OrderIndex = idx++;
+        }
+        if (CurrentFocusItem == target)
+        {
+            CurrentFocusItem = ItemsList.FirstOrDefault();
+            if (CurrentFocusItem == null) IsSheetOpen = false;
+        }
+    }
+
+    private async Task CompilePortfolioAndDownload()
+    {
+        if (ItemsList.Count == 0 || IsCompiling) return;
+
+        try
+        {
+            IsCompiling = true;
+            CompileStatus = "Initializing PDF Builder...";
+            CompileProgress = 5;
+            StateHasChanged();
+            await Task.Delay(150);
+
+            using var memoryStream = new MemoryStream();
+            var document = new PdfSharpCore.Pdf.PdfDocument();
+            
+            int total = ItemsList.Count;
+            int current = 0;
+            foreach (var item in ItemsList.OrderBy(i => i.OrderIndex))
+            {
+                current++;
+                CompileStatus = $"Processing page {current} of {total}...";
+                CompileProgress = (int)(5 + ((double)current / total) * 80);
+                StateHasChanged();
+                await Task.Delay(100); // Allow render cycle and show progress
+
+                var page = document.AddPage();
+                using var gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
+                using var image = PdfSharpCore.Drawing.XImage.FromStream(() => new MemoryStream(item.RawBytes));
+                
+                double targetHeight = image.PointHeight * ((100.0 - item.TopCropPercent - item.BottomCropPercent) / 100.0);
+                page.Width = image.PointWidth;
+                page.Height = targetHeight;
+                double yOffset = -image.PointHeight * (item.TopCropPercent / 100.0);
+                
+                gfx.DrawImage(image, 0, yOffset, image.PointWidth, image.PointHeight);
+            }
+            
+            CompileStatus = "Finalizing PDF document structure...";
+            CompileProgress = 90;
+            StateHasChanged();
+            await Task.Delay(150);
+
+            document.Save(memoryStream);
+            var base64Pdf = System.Convert.ToBase64String(memoryStream.ToArray());
+            
+            CompileStatus = "Initiating device download...";
+            CompileProgress = 100;
+            StateHasChanged();
+            await Task.Delay(150);
+            
+            await JS.InvokeVoidAsync("shotStackSaver.saveAndDownloadFile", "Archived_Conversation_Bundle.pdf", base64Pdf);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error compiling: {ex.Message}");
+        }
+        finally
+        {
+            IsCompiling = false;
+            CompileStatus = string.Empty;
+            CompileProgress = 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CheckSharedFiles()
+    {
+        // To be called via JS Interop to check IndexedDB for web share target files
+        var sharedFiles = await JS.InvokeAsync<List<SharedFileData>>("editorInteractions.getSharedFiles");
+        if (sharedFiles != null && sharedFiles.Count > 0)
+        {
+            ShowErrorAlert = false;
+            var skippedFiles = new List<string>();
+            const long maxAllowedSize = 1024 * 1024 * 15; // 15 MB limit
+
+            foreach (var file in sharedFiles)
+            {
+                try
+                {
+                    var buffer = System.Convert.FromBase64String(file.Base64Data);
+                    long fileSizeBytes = buffer.Length;
+
+                    if (fileSizeBytes > maxAllowedSize)
+                     {
+                         skippedFiles.Add($"{file.Name} ({FormatSize(fileSizeBytes)})");
+                         continue;
+                     }
+
+                    var b64String = $"data:{file.Type};base64,{file.Base64Data}";
+                    
+                    ItemsList.Add(new StagedFrameItem {
+                        RawBytes = buffer,
+                        Base64Preview = b64String,
+                        SourceName = file.Name,
+                        SizeBytes = fileSizeBytes,
+                        OrderIndex = ItemsList.Count
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sharing file {file.Name}: {ex.Message}");
+                    skippedFiles.Add($"{file.Name} (Load error)");
+                }
+            }
+
+            if (skippedFiles.Count > 0)
+            {
+                ErrorMessage = "Skipped shared files exceeding the 15MB size limit: " + string.Join(", ", skippedFiles);
+                ShowErrorAlert = true;
+            }
+
+            if (CurrentFocusItem == null && ItemsList.Count > 0)
+            {
+                CurrentFocusItem = ItemsList.First();
+                // Don't auto-open sheet to let user see their files first.
+                IsSheetOpen = false;
+            }
+            await JS.InvokeVoidAsync("editorInteractions.clearSharedFiles");
+            StateHasChanged();
+        }
+    }
+
+    public class SharedFileData
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Base64Data { get; set; } = string.Empty;
+    }
+}
+
+

@@ -61,11 +61,52 @@ async function onActivate(event) {
 }
 
 async function onFetch(event) {
+    if (event.request.method === 'POST' && event.request.url.includes('/share-target')) {
+        return event.respondWith((async () => {
+            try {
+                const formData = await event.request.formData();
+                const files = formData.getAll('images');
+                
+                if (files && files.length > 0) {
+                    await new Promise((resolve, reject) => {
+                        const request = indexedDB.open('ShotStackDB', 1);
+                        request.onupgradeneeded = (e) => {
+                            const db = e.target.result;
+                            if (!db.objectStoreNames.contains('SharedFiles')) {
+                                db.createObjectStore('SharedFiles', { keyPath: 'id' });
+                            }
+                        };
+                        request.onsuccess = async (e) => {
+                            const db = e.target.result;
+                            const tx = db.transaction('SharedFiles', 'readwrite');
+                            const store = tx.objectStore('SharedFiles');
+                            
+                            // Convert files to base64
+                            let i = 0;
+                            for (const file of files) {
+                                const buffer = await file.arrayBuffer();
+                                const base64Data = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+                                store.put({
+                                    id: `shared_${Date.now()}_${i++}`,
+                                    name: file.name,
+                                    type: file.type,
+                                    Base64Data: base64Data
+                                });
+                            }
+                            tx.oncomplete = () => resolve();
+                        };
+                        request.onerror = (e) => reject(e);
+                    });
+                }
+            } catch (err) {
+                console.error('Web Share Target error:', err);
+            }
+            return Response.redirect('/editor?shared=true', 303);
+        })());
+    }
+
     let cachedResponse = null;
     if (event.request.method === 'GET') {
-        // For all navigation requests, try to serve index.html from cache,
-        // unless that request is for an offline resource.
-        // If you need some URLs to be server-rendered, edit the following check to exclude those URLs
         const shouldServeIndexHtml = event.request.mode === 'navigate'
             && !manifestUrlList.some(url => url === event.request.url);
 
