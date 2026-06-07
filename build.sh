@@ -12,5 +12,8 @@ chmod +x dotnet-install.sh
 # Install .NET SDK 10.0 locally
 ./dotnet-install.sh -c 10.0 -InstallDir ./dotnet
 
+# Clean old output to prevent stale files
+rm -rf output
+
 # Publish the application using the local SDK installation without runtime relinking (emcc/wasm-tools)
 ./dotnet/dotnet publish -c Release -o output -p:UsingBrowserRuntimeWorkload=false
