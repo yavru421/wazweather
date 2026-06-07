@@ -13,6 +13,8 @@
     <WasmStripILAfterAOT>true</WasmStripILAfterAOT>
     <BlazorCacheBootResources>false</BlazorCacheBootResources>
     <DefaultItemExcludes>$(DefaultItemExcludes);output\**;publish_temp\**;dist\**</DefaultItemExcludes>
+    <NuGetAudit>false</NuGetAudit>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

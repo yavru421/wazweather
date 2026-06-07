@@ -18,7 +18,7 @@
             <div class="progress-bar-container">
                 <div class="progress-bar-fill" style="width: var(--blazor-load-percentage, 0%)"></div>
             </div>
-            <span class="progress-text"></span>
+            <span class="progress-text">Loading... var(--blazor-load-percentage-text, 0)%</span>
         </div>
     </div>
 
@@ -40,9 +40,7 @@
                     if (installingWorker.state === 'installed') {
                         if (navigator.serviceWorker.controller) {
                             // A new service worker has been installed and is ready to take over.
-                            // We force a reload to ensure the new assets and index.html are used.
-                            console.log('New or updated content is available, forcing reload...');
-                            window.location.reload();
+                            console.log('New or updated content is available. Please refresh the page to update.');
                         }
                     }
                 };
