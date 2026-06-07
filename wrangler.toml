@@ -1,7 +1,13 @@
 name = "blazorpwatemplate"
 compatibility_date = "2024-05-26"
-pages_build_output_dir = "output/wwwroot"
 
 [build]
 command = "bash build.sh"
 
+[assets]
+directory = "output/wwwroot"
+not_found_handling = "single-page-application"
+
+[[routes]]
+pattern = "shotstackstudio.dondlingergc.com"
+custom_domain = true
