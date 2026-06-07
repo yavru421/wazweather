@@ -59,12 +59,28 @@
         // High-speed blob transmission stream bypass framework
         window.shotStackSaver = {
             saveAndDownloadFile: function (filename, byteBase64) {
+                // Convert base64 to byte array
+                const byteCharacters = atob(byteBase64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                
+                // Create Blob with appropriate MIME type
+                const blob = new Blob([byteArray], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                
+                // Trigger download
                 const link = document.createElement('a');
                 link.download = filename;
-                link.href = 'data:application/pdf;base64,' + byteBase64;
+                link.href = url;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                
+                // Clean up Blob URL
+                setTimeout(() => URL.revokeObjectURL(url), 2000);
             }
         };
     </script>
