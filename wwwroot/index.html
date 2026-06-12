@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Pour & Measure</title>
+    <title>Remote Dimension Tool</title>
     <base href="/" />
     
     <!-- Apple PWA Standalone Mode Tags -->
@@ -48,9 +48,34 @@
         <a class="dismiss">✕</a>
     </div>
 
+    <!-- iOS Add to Home Screen Guidance -->
+    <div id="ios-pwa-prompt" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 16px; border-radius: 12px; z-index: 9999; text-align: center; width: 90%; max-width: 400px; font-family: sans-serif;">
+        <p style="margin: 0 0 10px 0; font-size: 14px;">Install this app on your iPhone: tap the <strong>Share</strong> icon below and select <strong>Add to Home Screen</strong>.</p>
+        <button onclick="document.getElementById('ios-pwa-prompt').style.display='none'" style="background: #007aff; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold;">Got it</button>
+    </div>
+    <script>
+        // Show prompt only on iOS Safari if not in standalone mode
+        const isIos = () => {
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            return /iphone|ipad|ipod/.test(userAgent);
+        };
+        const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+        if (isIos() && !isInStandaloneMode()) {
+            document.getElementById('ios-pwa-prompt').style.display = 'block';
+        }
+    </script>
+
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
     <script>
-        navigator.serviceWorker.register('service-worker.js').then(registration => {
+        // Request persistent storage defensively for iOS 7-day eviction
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().then(granted => {
+                if (granted) console.log("Storage will not be cleared except by explicit user action");
+                else console.log("Storage may be cleared by the UA under storage pressure.");
+            });
+        }
+
+        navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' }).then(registration => {
             registration.onupdatefound = () => {
                 const installingWorker = registration.installing;
                 if (installingWorker == null) {

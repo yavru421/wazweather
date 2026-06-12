@@ -1,0 +1,121 @@
+/* Container Layout: Anchored to all four corners of the viewport */
+.glass-pane-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    /* We use fixed instead of 100vh to avoid iOS Safari bottom bar jumps */
+    background-color: #000;
+    overflow: hidden;
+}
+
+/* Layer 0: The Video Feed */
+.glass-pane-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Fill the screen while maintaining aspect ratio */
+    z-index: 0; /* Base layer */
+    /* Flip the video horizontally if it's a front-facing camera (optional depending on use case) */
+    /* transform: scaleX(-1); */
+}
+
+/* Layer 1: The Canvas Overlay */
+.glass-pane-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10; /* Above the video */
+    touch-action: none; /* Crucial for handling touch events manually in JS */
+}
+
+/* Layer 2: The UI Controls */
+.glass-pane-ui {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 20; /* Highest layer, on top of the glass pane */
+    
+    /* Anchor safely above the iOS home indicator */
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    
+    display: flex;
+    justify-content: center;
+    pointer-events: none; /* Let touches pass through the empty areas */
+}
+
+.ui-panel {
+    background: rgba(30, 30, 30, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 20px;
+    margin: 10px 20px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    pointer-events: auto; /* Re-enable pointer events for the controls themselves */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.measurement-display {
+    color: white;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    text-align: center;
+}
+
+.measurement-display .value {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.measurement-display .unit {
+    font-size: 1.2rem;
+    font-weight: 500;
+    opacity: 0.7;
+    margin-left: 4px;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+}
+
+.btn:active {
+    transform: scale(0.96);
+}
+
+.btn-primary {
+    background: #007aff;
+    color: white;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
