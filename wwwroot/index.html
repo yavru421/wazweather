@@ -2699,7 +2699,8 @@ Check live hydrology & weather flow: ${shareUrl}`;
       if (fillUv) fillUv.style.width = '0%';
     }
 
-    cards.forEach(card => {
+    const cards = document.querySelectorAll('[data-app]');
+    if(cards) cards.forEach(card => {
       card.addEventListener('click', () => {
         const appKey = card.dataset.app;
         if(appKey === 'sentinel') return;
