@@ -1,6 +1,15 @@
 name = "wazweather"
 compatibility_date = "2025-01-01"
+main = "worker.js"
 
 [assets]
 directory = "wwwroot"
 not_found_handling = "single-page-application"
+
+[[d1_databases]]
+binding = "waz_analytics"
+database_name = "waz-analytics"
+database_id = "38d497a4-5a97-41c4-b89c-1ba47a0dea4f"
+
+[triggers]
+crons = ["* * * * *"]
