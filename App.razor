@@ -1,6 +1,7 @@
-<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(PourAndMeasure.Pages.NotFound)">
+<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(WaZWeather.Pages.NotFound)">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(PourAndMeasure.Layout.MainLayout)"/>
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(WaZWeather.Layout.MainLayout)"/>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
 </Router>
+

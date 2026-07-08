@@ -1,11 +1,6 @@
 name = "wazweather"
-compatibility_date = "2024-05-26"
-
-[build]
-command = "bash build.sh"
+compatibility_date = "2025-01-01"
 
 [assets]
-directory = "output/wwwroot"
+directory = "wwwroot"
 not_found_handling = "single-page-application"
-include = ["**/*"]
-

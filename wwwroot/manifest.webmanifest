@@ -1,5 +1,5 @@
 {
-  "name": "Pour & Measure",
+  "name": "WaZWeather",
   "short_name": "PourMeasure",
   "id": "/",
   "start_url": "/",
@@ -39,3 +39,4 @@
     }
   }
 }
+
