@@ -813,6 +813,10 @@
       var curHr = 0;
       for(var i=0;i<times.length;i++){ if(new Date(times[i])<=now) curHr=i; else break; }
 
+      if (el('waz-main-temp')) el('waz-main-temp').textContent = Math.round(h.temperature_2m[curHr]) + '°';
+      if (el('waz-main-desc')) el('waz-main-desc').textContent = wCode(h.weather_code[curHr]).label;
+      generateRecommendations(h);
+
       var feelsLike = (h.apparent_temperature && h.apparent_temperature[curHr]!=null) ? Math.round(h.apparent_temperature[curHr]) : null;
       var windSpd   = (h.wind_speed_10m && h.wind_speed_10m[curHr]!=null) ? Math.round(h.wind_speed_10m[curHr]) : null;
       var windDir   = (h.wind_direction_10m && h.wind_direction_10m[curHr]!=null) ? degToCardinal(h.wind_direction_10m[curHr]) : '--';
@@ -984,12 +988,23 @@
         if(code==='00065') ftVals=vals;
       });
       var cfs  = cfsVals.length?parseFloat(cfsVals[cfsVals.length-1].value):null;
-      var cfsPrev=cfsVals.length>1?parseFloat(cfsVals[cfsVals.length-2].value):cfs;
       var ft   = ftVals.length?parseFloat(ftVals[ftVals.length-1].value):null;
-      var vel  = (cfs!==null&&ft!==null&&ft>0)?(cfs/(ft*150)).toFixed(2):null;
-      if(cfs!==null){ setText('waz-cfs',cfs.toLocaleString()+' CFS'); var trend=cfs>cfsPrev?'↑':cfs<cfsPrev?'↓':'→'; setText('waz-trend',trend); el('waz-trend').style.color=cfs>cfsPrev?'#ef4444':cfs<cfsPrev?'#34d399':'#98989d'; }
-      if(ft!==null)  setText('waz-gauge', ft.toFixed(2)+' ft');
-      if(vel!==null) setText('waz-vel',   vel+' ft/s');
+      var flowStatus = 'Normal / Calm';
+      var flowNote = 'Great conditions for casual swimming or hanging out by the water.';
+      if(cfs !== null) {
+          if(cfs > 12000) {
+              flowStatus = 'High / Fast Current';
+              flowNote = 'Currents are strong. Not recommended for casual swimming or small craft.';
+          } else if(cfs > 8000) {
+              flowStatus = 'Elevated';
+              flowNote = 'Use caution on the water. Currents are swifter than usual.';
+          } else if (cfs === 0) {
+              flowStatus = 'Data Unavailable';
+              flowNote = 'Awaiting live telemetry from USGS.';
+          }
+      }
+      if (el('waz-flow-status')) el('waz-flow-status').textContent = flowStatus;
+      if (el('waz-flow-note')) el('waz-flow-note').textContent = flowNote;
       if(ft!==null){
         var floodMinor=12,floodAction=10;
         var pct=Math.min(100,Math.max(0,(ft/floodMinor)*100));
