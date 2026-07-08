@@ -209,18 +209,14 @@
     <div id="waz-live-badge"><div class="waz-live-dot"></div><span class="waz-live-label">Live</span></div>
     <div id="waz-clock">--:--:--</div>
   </div>
-  <div style="display:flex;align-items:center;">
-    <button id="waz-share-btn" aria-label="Share WaZWeather" style="background:transparent;border:none;color:#ffffff;cursor:pointer;margin-right:12px;padding:4px;display:flex;align-items:center;justify-content:center;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-    </button>
-    <button id="waz-close-btn" onclick="resetActiveGateway()" aria-label="Close WaZWeather">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
+  <button id="waz-close-btn" style="pointer-events:auto;" onclick="resetActiveGateway()" aria-label="Close WaZWeather">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
 </div>
 
 <!-- ════ CARD 1: OVERVIEW ════ -->
-<div id="waz-overview" class="waz-card waz-scroll">
+<div id="waz-overview" class="waz-card waz-scroll" data-share-text="Live weather from WazWeather:">
+  <div class="card-share-btn" onclick="shareCard(this)" style="position:absolute;top:15px;right:15px;width:32px;height:32px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
   <div class="ri-body">
     <div class="ri-source">
       <div><div class="ri-source-lbl">WazWeather · Local</div></div>
@@ -292,7 +288,8 @@
 </div>
 
 <!-- ════ CARD 2: RADAR (Split 68vh / rest) ════ -->
-<div id="waz-radar" class="waz-card">
+<div id="waz-radar" class="waz-card" data-share-text="Severe weather tracked! Check out the live interactive radar on WazWeather:">
+  <div class="card-share-btn radar-share" onclick="shareRadar()" style="position:absolute;top:15px;right:15px;width:32px;height:32px;background:rgba(0,0,0,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
   <div id="waz-radar-frame-wrap">
     <iframe id="windy-iframe"
       src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=9&overlay=radar&product=radar&level=surface&lat=44.3936&lon=-89.8173&play=true&message=true&marker=true&detailLat=44.3936&detailLon=-89.8173"
@@ -342,7 +339,8 @@
 </div>
 
 <!-- ════ CARD 3: RIVER ════ -->
-<div id="waz-river" class="waz-card waz-scroll">
+<div id="waz-river" class="waz-card waz-scroll" data-share-text="Current river flow status from WazWeather:">
+  <div class="card-share-btn" onclick="shareCard(this)" style="position:absolute;top:15px;right:15px;width:32px;height:32px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
   <div class="river-body">
     <div class="river-hdr">
       <div class="river-icon">
@@ -418,6 +416,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <!-- ════ v5 SELF-CONTAINED SCRIPT ════ -->
 <script>
 (function() {
@@ -460,22 +459,59 @@
   function tickClock(){ setText('waz-clock', new Date().toLocaleTimeString('en-US',{hour12:false})); }
   setInterval(tickClock, 1000); tickClock();
 
-  /* Share */
-  var shareBtn = el('waz-share-btn');
-  if(shareBtn) {
-    shareBtn.addEventListener('click', function() {
-      if(navigator.share) {
+
+
+  
+  /* Dynamic Sharing */
+  window.shareCard = function(btn) {
+    if(!window.html2canvas) { alert('Screenshot engine loading...'); return; }
+    var card = btn.closest('.waz-card');
+    var shareText = card.getAttribute('data-share-text') || 'WazWeather Update:';
+    shareText += ' ' + window.location.origin;
+    
+    // hide the button temporarily for the screenshot
+    btn.style.display = 'none';
+    
+    html2canvas(card, { backgroundColor: '#12141c', scale: 2 }).then(function(canvas) {
+      btn.style.display = 'flex';
+      canvas.toBlob(function(blob) {
+        if(!blob) return;
+        var file = new File([blob], 'wazweather_share.png', { type: 'image/png' });
+        if(navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            text: shareText,
+            files: [file]
+          }).catch(function(e){ console.warn(e); });
+        } else {
+          navigator.clipboard.writeText(shareText);
+          alert('Link copied! (Your browser does not support image sharing)');
+        }
+      }, 'image/png');
+    });
+  };
+
+  window.shareRadar = function() {
+    fetch('/assets/radar-share.gif').then(function(res) {
+      return res.blob();
+    }).then(function(blob) {
+      var file = new File([blob], 'radar-share.gif', { type: 'image/gif' });
+      var shareText = 'Severe weather tracked! Check out the live interactive radar on WazWeather: ' + window.location.origin;
+      if(navigator.canShare && navigator.canShare({ files: [file] })) {
         navigator.share({
-          title: 'WaZWeather',
-          text: 'Check out the live weather telemetry!',
-          url: window.location.href
+          text: shareText,
+          files: [file]
         }).catch(function(e){ console.warn(e); });
       } else {
-        navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+        navigator.clipboard.writeText(shareText);
+        alert('Link copied! (Your browser does not support GIF sharing)');
       }
+    }).catch(function(e) {
+      console.error(e);
+      var shareText = 'Check out the live interactive radar on WazWeather: ' + window.location.origin;
+      if(navigator.share) navigator.share({ text: shareText }).catch(function(e){});
+      else navigator.clipboard.writeText(shareText);
     });
-  }
+  };
 
   /* Dot sync */
   var container = el('wazeecha-telemetry');
