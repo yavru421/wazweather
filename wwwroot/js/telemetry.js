@@ -1,5 +1,13 @@
 (function() {
+    // Check or generate persistent User UUID
+    let userUuid = localStorage.getItem('waz_user_uuid');
+    if (!userUuid) {
+        userUuid = crypto.randomUUID();
+        localStorage.setItem('waz_user_uuid', userUuid);
+    }
+
     let telemetryData = {
+        user_uuid: userUuid,
         event_type: 'page_load',
         connection_type: 'unknown',
         pwa_installed: false,

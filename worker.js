@@ -19,9 +19,9 @@ export default {
               client_ip, cf_city, cf_region, cf_country, cf_postal_code, 
               cf_latitude, cf_longitude, cf_asn, cf_as_organization, cf_bot_score, cf_device_type,
               user_agent, connection_type, pwa_installed, 
-              event_type, web_vitals_ttfb, web_vitals_fcp, web_vitals_cls
+              event_type, web_vitals_ttfb, web_vitals_fcp, web_vitals_cls, user_uuid
             ) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `).bind(
             timestamp, 
             payload.endpoint || null, 
@@ -37,14 +37,15 @@ export default {
             cf.asn || null, 
             cf.asOrganization || null, 
             cf.botManagement?.score || null, 
-            cf.clientTcpRtt ? 'unknown' : 'unknown', // Device type usually needs enterprise, fallback to unknown
+            cf.clientTcpRtt ? 'unknown' : 'unknown', 
             user_agent, 
             payload.connection_type || null, 
             payload.pwa_installed ? 1 : 0, 
             payload.event_type || 'api_fetch', 
             payload.web_vitals_ttfb || null, 
             payload.web_vitals_fcp || null, 
-            payload.web_vitals_cls || null
+            payload.web_vitals_cls || null,
+            payload.user_uuid || null
           ).run();
           
           return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -91,10 +92,10 @@ export default {
       ctx.waitUntil(
         env.waz_analytics.prepare(`
           INSERT INTO analytics (
-            timestamp, endpoint, latency_ms, status_code, client_ip, event_type
+            timestamp, endpoint, latency_ms, status_code, client_ip, event_type, user_uuid
           ) 
-          VALUES (?, ?, ?, ?, ?, ?)
-        `).bind(timestamp, api, latency, status, 'cron', 'background_poll').run()
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).bind(timestamp, api, latency, status, 'cron', 'background_poll', 'system').run()
       );
     }
   }
