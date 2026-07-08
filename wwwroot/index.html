@@ -1,6 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>WaZWeather</title><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script><style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: system-ui, -apple-system, sans-serif; background-color: #050a06; color: #fff; margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }</style></head><body>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>WaZWeather</title><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script><style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: system-ui, -apple-system, sans-serif; background-color: #12141c; color: #ffffff; margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }</style></head><body>
                               <!-- WaZWeather v5 — Rain Intel + Split Radar + 7-Day Forecast -->
-     <section id="wazeecha-telemetry" class="telemetry-section content-section" style="position:fixed;inset:0;z-index:9999;background:#050a06;margin:0;padding:0;display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;">
+     <section id="wazeecha-telemetry" class="telemetry-section content-section" style="position:fixed;inset:0;z-index:9999;background:#12141c;margin:0;padding:0;display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;">
 
 <style>
 /* ═══ WaZWeather v5 Core ═══ */
@@ -12,9 +12,9 @@
 #waz-live-badge{display:flex;align-items:center;gap:5px;}
 .waz-live-dot{width:6px;height:6px;border-radius:50%;background:#39FF14;box-shadow:0 0 8px #39FF14;animation:wazpulse 2s ease-in-out infinite;}
 @keyframes wazpulse{0%,100%{opacity:1}50%{opacity:.25}}
-.waz-live-label{color:#39FF14;font-size:.63rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
-#waz-clock{font-family:ui-monospace,monospace;font-size:.95rem;font-weight:700;color:#fff;}
-#waz-close-btn{pointer-events:auto;background:rgba(255,255,255,.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.18);color:#fff;width:42px;height:42px;border-radius:21px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.waz-live-label{color:#39FF14;font-size:1.1rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
+#waz-clock{font-family:ui-monospace,monospace;font-size:1.2rem;font-weight:700;color:#ffffff;}
+#waz-close-btn{pointer-events:auto;background:rgba(255,255,255,.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.18);color:#ffffff;width:42px;height:42px;border-radius:21px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;flex-shrink:0;}
 #waz-close-btn:active{background:rgba(255,255,255,.22);}
 .waz-card{width:100vw;height:100vh;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;position:relative;box-sizing:border-box;}
 .waz-scroll{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;height:100%;}
@@ -24,51 +24,51 @@
 #waz-rain-intel{background:radial-gradient(ellipse at 30% 0%,#0c2340 0%,#050a06 65%);}
 .ri-body{padding:72px 18px 36px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
 .ri-source{display:flex;justify-content:space-between;align-items:center;}
-.ri-source-lbl{color:#60a5fa;font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;}
-#waz-updated{color:#9ca3af;font-size:.63rem;}
+.ri-source-lbl{color:#0a84ff;font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;}
+#waz-updated{color:#98989d;font-size:1.1rem;}
 
 /* Countdown hero */
 .ri-countdown-hero{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04));border:1px solid rgba(59,130,246,.25);border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;}
-.ri-countdown-label{color:#60a5fa;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;}
-#waz-countdown-main{font-size:2.4rem;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;}
-#waz-countdown-sub{font-size:.78rem;color:#94a3b8;margin-top:2px;}
+.ri-countdown-label{color:#0a84ff;font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;}
+#waz-countdown-main{font-size:3rem;font-weight:900;color:#ffffff;letter-spacing:-1px;line-height:1;}
+#waz-countdown-sub{font-size:1rem;color:#94a3b8;margin-top:2px;}
 .ri-today-strip{display:flex;gap:10px;}
 .ri-today-cell{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:3px;}
-.ri-today-lbl{color:#9ca3af;font-size:.58rem;text-transform:uppercase;font-weight:700;letter-spacing:.5px;}
-#waz-today-total{color:#60a5fa;font-size:1.4rem;font-weight:900;}
-#waz-today-max-pct{color:#f97316;font-size:1.4rem;font-weight:900;}
-#waz-tomorrow-rain{color:#a78bfa;font-size:1.4rem;font-weight:900;}
+.ri-today-lbl{color:#98989d;font-size:1.2rem;text-transform:uppercase;font-weight:700;letter-spacing:.5px;}
+#waz-today-total{color:#0a84ff;font-size:1.8rem;font-weight:900;}
+#waz-today-max-pct{color:#f97316;font-size:1.8rem;font-weight:900;}
+#waz-tomorrow-rain{color:#a78bfa;font-size:1.8rem;font-weight:900;}
 
 /* 12-hr rain bar chart */
 .ri-bars-block{background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.18);border-radius:16px;padding:12px 12px 10px;}
 .ri-bars-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.ri-bars-title{color:#60a5fa;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;}
-#waz-rain-summary{font-size:.72rem;font-weight:700;color:#fff;}
+.ri-bars-title{color:#0a84ff;font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;}
+#waz-rain-summary{font-size:.9rem;font-weight:700;color:#ffffff;}
 .ri-bars{display:flex;align-items:flex-end;gap:3px;height:50px;}
 .ri-bar-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;}
-.ri-bar-pct{color:#60a5fa;font-size:.46rem;font-weight:700;line-height:1;}
+.ri-bar-pct{color:#0a84ff;font-size:.46rem;font-weight:700;line-height:1;}
 .ri-bar-fill{width:100%;border-radius:3px 3px 0 0;min-height:2px;}
-.ri-bar-lbl{color:#9ca3af;font-size:.46rem;text-align:center;white-space:nowrap;overflow:hidden;line-height:1.2;}
-#waz-rain-next{color:#9ca3af;font-size:.7rem;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.05);}
-#waz-rain-next span{color:#fff;font-weight:700;}
+.ri-bar-lbl{color:#98989d;font-size:.46rem;text-align:center;white-space:nowrap;overflow:hidden;line-height:1.2;}
+#waz-rain-next{color:#98989d;font-size:.7rem;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.05);}
+#waz-rain-next span{color:#ffffff;font-weight:700;}
 
 /* Compact stat strip */
 .ri-stat-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
 .ri-stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:11px 10px;display:flex;flex-direction:column;gap:2px;}
-.ri-stat-lbl{color:#9ca3af;font-size:.58rem;text-transform:uppercase;font-weight:700;}
-.ri-stat-val{color:#fff;font-size:1.15rem;font-weight:800;line-height:1.1;}
-.ri-stat-sub{color:#9ca3af;font-size:.62rem;}
+.ri-stat-lbl{color:#98989d;font-size:1.2rem;text-transform:uppercase;font-weight:700;}
+.ri-stat-val{color:#ffffff;font-size:1.8rem;font-weight:800;line-height:1.1;}
+.ri-stat-sub{color:#98989d;font-size:.62rem;}
 .ri-sun-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:13px;padding:10px 14px;}
 .ri-sun-item{display:flex;align-items:center;gap:7px;}
-.ri-sun-lbl{color:#9ca3af;font-size:.58rem;text-transform:uppercase;font-weight:700;}
-.ri-sun-val{color:#fff;font-size:.85rem;font-weight:700;}
+.ri-sun-lbl{color:#98989d;font-size:1.2rem;text-transform:uppercase;font-weight:700;}
+.ri-sun-val{color:#ffffff;font-size:1.1rem;font-weight:700;}
 .ri-sun-sep{flex:1;height:1px;background:rgba(255,255,255,.05);margin:0 10px;}
 .ri-persona-row{display:flex;gap:7px;flex-wrap:wrap;}
-.ri-persona-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:6px 12px;color:#9ca3af;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.ri-persona-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:6px 12px;color:#98989d;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .2s;}
 .ri-persona-btn.active{background:rgba(57,255,20,.1);border-color:rgba(57,255,20,.35);color:#39FF14;}
 .ri-advice{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:13px;padding:10px 12px;}
-.ri-advice-lbl{color:#9ca3af;font-size:.58rem;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
-#waz-advice{color:#fff;font-size:.78rem;line-height:1.45;font-weight:500;}
+.ri-advice-lbl{color:#98989d;font-size:1.2rem;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+#waz-advice{color:#ffffff;font-size:1rem;line-height:1.45;font-weight:500;}
 
 /* ═══ Card 2: RADAR (Split 70/30) ═══ */
 #waz-radar{display:flex;flex-direction:column;padding:0;}
@@ -76,8 +76,8 @@
 #windy-iframe{width:100%;height:100%;border:none;display:block;}
 #waz-radar-strip{flex:1;background:#0a0f1a;border-top:1px solid rgba(255,255,255,.08);padding:12px 16px;display:flex;flex-direction:column;gap:10px;overflow:hidden;}
 .radar-strip-top{display:flex;justify-content:space-between;align-items:center;}
-.radar-strip-lbl{color:#9ca3af;font-size:.62rem;text-transform:uppercase;font-weight:700;letter-spacing:1px;}
-#waz-radar-time{color:#60a5fa;font-size:.72rem;font-weight:700;}
+.radar-strip-lbl{color:#98989d;font-size:.62rem;text-transform:uppercase;font-weight:700;letter-spacing:1px;}
+#waz-radar-time{color:#0a84ff;font-size:.9rem;font-weight:700;}
 .radar-layer-btns{display:flex;gap:7px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
 .radar-layer-btns::-webkit-scrollbar{display:none;}
 .rlb{display:flex;align-items:center;gap:5px;padding:8px 12px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.65);font-size:.7rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
@@ -88,22 +88,22 @@
 #waz-river{background:radial-gradient(circle at 70% 10%,#1e3a8a,#0a0f1e 65%);}
 .river-body{padding:72px 18px 36px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
 .river-hdr{display:flex;align-items:center;gap:12px;}
-.river-icon{width:46px;height:46px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(59,130,246,.3);}
-.river-title{font-size:1.7rem;font-weight:900;color:#fff;letter-spacing:-.5px;}
-.river-gauge{color:#94a3b8;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+.river-icon{width:46px;height:46px;background:linear-gradient(135deg,#0a84ff,#1d4ed8);border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(59,130,246,.3);}
+.river-title{font-size:2rem;font-weight:900;color:#ffffff;letter-spacing:-.5px;}
+.river-gauge{color:#94a3b8;font-size:.9rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
 .river-main{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:22px;}
-.river-cfs-lbl{color:#94a3b8;font-size:.8rem;font-weight:600;margin-bottom:5px;}
-.river-cfs-val{color:#60a5fa;font-size:2.8rem;font-weight:900;line-height:1;letter-spacing:-2px;}
-#waz-trend{font-size:.95rem;font-weight:800;margin-left:5px;}
+.river-cfs-lbl{color:#94a3b8;font-size:1.05rem;font-weight:600;margin-bottom:5px;}
+.river-cfs-val{color:#0a84ff;font-size:3.5rem;font-weight:900;line-height:1;letter-spacing:-2px;}
+#waz-trend{font-size:1.2rem;font-weight:800;margin-left:5px;}
 .river-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
 .river-sub-cell{background:rgba(0,0,0,.2);padding:13px;border-radius:13px;}
-.river-sub-lbl{color:#94a3b8;font-size:.75rem;font-weight:600;margin-bottom:3px;}
+.river-sub-lbl{color:#94a3b8;font-size:1.2rem;font-weight:600;margin-bottom:3px;}
 .river-sub-val{font-size:1.5rem;font-weight:800;line-height:1;}
 .flood-bar-wrap{margin-top:12px;}
-.flood-bar-labels{display:flex;justify-content:space-between;font-size:.62rem;color:#9ca3af;margin-bottom:3px;}
+.flood-bar-labels{display:flex;justify-content:space-between;font-size:.62rem;color:#98989d;margin-bottom:3px;}
 .flood-bar-track{height:5px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
 #waz-flood-fill{height:100%;border-radius:999px;transition:width 1s ease;}
-#waz-flood-label{font-size:.65rem;color:#9ca3af;margin-top:4px;}
+#waz-flood-label{font-size:1.1rem;color:#98989d;margin-top:4px;}
 .river-chart-wrap{height:160px;background:rgba(0,0,0,.18);border-radius:16px;padding:10px;}
 
 /* ═══ Card 4: ALERTS ═══ */
@@ -111,46 +111,46 @@
 .alerts-body{padding:72px 18px 36px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
 .alerts-hdr{display:flex;align-items:center;gap:11px;}
 .alerts-icon{width:42px;height:42px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.alerts-title{font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:-.5px;}
-.alerts-zone{color:#9ca3af;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+.alerts-title{font-size:1.5rem;font-weight:900;color:#ffffff;letter-spacing:-.5px;}
+.alerts-zone{color:#98989d;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
 #waz-alerts-list{display:flex;flex-direction:column;gap:9px;}
 .alert-item{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:13px;padding:13px 15px;}
 .alert-event{color:#fca5a5;font-size:.9rem;font-weight:800;}
-.alert-headline{color:#fff;font-size:.75rem;line-height:1.4;margin-top:3px;opacity:.85;}
+.alert-headline{color:#ffffff;font-size:1.2rem;line-height:1.4;margin-top:3px;opacity:.85;}
 .alert-meta{display:flex;gap:7px;margin-top:7px;flex-wrap:wrap;}
 .alert-tag{font-size:.6rem;padding:3px 8px;border-radius:20px;font-weight:700;background:rgba(239,68,68,.15);color:#fca5a5;}
 .no-alerts{background:rgba(57,255,20,.04);border:1px solid rgba(57,255,20,.12);border-radius:15px;padding:26px 18px;text-align:center;}
 .no-alerts-icon{font-size:2.2rem;margin-bottom:7px;}
 .no-alerts-title{color:#39FF14;font-size:1.05rem;font-weight:800;}
-.no-alerts-sub{color:#9ca3af;font-size:.78rem;margin-top:3px;}
+.no-alerts-sub{color:#98989d;font-size:1rem;margin-top:3px;}
 .alerts-footer{display:flex;justify-content:space-between;align-items:center;padding-top:7px;border-top:1px solid rgba(255,255,255,.05);}
-.alerts-src{color:#9ca3af;font-size:.65rem;}
-#waz-alerts-stamp{color:#9ca3af;font-size:.65rem;}
+.alerts-src{color:#98989d;font-size:1.1rem;}
+#waz-alerts-stamp{color:#98989d;font-size:1.1rem;}
 
 /* ═══ Card 5: FORECAST ═══ */
 #waz-forecast{background:radial-gradient(ellipse at 60% 0%,#1a0d2e,#050a06 65%);}
 .fc-body{padding:72px 18px 36px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
 .fc-hdr{display:flex;justify-content:space-between;align-items:flex-end;}
-.fc-title{font-size:1.7rem;font-weight:900;color:#fff;letter-spacing:-.5px;}
-.fc-sub{color:#9ca3af;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.fc-title{font-size:2rem;font-weight:900;color:#ffffff;letter-spacing:-.5px;}
+.fc-sub{color:#98989d;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;}
 .aqi-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:6px 12px;}
-.aqi-badge-lbl{color:#9ca3af;font-size:.62rem;font-weight:700;text-transform:uppercase;}
+.aqi-badge-lbl{color:#98989d;font-size:.62rem;font-weight:700;text-transform:uppercase;}
 #waz-aqi-val{font-size:1.1rem;font-weight:900;color:#39FF14;}
-#waz-aqi-status{font-size:.62rem;font-weight:700;color:#9ca3af;}
+#waz-aqi-status{font-size:.62rem;font-weight:700;color:#98989d;}
 .fc-days{display:flex;flex-direction:column;gap:8px;}
 .fc-day{display:flex;align-items:center;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.055);border-radius:14px;padding:12px 14px;gap:10px;}
-.fc-day-name{color:#fff;font-size:.82rem;font-weight:700;width:34px;flex-shrink:0;}
+.fc-day-name{color:#ffffff;font-size:.82rem;font-weight:700;width:34px;flex-shrink:0;}
 .fc-day-icon{font-size:1.3rem;flex-shrink:0;}
-.fc-day-desc{color:#9ca3af;font-size:.72rem;flex:1;}
-.fc-day-temp{color:#fff;font-size:.8rem;font-weight:800;white-space:nowrap;flex-shrink:0;text-align:right;}
+.fc-day-desc{color:#98989d;font-size:.9rem;flex:1;}
+.fc-day-temp{color:#ffffff;font-size:1.05rem;font-weight:800;white-space:nowrap;flex-shrink:0;text-align:right;}
 .fc-day-rain-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;width:48px;}
 .fc-day-rain-bar-bg{width:100%;height:4px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
-.fc-day-rain-bar-fill{height:100%;border-radius:999px;background:#3b82f6;transition:width .5s ease;}
-.fc-day-rain-pct{color:#60a5fa;font-size:.6rem;font-weight:700;}
+.fc-day-rain-bar-fill{height:100%;border-radius:999px;background:#0a84ff;transition:width .5s ease;}
+.fc-day-rain-pct{color:#0a84ff;font-size:.6rem;font-weight:700;}
 .fc-precip-today{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
-.fc-precip-lbl{color:#60a5fa;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
-#waz-precip-today{color:#fff;font-size:1.1rem;font-weight:900;}
-#waz-precip-week{color:#fff;font-size:1.1rem;font-weight:900;}
+.fc-precip-lbl{color:#0a84ff;font-size:1.1rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+#waz-precip-today{color:#ffffff;font-size:1.1rem;font-weight:900;}
+#waz-precip-week{color:#ffffff;font-size:1.1rem;font-weight:900;}
 
 /* ═══ STORM TARGET COUNTDOWN Alert Bar ═══ */
 #waz-storm-alert-bar {
@@ -158,7 +158,7 @@
   border: 2px solid #ef4444;
   border-radius: 12px;
   padding: 10px 14px;
-  color: #fff;
+  color: #ffffff;
   font-family: ui-monospace, monospace;
   box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
 }
@@ -173,7 +173,7 @@
 .sab-eta {
   font-size: 1.15rem;
   font-weight: 900;
-  color: #ffffff;
+  color: #fffffffff;
 }
 .sab-meta {
   font-size: 0.62rem;
@@ -192,9 +192,11 @@
 }
 </style>
 
-<!-- 5 Progress Dots -->
+<!-- 7 Progress Dots -->
 <div id="waz-dots">
   <div class="waz-dot active"></div>
+  <div class="waz-dot"></div>
+  <div class="waz-dot"></div>
   <div class="waz-dot"></div>
   <div class="waz-dot"></div>
   <div class="waz-dot"></div>
@@ -212,33 +214,52 @@
   </button>
 </div>
 
-<!-- ════ CARD 1: RAIN INTEL ════ -->
-<div id="waz-rain-intel" class="waz-card waz-scroll">
+<!-- ════ CARD 1: OVERVIEW ════ -->
+<div id="waz-overview" class="waz-card waz-scroll">
   <div class="ri-body">
     <div class="ri-source">
-      <div><div class="ri-source-lbl">☔ Rain Intel · Wazeecha</div></div>
+      <div><div class="ri-source-lbl">WazWeather · Local</div></div>
       <div id="waz-updated">—</div>
     </div>
 
-    <!-- STORM TARGET COUNTDOWN Alert Bar -->
-    <div id="waz-storm-alert-bar" style="display:none; margin-bottom: 12px;"></div>
+    <!-- Main Temp Display -->
+    <div style="text-align: center; margin: 40px 0;">
+      <div id="waz-main-temp" style="font-size: 5rem; font-weight: 900; line-height: 1; letter-spacing: -3px; color: #ffffff;">--°</div>
+      <div id="waz-main-desc" style="font-size: 1.2rem; font-weight: 700; color: #98989d; margin-top: 10px;">Loading...</div>
+    </div>
+
+    <!-- Compact stat strip -->
+    <div class="ri-stat-strip">
+      <div class="ri-stat"><div class="ri-stat-lbl" id="waz-lbl-feels">Feels Like</div><div class="ri-stat-val" id="waz-feels">--°</div></div>
+      <div class="ri-stat"><div class="ri-stat-lbl">Wind</div><div class="ri-stat-val" id="waz-wind">-- mph</div><div class="ri-stat-sub" id="waz-wind-dir">--</div></div>
+      <div class="ri-stat"><div class="ri-stat-lbl" id="waz-lbl-uv">UV Max</div><div class="ri-stat-val" id="waz-uv" style="color:#ffb300;">--</div></div>
+    </div>
+
+    <!-- Sun strip -->
+    <div class="ri-sun-row">
+      <div class="ri-sun-item"><span style="font-size:1.2rem;">🌅</span><div><div class="ri-sun-lbl">Sunrise</div><div class="ri-sun-val" id="waz-sunrise">--:--</div></div></div>
+      <div class="ri-sun-sep"></div>
+      <div class="ri-sun-item"><div style="text-align:right;"><div class="ri-sun-lbl">Sunset</div><div class="ri-sun-val" id="waz-sunset">--:--</div></div><span style="font-size:1.2rem;">🌇</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CARD 2: RAIN ARRIVAL ════ -->
+<div id="waz-rain-arrival" class="waz-card waz-scroll">
+  <div class="ri-body">
+    <div class="ri-source">
+      <div><div class="ri-source-lbl">☔ Precipitation Intel</div></div>
+    </div>
 
     <!-- Live countdown hero -->
-    <div class="ri-countdown-hero">
+    <div class="ri-countdown-hero" style="margin-top: 20px;">
       <div class="ri-countdown-label">🌧 Rain Arrival</div>
       <div id="waz-countdown-main">Checking…</div>
       <div id="waz-countdown-sub">Loading forecast data</div>
     </div>
 
-    <!-- ZLA Rain-Wall Intercept HUD -->
-    <div id="rain-countdown-hud" class="ri-countdown-hero" style="display:none; margin-top: 10px; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.15); padding: 12px; border-radius: 16px; box-shadow: none;">
-      <div class="ri-countdown-label" style="opacity: 0.85;">🎯 Radar Rain Intercept</div>
-      <div id="zla-radar-hud-main" style="font-family:ui-monospace,monospace; font-size:1.15rem; font-weight:700; color:#39FF14;">Scanning...</div>
-      <div id="zla-radar-hud-sub" style="font-size:0.7rem; color:#9ca3af; margin-top:2px;">ZLA Minute-by-Minute Kinematic Tracking</div>
-    </div>
-
     <!-- Today / Tomorrow strip -->
-    <div class="ri-today-strip">
+    <div class="ri-today-strip" style="margin-top: 20px;">
       <div class="ri-today-cell">
         <div class="ri-today-lbl">Today Rain</div>
         <div id="waz-today-total">--"</div>
@@ -254,98 +275,13 @@
     </div>
 
     <!-- 12-hr bar chart -->
-    <div class="ri-bars-block">
+    <div class="ri-bars-block" style="margin-top: 20px;">
       <div class="ri-bars-hdr">
         <span class="ri-bars-title">Next 12 Hours</span>
         <span id="waz-rain-summary">Loading…</span>
       </div>
       <div class="ri-bars" id="waz-rain-bars"></div>
       <div id="waz-rain-next">Checking…</div>
-    </div>
-
-    <!-- Persona buttons -->
-    <div class="ri-persona-row">
-      <button class="ri-persona-btn active" data-persona="lake" onclick="wazSetPersona('lake')">🏖 Lake</button>
-      <button class="ri-persona-btn" data-persona="fishing" onclick="wazSetPersona('fishing')">🎣 Fishing</button>
-      <button class="ri-persona-btn" data-persona="work" onclick="wazSetPersona('work')">🏗 Work</button>
-      <button class="ri-persona-btn" data-persona="family" onclick="wazSetPersona('family')">👨‍👩‍👧 Family</button>
-    </div>
-
-    <!-- HUD Mode Toggle -->
-    <div class="ri-mode-toggle-wrap" style="display: flex; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 4px;">
-      <button id="mode-btn-foreman" onclick="setWazMode('foreman')" style="flex: 1; background: none; border: none; color: #9ca3af; padding: 8px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">🏗️ Foreman</button>
-      <button id="mode-btn-outdoorsman" onclick="setWazMode('outdoorsman')" style="flex: 1; background: none; border: none; color: #9ca3af; padding: 8px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">🌲 Outdoorsman</button>
-    </div>
-
-    <!-- Foreman HUD Card -->
-    <div id="hud-foreman-card" class="ri-countdown-hero" style="display: none; background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid rgba(249, 115, 22, 0.25); border-radius: 16px; padding: 14px; box-shadow: none;">
-      <div class="ri-countdown-label" style="color: #f97316;">🏗️ Jobsite Foreman HUD</div>
-      
-      <!-- Pour Ready Index -->
-      <div style="margin-top: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.7rem; color: #9ca3af; font-weight: 700; text-transform: uppercase;">Pour Ready Index</span>
-          <span id="foreman-pour-status" style="font-size: 0.75rem; font-weight: 800; color: #39FF14;">SAFE</span>
-        </div>
-        <div id="foreman-pour-details" style="font-size: 0.65rem; color: #d1d5db; margin-top: 2px;">Temp: --°F | RH: --% (No risks detected)</div>
-      </div>
-      
-      <!-- Roofing/Siding Safety -->
-      <div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.7rem; color: #9ca3af; font-weight: 700; text-transform: uppercase;">Roofing & Siding Safety</span>
-          <span id="foreman-roofing-status" style="font-size: 0.75rem; font-weight: 800; color: #39FF14;">SAFE</span>
-        </div>
-        <div id="foreman-roofing-details" style="font-size: 0.65rem; color: #d1d5db; margin-top: 2px;">Wind: -- mph | Temp: --°F</div>
-      </div>
-
-      <!-- Share Action -->
-      <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
-        <button onclick="shareForemanDiagnostics()" style="background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.35); color: #fff; padding: 6px 12px; font-size: 0.65rem; font-weight: 800; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s;">📤 Share Diagnostics</button>
-      </div>
-    </div>
-
-    <!-- Outdoorsman HUD Card -->
-    <div id="hud-outdoorsman-card" class="ri-countdown-hero" style="display: none; background: linear-gradient(135deg, rgba(57, 255, 20, 0.08) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid rgba(57, 255, 20, 0.2); border-radius: 16px; padding: 14px; box-shadow: none;">
-      <div class="ri-countdown-label" style="color: #39FF14;">🌲 Outdoorsman HUD</div>
-      
-      <!-- Lake Wazeecha Stability -->
-      <div style="margin-top: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.7rem; color: #9ca3af; font-weight: 700; text-transform: uppercase;">Wazeecha Flow Stability</span>
-          <span id="outdoors-stability-status" style="font-size: 0.75rem; font-weight: 800; color: #39FF14;">STABLE</span>
-        </div>
-        <div id="outdoors-stability-details" style="font-size: 0.65rem; color: #d1d5db; margin-top: 2px;">Flow Rate: -- CFS (USGS 05395000)</div>
-      </div>
-      
-      <!-- Barometric Strike Window -->
-      <div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.7rem; color: #9ca3af; font-weight: 700; text-transform: uppercase;">Barometric Strike Window</span>
-          <span id="outdoors-strike-status" style="font-size: 0.75rem; font-weight: 800; color: #9ca3af;">NO TREND</span>
-        </div>
-        <div id="outdoors-strike-details" style="font-size: 0.65rem; color: #d1d5db; margin-top: 2px;">3hr Delta: -- hPa (No target pressure drop)</div>
-      </div>
-    </div>
-
-    <!-- Compact stat strip -->
-    <div class="ri-stat-strip">
-      <div class="ri-stat"><div class="ri-stat-lbl" id="waz-lbl-feels">Feels Like</div><div class="ri-stat-val" id="waz-feels">--°</div></div>
-      <div class="ri-stat"><div class="ri-stat-lbl">Wind</div><div class="ri-stat-val" id="waz-wind">-- mph</div><div class="ri-stat-sub" id="waz-wind-dir">--</div></div>
-      <div class="ri-stat"><div class="ri-stat-lbl" id="waz-lbl-uv">UV Max</div><div class="ri-stat-val" id="waz-uv" style="color:#fbbf24;">--</div></div>
-    </div>
-
-    <!-- Sun strip -->
-    <div class="ri-sun-row">
-      <div class="ri-sun-item"><span style="font-size:1rem;">🌅</span><div><div class="ri-sun-lbl">Sunrise</div><div class="ri-sun-val" id="waz-sunrise">--:--</div></div></div>
-      <div class="ri-sun-sep"></div>
-      <div class="ri-sun-item"><div style="text-align:right;"><div class="ri-sun-lbl">Sunset</div><div class="ri-sun-val" id="waz-sunset">--:--</div></div><span style="font-size:1rem;">🌇</span></div>
-    </div>
-
-    <!-- Advice -->
-    <div class="ri-advice">
-      <div class="ri-advice-lbl">💡 Recommendation</div>
-      <div id="waz-advice">Loading…</div>
     </div>
   </div>
 </div>
@@ -410,14 +346,9 @@
       <div><div class="river-title">Hydrology</div><div class="river-gauge">Wisconsin River · USGS 05395000</div></div>
     </div>
     <div class="river-main">
-      <div class="river-cfs-lbl">Current Flow Rate</div>
-      <div style="display:flex;align-items:baseline;gap:5px;">
-        <div id="waz-cfs" class="river-cfs-val">-- CFS</div>
-        <div id="waz-trend"></div>
-      </div>
+      
       <div class="river-sub-grid">
-        <div class="river-sub-cell"><div class="river-sub-lbl">River Depth</div><div id="waz-gauge" class="river-sub-val" style="color:#a78bfa;">-- ft</div></div>
-        <div class="river-sub-cell"><div class="river-sub-lbl">Velocity Est.</div><div id="waz-vel" class="river-sub-val" style="color:#34d399;">-- ft/s</div></div>
+        <div class="river-sub-cell" style="grid-column: span 2;"><div class="river-sub-lbl">River Flow Status</div><div id="waz-flow-status" class="river-sub-val" style="color:#ffffff; font-size: 1.8rem;">--</div><div id="waz-flow-note" style="color:#98989d; font-size:1.05rem; margin-top:5px;">Loading...</div></div>
       </div>
       <div class="flood-bar-wrap" id="waz-flood-wrap" style="display:none;">
         <div class="flood-bar-labels"><span>Stage</span><span id="waz-flood-label">--</span></div>
@@ -461,6 +392,23 @@
 
     <div class="fc-days" id="waz-fc-days">
       <!-- populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ════ CARD 7: RECOMMENDATIONS ════ -->
+<div id="waz-recommendations" class="waz-card waz-scroll">
+  <div class="ri-body">
+    <div class="ri-source">
+      <div><div class="ri-source-lbl">💡 Smart Insights</div></div>
+    </div>
+    
+    <div id="waz-smart-insights-container" style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+        <!-- Populated by JS -->
+        <div class="ri-advice">
+          <div class="ri-advice-lbl" style="color:#0a84ff;">Analyzing...</div>
+          <div style="color:#ffffff; font-size:1rem; font-weight:500;">Generating smart insights based on current conditions.</div>
+        </div>
     </div>
   </div>
 </div>
@@ -521,14 +469,14 @@
   function degToCardinal(d){ return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8]||'--'; }
   function relTime(ts){ var d=Date.now()-ts; if(d<60000) return 'just now'; if(d<3600000) return Math.floor(d/60000)+'m ago'; return Math.floor(d/3600000)+'h ago'; }
   function wCode(c){
-    if(c<=1)  return {emoji:'☀️', label:'Clear',       color:'#fbbf24'};
-    if(c<=3)  return {emoji:'⛅', label:'Partly Cloudy',color:'#9ca3af'};
+    if(c<=1)  return {emoji:'☀️', label:'Clear',       color:'#ffb300'};
+    if(c<=3)  return {emoji:'⛅', label:'Partly Cloudy',color:'#98989d'};
     if(c<=48) return {emoji:'🌫️', label:'Foggy',        color:'#6b7280'};
-    if(c<=67) return {emoji:'🌧️', label:'Rain',         color:'#3b82f6'};
+    if(c<=67) return {emoji:'🌧️', label:'Rain',         color:'#0a84ff'};
     if(c<=77) return {emoji:'❄️', label:'Snow',         color:'#bfdbfe'};
-    if(c<=82) return {emoji:'🌦️', label:'Showers',      color:'#60a5fa'};
+    if(c<=82) return {emoji:'🌦️', label:'Showers',      color:'#0a84ff'};
     if(c<=99) return {emoji:'⛈️', label:'Thunderstorm', color:'#ef4444'};
-    return {emoji:'🌡️', label:'Unknown', color:'#9ca3af'};
+    return {emoji:'🌡️', label:'Unknown', color:'#98989d'};
   }
   function dayName(dateStr, i){
     if(i===0) return 'Today';
@@ -565,7 +513,7 @@
     ctx.font = 'bold 24px monospace';
     ctx.fillText('🏗️ JOBSITE FOREMAN DIAGNOSTICS', 30, 50);
 
-    ctx.fillStyle = '#9ca3af';
+    ctx.fillStyle = '#98989d';
     ctx.font = '14px monospace';
     ctx.fillText('Time: ' + new Date().toLocaleString(), 30, 80);
     ctx.fillText('Location: ' + LAT.toFixed(4) + ', ' + LON.toFixed(4), 30, 100);
@@ -574,7 +522,7 @@
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(30, 120); ctx.lineTo(570, 120); ctx.stroke();
 
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#fffffffff';
     ctx.font = 'bold 18px monospace';
     ctx.fillText('POUR READY INDEX:', 30, 160);
 
@@ -588,7 +536,7 @@
 
     ctx.beginPath(); ctx.moveTo(30, 220); ctx.lineTo(570, 220); ctx.stroke();
 
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#fffffffff';
     ctx.font = 'bold 18px monospace';
     ctx.fillText('ROOFING & SIDING SAFETY:', 30, 260);
 
@@ -638,7 +586,75 @@
     updateHudStats();
   };
 
-  function updateHudStats(){
+  
+  // Generate Smart Recommendations
+  function generateRecommendations(h) {
+    if(!h || !h.temperature_2m) return;
+    var container = el('waz-smart-insights-container');
+    if(!container) return;
+    
+    var now = new Date();
+    var curHr = 0;
+    for(var i=0; i<h.time.length; i++){
+      if(new Date(h.time[i]) <= now) curHr = i;
+      else break;
+    }
+    
+    var insights = [];
+    
+    // 1. The "Bring It" Metric
+    var rainRisk = false;
+    for(var i=curHr; i<curHr+6; i++){
+        if(h.precipitation_probability[i] > 40) {
+            rainRisk = true; break;
+        }
+    }
+    if(rainRisk) {
+        insights.push({title: '☔ Precipitation Risk', text: 'Grab an umbrella or rain shell before you head out. Rain likely in the next 6 hours.'});
+    }
+    
+    // 2. The "Window" Metric
+    var windowFound = false;
+    for(var i=curHr; i<curHr+12; i++){
+        if(h.precipitation_probability[i] === 0 && h.weather_code[i] <= 3) {
+            var startHr = new Date(h.time[i]).getHours();
+            var ampm = startHr >= 12 ? 'PM' : 'AM';
+            var hr12 = startHr % 12 || 12;
+            insights.push({title: '🌤️ Perfect Window', text: 'Perfect window for outdoor activities/walks around ' + hr12 + ' ' + ampm + '.'});
+            windowFound = true;
+            break;
+        }
+    }
+    
+    // 3. The "Layer" Metric
+    var tCur = h.temperature_2m[curHr];
+    var tEve = null;
+    for(var i=curHr; i<curHr+12; i++){
+        var d = new Date(h.time[i]);
+        if(d.getHours() >= 18) {
+            tEve = h.temperature_2m[i]; break;
+        }
+    }
+    if(tCur > 70 && tEve && tEve < 55) {
+        insights.push({title: '🧥 Layer Up', text: 'Warm afternoon, but it\'s going to get chilly fast after sunset. Pack a light jacket.'});
+    }
+    
+    // 4. The "Car Window" Metric
+    if(h.precipitation_probability[curHr] > 50 || h.precipitation_probability[curHr+1] > 50) {
+        insights.push({title: '🚗 Sudden Shower', text: 'Rain approaching soon. Make sure car windows are rolled up!'});
+    }
+    
+    if(insights.length === 0) {
+        insights.push({title: '✨ All Clear', text: 'Conditions look great. Enjoy the day!'});
+    }
+    
+    var html = '';
+    insights.forEach(function(ins) {
+        html += '<div class="ri-advice" style="margin-bottom: 15px;"><div class="ri-advice-lbl" style="color:#0a84ff; font-size:0.75rem; font-weight:700; margin-bottom:5px;">' + ins.title + '</div><div style="color:#ffffff; font-size:1.1rem; line-height:1.4; font-weight:500;">' + ins.text + '</div></div>';
+    });
+    container.innerHTML = html;
+  }
+\n\n  function updateHudStats(){
     if(!wxCache) return;
     try {
       var h = wxCache.hourly || {};
@@ -673,7 +689,7 @@
           pourReason = "High humidity (> 85% RH)";
         } else if(rh < 30){
           pourStatus = "CAUTION (DRY CURING)";
-          pourColor = "#fbbf24";
+          pourColor = "#ffb300";
           pourReason = "Low humidity (< 30% RH)";
         }
         var pourStatusEl = el('foreman-pour-status');
@@ -743,7 +759,7 @@
         var p3HrAgo = curHr >= 3 ? h.pressure_msl[curHr - 3] : pCur;
         var pDelta = pCur - p3HrAgo;
         var strikeStatus = "MODERATE";
-        var strikeColor = "#60a5fa";
+        var strikeColor = "#0a84ff";
         var strikeReason = "Stable barometric pressure";
         if(pDelta < -1.5){
           strikeStatus = "PRIME STRIKE";
@@ -751,7 +767,7 @@
           strikeReason = "Pressure drop of " + Math.abs(pDelta).toFixed(1) + " hPa triggers feeding";
         } else if(pDelta > 1.5){
           strikeStatus = "SLOW BITE";
-          strikeColor = "#9ca3af";
+          strikeColor = "#98989d";
           strikeReason = "Rising pressure: " + pDelta.toFixed(1) + " hPa";
         }
         var strikeStatusEl = el('outdoors-strike-status');
@@ -820,7 +836,7 @@
       var tomorrowPct = (d.precipitation_probability_max && d.precipitation_probability_max[1]!=null) ? d.precipitation_probability_max[1] : '--';
       setText('waz-today-total', todayTotal !== '--' ? todayTotal+'"' : '--"');
       setText('waz-today-max-pct', todayMaxPct !== '--' ? todayMaxPct+'%' : '--%');
-      el('waz-today-max-pct') && (el('waz-today-max-pct').style.color = todayMaxPct>=60?'#ef4444':todayMaxPct>=30?'#f97316':'#60a5fa');
+      el('waz-today-max-pct') && (el('waz-today-max-pct').style.color = todayMaxPct>=60?'#ef4444':todayMaxPct>=30?'#f97316':'#0a84ff');
       setText('waz-tomorrow-rain', tomorrowPct !== '--' ? tomorrowPct+'%' : '--%');
       el('waz-tomorrow-rain') && (el('waz-tomorrow-rain').style.color = tomorrowPct>=60?'#ef4444':tomorrowPct>=30?'#f97316':'#a78bfa');
 
@@ -862,7 +878,7 @@
         if(hasRain && firstRainHr===-1) firstRainHr=ri;
         if(prob>maxProb) maxProb=prob;
         var barH=Math.max(2,Math.round((prob/100)*44));
-        var col=prob>=70?'#ef4444':prob>=40?'#f97316':prob>=20?'#3b82f6':'rgba(255,255,255,0.1)';
+        var col=prob>=70?'#ef4444':prob>=40?'#f97316':prob>=20?'#0a84ff':'rgba(255,255,255,0.1)';
         var t=new Date(h.time[hi]);
         var tLbl=t.toLocaleTimeString([],{hour:'numeric'}).replace(' ','').toLowerCase();
         barHTML+='<div class="ri-bar-col">'+
@@ -873,7 +889,7 @@
       var barsEl=el('waz-rain-bars'); if(barsEl) barsEl.innerHTML=barHTML;
       var totalAmt=rainAmt.slice(curHr,curHr+12).reduce(function(a,v){return a+(v||0);},0);
       var summaryEl=el('waz-rain-summary');
-      if(summaryEl){ summaryEl.textContent=maxProb>0?'Max '+maxProb+'% · '+totalAmt.toFixed(2)+'"':'No rain'; summaryEl.style.color=maxProb>=70?'#ef4444':maxProb>=40?'#f97316':maxProb>0?'#60a5fa':'#39FF14'; }
+      if(summaryEl){ summaryEl.textContent=maxProb>0?'Max '+maxProb+'% · '+totalAmt.toFixed(2)+'"':'No rain'; summaryEl.style.color=maxProb>=70?'#ef4444':maxProb>=40?'#f97316':maxProb>0?'#0a84ff':'#39FF14'; }
 
       /* Countdown */
       var nextEl=el('waz-rain-next');
@@ -926,7 +942,7 @@
         weekTotal += sum;
         var info = wCode(wc);
         var barPct = Math.min(100, pct);
-        var rainColor = pct>=70?'#ef4444':pct>=40?'#f97316':'#3b82f6';
+        var rainColor = pct>=70?'#ef4444':pct>=40?'#f97316':'#0a84ff';
         return '<div class="fc-day">'+
           '<div class="fc-day-name">'+dayName(t,i)+'</div>'+
           '<div class="fc-day-icon">'+info.emoji+'</div>'+
@@ -971,13 +987,13 @@
       var cfsPrev=cfsVals.length>1?parseFloat(cfsVals[cfsVals.length-2].value):cfs;
       var ft   = ftVals.length?parseFloat(ftVals[ftVals.length-1].value):null;
       var vel  = (cfs!==null&&ft!==null&&ft>0)?(cfs/(ft*150)).toFixed(2):null;
-      if(cfs!==null){ setText('waz-cfs',cfs.toLocaleString()+' CFS'); var trend=cfs>cfsPrev?'↑':cfs<cfsPrev?'↓':'→'; setText('waz-trend',trend); el('waz-trend').style.color=cfs>cfsPrev?'#ef4444':cfs<cfsPrev?'#34d399':'#9ca3af'; }
+      if(cfs!==null){ setText('waz-cfs',cfs.toLocaleString()+' CFS'); var trend=cfs>cfsPrev?'↑':cfs<cfsPrev?'↓':'→'; setText('waz-trend',trend); el('waz-trend').style.color=cfs>cfsPrev?'#ef4444':cfs<cfsPrev?'#34d399':'#98989d'; }
       if(ft!==null)  setText('waz-gauge', ft.toFixed(2)+' ft');
       if(vel!==null) setText('waz-vel',   vel+' ft/s');
       if(ft!==null){
         var floodMinor=12,floodAction=10;
         var pct=Math.min(100,Math.max(0,(ft/floodMinor)*100));
-        var fc=ft>=floodMinor?'#ef4444':ft>=floodAction?'#f97316':'#3b82f6';
+        var fc=ft>=floodMinor?'#ef4444':ft>=floodAction?'#f97316':'#0a84ff';
         var sl=ft>=floodMinor?'Flood Stage':ft>=floodAction?'Action Stage':'Normal';
         var wrap=el('waz-flood-wrap'); if(wrap) wrap.style.display='block';
         var fill=el('waz-flood-fill'); if(fill){fill.style.width=pct+'%';fill.style.background=fc;}
@@ -986,7 +1002,7 @@
       var canvas=el('waz-hydro-chart');
       if(canvas&&window.Chart&&chartData.length){
         var ex=Chart.getChart(canvas); if(ex) ex.destroy();
-        new Chart(canvas,{type:'line',data:{labels:chartLabels,datasets:[{data:chartData,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,pointRadius:0,tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{ticks:{color:'#9ca3af',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+        new Chart(canvas,{type:'line',data:{labels:chartLabels,datasets:[{data:chartData,borderColor:'#0a84ff',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,pointRadius:0,tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{ticks:{color:'#98989d',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
       }
       updateHudStats();
     } catch(err){ console.warn('[WaZv5] renderRiver:',err); }
@@ -1094,14 +1110,14 @@
             } else {
               etaText = "ACTIVE STORM THREAT IN TRAJECTORY";
               alertBar.style.background = "linear-gradient(90deg, #111827 0%, #374151 100%)";
-              severityColor = "#9ca3af";
+              severityColor = "#98989d";
               borderGlow = "none";
             }
             
             alertBar.style.boxShadow = borderGlow;
             alertBar.innerHTML = 
               '<div class="sab-title" style="font-size: 0.65rem; font-weight: 900; letter-spacing: 1.5px; color: #fca5a5; text-transform: uppercase; margin-bottom: 2px;">' + title + '</div>' +
-              '<div class="sab-eta" style="color: #fff; font-size: 1.15rem; font-weight: 900;">' + etaText + '</div>' +
+              '<div class="sab-eta" style="color: #ffffff; font-size: 1.15rem; font-weight: 900;">' + etaText + '</div>' +
               '<div class="sab-meta" style="font-size: 0.62rem; color: rgba(255,255,255,0.7); margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 5px;">' +
                 'Vector: [' + f.tracking_vector_x.toFixed(2) + ', ' + f.tracking_vector_y.toFixed(2) + '] | ' +
                 'Intensity: Lvl ' + f.intensity + ' | Grid: ' + f.grid_ref_lat.toFixed(3) + ', ' + f.grid_ref_lon.toFixed(3) +
@@ -1266,10 +1282,10 @@
             <!-- Header -->
             <div style="display:flex; align-items:center; justify-content:space-between;">
                 <div>
-                    <div style="color:#9ca3af; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:2px;">Right Now at the Lake</div>
-                    <div style="color:#9ca3af; font-size:0.75rem; margin-top:2px;">Live from KISW · Wisconsin Rapids</div>
+                    <div style="color:#98989d; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:2px;">Right Now at the Lake</div>
+                    <div style="color:#98989d; font-size:0.75rem; margin-top:2px;">Live from KISW · Wisconsin Rapids</div>
                 </div>
-                <div id="lake-updated-stamp" style="font-size:0.7rem; color:#9ca3af;">Loading…</div>
+                <div id="lake-updated-stamp" style="font-size:0.7rem; color:#98989d;">Loading…</div>
             </div>
 
             <!-- Persona Selector (Hidden) -->
@@ -1280,7 +1296,7 @@
                         flex: 1 0 auto;
                         background: rgba(255, 255, 255, 0.05);
                         border: 1px solid rgba(255, 255, 255, 0.1);
-                        color: #9ca3af;
+                        color: #98989d;
                         padding: 8px 14px;
                         border-radius: 12px;
                         font-size: 0.8rem;
@@ -1313,24 +1329,24 @@
                 <span id="lake-verdict-emoji" style="font-size:2rem;">🌀</span>
                 <div>
                     <div id="lake-verdict-label" style="font-size:1.5rem; font-weight:900; color:white; letter-spacing:-0.5px;">Checking…</div>
-                    <div id="lake-verdict-sub" style="font-size:0.8rem; color:#9ca3af; margin-top:2px;">Fetching conditions</div>
+                    <div id="lake-verdict-sub" style="font-size:0.8rem; color:#98989d; margin-top:2px;">Fetching conditions</div>
                 </div>
             </div>
 
             <!-- Stats Row -->
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:4px;">
-                    <div id="label-feels" style="color:#9ca3af; font-size:0.7rem; text-transform:uppercase; font-weight:700;">Feels Like</div>
-                    <div id="lake-feels" style="color:white; font-size:1.4rem; font-weight:800;">--°</div>
+                    <div id="label-feels" style="color:#98989d; font-size:0.7rem; text-transform:uppercase; font-weight:700;">Feels Like</div>
+                    <div id="lake-feels" style="color:white; font-size:1.8rem; font-weight:800;">--°</div>
                 </div>
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:4px;">
-                    <div id="label-wind" style="color:#9ca3af; font-size:0.7rem; text-transform:uppercase; font-weight:700;">Wind</div>
-                    <div id="lake-wind" style="color:white; font-size:1.4rem; font-weight:800;">-- mph</div>
-                    <div id="lake-wind-dir" style="color:#9ca3af; font-size:0.75rem;">--</div>
+                    <div id="label-wind" style="color:#98989d; font-size:0.7rem; text-transform:uppercase; font-weight:700;">Wind</div>
+                    <div id="lake-wind" style="color:white; font-size:1.8rem; font-weight:800;">-- mph</div>
+                    <div id="lake-wind-dir" style="color:#98989d; font-size:0.75rem;">--</div>
                 </div>
                 <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:4px;">
-                    <div id="label-uv" style="color:#9ca3af; font-size:0.7rem; text-transform:uppercase; font-weight:700;">UV Max</div>
-                    <div id="lake-uv" style="color:#fbbf24; font-size:1.4rem; font-weight:800;">--</div>
+                    <div id="label-uv" style="color:#98989d; font-size:0.7rem; text-transform:uppercase; font-weight:700;">UV Max</div>
+                    <div id="lake-uv" style="color:#ffb300; font-size:1.8rem; font-weight:800;">--</div>
                 </div>
             </div>
 
@@ -1339,14 +1355,14 @@
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:1.2rem;">🌅</span>
                     <div>
-                        <div style="color:#9ca3af; font-size:0.65rem; text-transform:uppercase; font-weight:700;">Sunrise</div>
+                        <div style="color:#98989d; font-size:0.65rem; text-transform:uppercase; font-weight:700;">Sunrise</div>
                         <div id="lake-sunrise" style="color:white; font-size:0.95rem; font-weight:700;">--:--</div>
                     </div>
                 </div>
                 <div style="height:1px; flex:1; background:rgba(255,255,255,0.06); margin:0 16px;"></div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <div style="text-align:right;">
-                        <div style="color:#9ca3af; font-size:0.65rem; text-transform:uppercase; font-weight:700;">Sunset</div>
+                        <div style="color:#98989d; font-size:0.65rem; text-transform:uppercase; font-weight:700;">Sunset</div>
                         <div id="lake-sunset" style="color:white; font-size:0.95rem; font-weight:700;">--:--</div>
                     </div>
                     <span style="font-size:1.2rem;">🌇</span>
@@ -1355,13 +1371,13 @@
 
              <!-- Visibility row -->
              <div style="display:flex; align-items:center; justify-content:space-between; padding:0 4px; margin-bottom:4px;">
-                 <div style="color:#9ca3af; font-size:0.8rem;">Visibility</div>
-                 <div id="lake-visibility" style="color:#9ca3af; font-size:0.8rem; font-weight:600;">--</div>
+                 <div style="color:#98989d; font-size:0.8rem;">Visibility</div>
+                 <div id="lake-visibility" style="color:#98989d; font-size:0.8rem; font-weight:600;">--</div>
              </div>
 
              <!-- Action Advice Card Widget -->
              <div id="waz-advice-widget" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:18px; padding:12px 16px; display:flex; flex-direction:column; gap:6px;">
-                 <div style="color:#9ca3af; font-size:0.65rem; text-transform:uppercase; font-weight:700; display:flex; align-items:center; gap:6px;">
+                 <div style="color:#98989d; font-size:0.65rem; text-transform:uppercase; font-weight:700; display:flex; align-items:center; gap:6px;">
                      <span style="font-size:0.8rem;">💡</span> Recommendation
                  </div>
                  <div id="waz-advice-content" style="color:white; font-size:0.8rem; line-height:1.4; font-weight:500;">
@@ -1505,13 +1521,13 @@
                     }
 
                     if (willRain) {
-                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #3b82f6;"><span style="font-size:1.4rem;">☔</span> Take an Umbrella!</div>`;
+                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #0a84ff;"><span style="font-size:1.8rem;">☔</span> Take an Umbrella!</div>`;
                     } else if (current.temperature_2m < 60) {
-                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #8b5cf6;"><span style="font-size:1.4rem;">🧥</span> Grab a Jacket</div>`;
+                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #8b5cf6;"><span style="font-size:1.8rem;">🧥</span> Grab a Jacket</div>`;
                     } else if (current.cloud_cover < 30) {
-                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #f59e0b;"><span style="font-size:1.4rem;">😎</span> Sunglasses On!</div>`;
+                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #f59e0b;"><span style="font-size:1.8rem;">😎</span> Sunglasses On!</div>`;
                     } else {
-                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #10b981;"><span style="font-size:1.4rem;">🌤️</span> Perfect Weather</div>`;
+                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #10b981;"><span style="font-size:1.8rem;">🌤️</span> Perfect Weather</div>`;
                     }
 
                     document.getElementById('quick-action-cards').innerHTML = cardsHtml;
@@ -1557,7 +1573,7 @@
                                 tooltip: {
                                     backgroundColor: 'rgba(0,0,0,0.8)',
                                     titleColor: '#39ff14',
-                                    bodyColor: '#fff',
+                                    bodyColor: '#ffffff',
                                     borderColor: 'rgba(57, 255, 20, 0.4)',
                                     borderWidth: 1,
                                     displayColors: false
@@ -1642,15 +1658,15 @@
                 </div>
                 <div>
                     <h2 style="font-size:1.8rem; font-weight:900; color:white; margin:0; letter-spacing:-0.5px;">Active Alert</h2>
-                    <div style="color:#9ca3af; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Wood County, WI · WIZ030</div>
+                    <div style="color:#98989d; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Wood County, WI · WIZ030</div>
                 </div>
             </div>
 
             <div id="nws-alerts-list" style="display:flex; flex-direction:column; gap:12px;"></div>
 
             <div style="display:flex; align-items:center; justify-content:space-between; padding-top:8px; border-top:1px solid rgba(255,255,255,0.05);">
-                <div style="color:#9ca3af; font-size:0.75rem;">Source: NWS Green Bay</div>
-                <div id="nws-alerts-stamp" style="color:#9ca3af; font-size:0.75rem;"></div>
+                <div style="color:#98989d; font-size:0.75rem;">Source: NWS Green Bay</div>
+                <div id="nws-alerts-stamp" style="color:#98989d; font-size:0.75rem;"></div>
             </div>
         </div>
     </div>
@@ -1662,7 +1678,7 @@
     <div id="card-hydro" class="swipe-card tinder-card" style="height:100%; width:100%; scroll-snap-align: start; scroll-snap-stop: always; background:radial-gradient(circle at top right, #1e3a8a 0%, #0f172a 100%); display:flex; flex-direction:column; justify-content:center; padding:24px; position:relative; width: 100vw; height: 100vh; flex-shrink: 0; scroll-snap-align: start; scroll-snap-stop: always; overflow-y: auto; padding: 24px; box-sizing: border-box;">
         <div style="max-width:500px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:24px;">
             <div style="display:flex; align-items:center; gap:16px;">
-                <div style="width:56px; height:56px; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 16px rgba(59,130,246,0.3);">
+                <div style="width:56px; height:56px; background:linear-gradient(135deg, #0a84ff, #1d4ed8); border-radius:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 16px rgba(59,130,246,0.3);">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
                 </div>
                 <div>
@@ -1675,19 +1691,19 @@
                 <div style="margin-bottom:32px;">
                     <div style="color:#94a3b8; font-size:1.1rem; font-weight:600; margin-bottom:8px;">Current Flow Rate</div>
                     <div style="display:flex; align-items:baseline; gap:12px;">
-                        <div id="metric-cfs" style="color:#60a5fa; font-size:4rem; font-weight:900; line-height:1; letter-spacing:-2px;">-- CFS</div>
-                        <div id="metric-trend" style="font-size:1.2rem; font-weight:800; color:#9ca3af;"></div>
+                        <div id="metric-cfs" style="color:#0a84ff; font-size:4rem; font-weight:900; line-height:1; letter-spacing:-2px;">-- CFS</div>
+                        <div id="metric-trend" style="font-size:1.2rem; font-weight:800; color:#98989d;"></div>
                     </div>
                     <!-- Flood Stage Proximity Bar -->
                     <div id="flood-stage-bar" style="margin-top:12px; display:none;">
-                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#9ca3af; margin-bottom:4px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#98989d; margin-bottom:4px;">
                             <span>Stage</span>
-                            <span id="flood-stage-label" style="color:#9ca3af;"></span>
+                            <span id="flood-stage-label" style="color:#98989d;"></span>
                         </div>
                         <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden;">
                             <div id="flood-stage-fill" style="height:100%; border-radius:999px; transition:width 1s ease;"></div>
                         </div>
-                        <div id="river-stage-forecast" style="margin-top:8px; font-size:0.75rem; color:#9ca3af;"></div>
+                        <div id="river-stage-forecast" style="margin-top:8px; font-size:0.75rem; color:#98989d;"></div>
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
@@ -2017,12 +2033,12 @@
           const aqiVal = el('metric-aqi') ? el('metric-aqi').textContent : '26';
           el('lake-feels').textContent = aqiVal;
           if (uvMax !== null) el('lake-uv').textContent = uvMax.toFixed(1);
-          el('lake-uv').style.color = '#fbbf24';
+          el('lake-uv').style.color = '#ffb300';
         } else {
           // Lake & Family defaults
           if (feelsLike !== null) el('lake-feels').textContent = feelsLike + '°';
           if (uvMax !== null) el('lake-uv').textContent = uvMax.toFixed(1);
-          el('lake-uv').style.color = '#fbbf24';
+          el('lake-uv').style.color = '#ffb300';
         }
 
         if (windSpd !== null) el('lake-wind').textContent = windSpd + ' mph';
@@ -2189,7 +2205,7 @@
           return `
           <div style="scroll-snap-align: center; min-width: 160px; flex: 0 0 auto; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:24px; padding:20px; display:flex; flex-direction:column; backdrop-filter:blur(20px);">
               <div style="font-size:1rem; font-weight:800; color:#38bdf8; margin-bottom:8px;">${escapeHtml(dayKey)}</div>
-              <div style="font-size:0.75rem; color:#9ca3af; margin-bottom:8px;">${moon}</div>
+              <div style="font-size:0.75rem; color:#98989d; margin-bottom:8px;">${moon}</div>
               
               <div style="background:${statusColor}22; border:1px solid ${statusColor}44; border-radius:12px; padding:6px 12px; display:inline-block; margin-bottom:16px; align-self:flex-start;">
                   <span style="font-size:0.78rem; font-weight:800; color:${statusColor};">${escapeHtml(statusText)}</span>
@@ -2258,7 +2274,7 @@ Check live hydrology & weather flow: ${shareUrl}`;
 
     // Render NWS Alerts card
     async function renderAlertsCard() {
-      const severityColor = { Extreme:'#ef4444', Severe:'#f97316', Moderate:'#eab308', Minor:'#9ca3af' };
+      const severityColor = { Extreme:'#ef4444', Severe:'#f97316', Moderate:'#eab308', Minor:'#98989d' };
       try {
         const { features, ts } = await fetchNWSAlerts();
         const card = document.getElementById('card-alerts');
@@ -2282,17 +2298,17 @@ Check live hydrology & weather flow: ${shareUrl}`;
 
         list.innerHTML = features.slice(0, 3).map(f => {
           const p = f.properties;
-          const color = severityColor[p.severity] || '#9ca3af';
+          const color = severityColor[p.severity] || '#98989d';
           const expires = p.expires ? new Date(p.expires) : null;
           const expiresStr = expires ? `Expires ${expires.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}` : '';
           return `
             <div style="background:rgba(255,255,255,0.02); border:1px solid ${color}33; border-left:3px solid ${color}; border-radius:12px; padding:16px;">
               <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                 <span style="background:${color}22; color:${color}; font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:3px 10px; border-radius:100px; border:1px solid ${color}44;">${escapeHtml(p.severity)} · ${escapeHtml(p.urgency)}</span>
-                <span style="color:#9ca3af; font-size:0.7rem;">${escapeHtml(expiresStr)}</span>
+                <span style="color:#98989d; font-size:0.7rem;">${escapeHtml(expiresStr)}</span>
               </div>
               <div style="color:white; font-weight:700; font-size:1rem; line-height:1.3; margin-bottom:4px;">${escapeHtml(p.event)}</div>
-              <div style="color:#9ca3af; font-size:0.8rem; line-height:1.4;">${escapeHtml((p.headline || '').substring(0, 120))}</div>
+              <div style="color:#98989d; font-size:0.8rem; line-height:1.4;">${escapeHtml((p.headline || '').substring(0, 120))}</div>
             </div>`;
         }).join('');
       } catch(err) {
@@ -2339,7 +2355,7 @@ Check live hydrology & weather flow: ${shareUrl}`;
           if (offset >= times.length) return '';
           const hr = new Date(times[offset]).getHours();
           const label = hr === 0 ? 'Midnight' : hr < 12 ? hr + 'am' : hr === 12 ? 'Noon' : (hr - 12) + 'pm';
-          return `<span style="color:#9ca3af; font-size:0.65rem; font-weight:600;">${label}</span>`;
+          return `<span style="color:#98989d; font-size:0.65rem; font-weight:600;">${label}</span>`;
         }).join('');
       } catch(err) {
         console.warn('Hourly precip render error:', err);
@@ -2427,7 +2443,7 @@ Check live hydrology & weather flow: ${shareUrl}`;
             if (trendEl) {
               const delta = cfsCurrent - cfsPrev;
               trendEl.textContent = delta > 50 ? '↑ Rising' : delta < -50 ? '↓ Falling' : '→ Steady';
-              trendEl.style.color  = delta > 50 ? '#ef4444' : delta < -50 ? '#34d399' : '#9ca3af';
+              trendEl.style.color  = delta > 50 ? '#ef4444' : delta < -50 ? '#34d399' : '#98989d';
             }
             const step = Math.max(1, Math.floor(valuesList.length / 40));
             for(let i=0; i<valuesList.length; i+=step) {
@@ -2455,14 +2471,14 @@ Check live hydrology & weather flow: ${shareUrl}`;
             labels: labels,
             datasets: [
               { label: 'Flow (CFS)', data: cfsData, borderColor: '#39ff14', backgroundColor: 'rgba(57, 255, 20, 0.1)', yAxisID: 'y', fill: true, tension: 0.6, pointRadius: 0 },
-              { label: 'Gauge (ft)', data: gaugeData, borderColor: '#ffffff', yAxisID: 'y1', borderDash: [5, 5], tension: 0.6, pointRadius: 0 }
+              { label: 'Gauge (ft)', data: gaugeData, borderColor: '#fffffffff', yAxisID: 'y1', borderDash: [5, 5], tension: 0.6, pointRadius: 0 }
             ]
           },
           options: {
             responsive: true, maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             scales: {
-              x: { grid: { display: false }, ticks: { color: '#9ca3af', maxTicksLimit: 7 } },
+              x: { grid: { display: false }, ticks: { color: '#98989d', maxTicksLimit: 7 } },
               y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#00e5ff' } },
               y1: { type: 'linear', display: true, position: 'right', grid: { display: false }, ticks: { color: '#a78bfa' } }
             },
@@ -2493,14 +2509,14 @@ Check live hydrology & weather flow: ${shareUrl}`;
             labels: labels,
             datasets: [
               { label: 'Flow (CFS)', data: cfsData, borderColor: '#39ff14', backgroundColor: 'rgba(57, 255, 20, 0.1)', yAxisID: 'y', fill: true, tension: 0.6, pointRadius: 0 },
-              { label: 'Gauge (ft)', data: gaugeData, borderColor: '#ffffff', yAxisID: 'y1', borderDash: [5, 5], tension: 0.6, pointRadius: 0 }
+              { label: 'Gauge (ft)', data: gaugeData, borderColor: '#fffffffff', yAxisID: 'y1', borderDash: [5, 5], tension: 0.6, pointRadius: 0 }
             ]
           },
           options: {
             responsive: true, maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             scales: {
-              x: { grid: { display: false }, ticks: { color: '#9ca3af', maxTicksLimit: 7 } },
+              x: { grid: { display: false }, ticks: { color: '#98989d', maxTicksLimit: 7 } },
               y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#00e5ff' } },
               y1: { type: 'linear', display: true, position: 'right', grid: { display: false }, ticks: { color: '#a78bfa' } }
             },
