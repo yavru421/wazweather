@@ -242,8 +242,36 @@
       <div class="ri-sun-sep"></div>
       <div class="ri-sun-item"><div style="text-align:right;"><div class="ri-sun-lbl">Sunset</div><div class="ri-sun-val" id="waz-sunset">--:--</div></div><span style="font-size:1.2rem;">🌇</span></div>
     </div>
+
+    <!-- Personalization Button -->
+    <div style="margin-top: 14px;">
+      <button onclick="openPersonalization()" style="width: 100%; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 13px; padding: 14px; color: #ffffff; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Personalize Settings
+      </button>
+    </div>
   </div>
 </div>
+
+<div id="blazor-app" style="display:none; position:fixed; inset:0; z-index:100000; background:#12141c; overflow-y:auto; overflow-x:hidden;"></div>
+
+<script>
+let blazorLoaded = false;
+window.openPersonalization = function() {
+    const el = document.getElementById('blazor-app');
+    el.style.display = 'block';
+    if (!blazorLoaded) {
+        blazorLoaded = true;
+        const script = document.createElement('script');
+        script.src = '_framework/blazor.webassembly.js';
+        script.setAttribute('autostart', 'true');
+        document.body.appendChild(script);
+    }
+}
+window.closePersonalization = function() {
+    document.getElementById('blazor-app').style.display = 'none';
+}
+</script>
 
 <!-- ════ CARD 2: RAIN ARRIVAL ════ -->
 <div id="waz-rain-arrival" class="waz-card waz-scroll">

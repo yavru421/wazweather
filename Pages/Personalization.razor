@@ -1,0 +1,201 @@
+@page "/personalization"
+@using System.Net.Http.Json
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+@inject HttpClient Http
+
+<div class="pers-container">
+    <div class="pers-header">
+        <button class="pers-close-btn" @onclick="CloseModal" aria-label="Close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <h1 class="pers-title">Settings</h1>
+        <p class="pers-subtitle">Customize your Zero-Liability weather experience.</p>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="pers-loading">
+            <div class="pers-spinner"></div>
+            <p>Loading Preferences...</p>
+        </div>
+    }
+    else
+    {
+        <div class="pers-form">
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="pers-error">@errorMessage</div>
+            }
+            @if (showSuccess)
+            {
+                <div class="pers-success">Preferences Saved Successfully!</div>
+            }
+
+            <div class="pers-group">
+                <label class="pers-label">Unique Username</label>
+                <input class="pers-input" type="text" @bind="username" placeholder="e.g. stormchaser99" maxlength="30" />
+                <p class="pers-help">Choose a unique handle for community features.</p>
+            </div>
+
+            <div class="pers-group">
+                <label class="pers-label">Default Zip Code</label>
+                <input class="pers-input" type="text" @bind="defaultZip" placeholder="e.g. 54494" maxlength="10" />
+            </div>
+
+            <div class="pers-group">
+                <label class="pers-label">Temperature Units</label>
+                <div class="pers-toggle">
+                    <button class="pers-toggle-btn @(tempUnits == "F" ? "active" : "")" @onclick='() => tempUnits = "F"'>°F</button>
+                    <button class="pers-toggle-btn @(tempUnits == "C" ? "active" : "")" @onclick='() => tempUnits = "C"'>°C</button>
+                </div>
+            </div>
+
+            <div class="pers-group">
+                <label class="pers-label">Theme Preference</label>
+                <div class="pers-select-wrap">
+                    <select class="pers-select" @bind="themePreference">
+                        <option value="Dark">Obsidian Dark (Default)</option>
+                        <option value="Light">Glacier Light</option>
+                        <option value="OLED">OLED Pure Black</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="pers-save-btn" @onclick="SavePreferences" disabled="@isSaving">
+                @if (isSaving)
+                {
+                    <span>Saving...</span>
+                }
+                else
+                {
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span>Save Preferences</span>
+                }
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private string uuid = "";
+    private string username = "";
+    private string defaultZip = "";
+    private string tempUnits = "F";
+    private string themePreference = "Dark";
+    
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string errorMessage = "";
+    private bool showSuccess = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            uuid = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "waz_user_uuid");
+            if (string.IsNullOrEmpty(uuid))
+            {
+                uuid = Guid.NewGuid().ToString();
+                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "waz_user_uuid", uuid);
+            }
+
+            var response = await Http.GetAsync($"/api/preferences?uuid={uuid}");
+            if (response.IsSuccessStatusCode)
+            {
+                var prefs = await response.Content.ReadFromJsonAsync<UserPreferences>();
+                if (prefs != null)
+                {
+                    username = prefs.username ?? "";
+                    defaultZip = prefs.default_zip ?? "";
+                    tempUnits = prefs.temp_units ?? "F";
+                    themePreference = prefs.theme_preference ?? "Dark";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading preferences: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SavePreferences()
+    {
+        isSaving = true;
+        errorMessage = "";
+        showSuccess = false;
+        StateHasChanged();
+
+        try
+        {
+            var payload = new UserPreferences
+            {
+                user_uuid = uuid,
+                username = string.IsNullOrWhiteSpace(username) ? null : username.Trim(),
+                default_zip = defaultZip,
+                temp_units = tempUnits,
+                theme_preference = themePreference
+            };
+
+            var response = await Http.PostAsJsonAsync("/api/preferences", payload);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                showSuccess = true;
+                // Optional: apply theme changes via JS Interop immediately
+                if (themePreference == "OLED")
+                {
+                    await JSRuntime.InvokeVoidAsync("document.body.style.setProperty", "background-color", "#000000");
+                }
+                else
+                {
+                    await JSRuntime.InvokeVoidAsync("document.body.style.setProperty", "background-color", "#12141c");
+                }
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                errorMessage = "Username is already taken. Please choose another.";
+            }
+            else
+            {
+                var errorResult = await response.Content.ReadAsStringAsync();
+                errorMessage = "Failed to save: " + errorResult;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while saving.";
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+            
+            if (showSuccess)
+            {
+                await Task.Delay(3000);
+                showSuccess = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task CloseModal()
+    {
+        await JSRuntime.InvokeVoidAsync("closePersonalization");
+    }
+
+    public class UserPreferences
+    {
+        public string? user_uuid { get; set; }
+        public string? username { get; set; }
+        public string? default_zip { get; set; }
+        public string? temp_units { get; set; }
+        public string? theme_preference { get; set; }
+    }
+}

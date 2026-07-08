@@ -67,6 +67,60 @@ export default {
       }
     }
 
+    if (url.pathname === '/api/preferences') {
+      if (request.method === 'GET') {
+        try {
+          const uuid = url.searchParams.get('uuid');
+          if (!uuid) return new Response(JSON.stringify({ error: 'Missing uuid' }), { status: 400 });
+          
+          const { results } = await env.waz_analytics.prepare(`
+            SELECT * FROM user_preferences WHERE user_uuid = ?
+          `).bind(uuid).all();
+          
+          return new Response(JSON.stringify(results[0] || {}), {
+            headers: { 'Content-Type': 'application/json' }
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+        }
+      } else if (request.method === 'POST') {
+        try {
+          const payload = await request.json();
+          const timestamp = new Date().toISOString();
+          
+          if (!payload.user_uuid) {
+             return new Response(JSON.stringify({ error: 'Missing user_uuid' }), { status: 400 });
+          }
+
+          // Use INSERT ON CONFLICT DO UPDATE (UPSERT)
+          await env.waz_analytics.prepare(`
+            INSERT INTO user_preferences (user_uuid, username, default_zip, temp_units, theme_preference, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(user_uuid) DO UPDATE SET
+              username = excluded.username,
+              default_zip = excluded.default_zip,
+              temp_units = excluded.temp_units,
+              theme_preference = excluded.theme_preference,
+              updated_at = excluded.updated_at
+          `).bind(
+            payload.user_uuid,
+            payload.username || null,
+            payload.default_zip || null,
+            payload.temp_units || null,
+            payload.theme_preference || null,
+            timestamp
+          ).run();
+          
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        } catch (e) {
+          if (e.message && e.message.includes('UNIQUE constraint failed')) {
+            return new Response(JSON.stringify({ error: 'Username already taken' }), { status: 409 });
+          }
+          return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+        }
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
 
