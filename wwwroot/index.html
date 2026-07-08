@@ -3,146 +3,553 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Remote Dimension Tool</title>
+    <meta name="description" content="WaZWeather — Zero-Liability Architecture demo: 5-scene gamified comparison of ZLA vs SaaS, running 100% in-browser with no backend." />
+    <title>WaZWeather</title>
     <base href="/" />
-    
+
     <!-- Apple PWA Standalone Mode Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="apple-touch-icon" href="icon-192.png" />
-    
-    <link rel="stylesheet" href="css/app.css" />
+
     <link rel="icon" type="image/png" href="icon-192.png" />
-    <link href="WaZWeather.styles.css" rel="stylesheet" />
     <link href="manifest.webmanifest" rel="manifest" />
-    
-    <!-- Leaflet.js Mapping Library (Geofencing) -->
+
+    <!-- Leaflet.js Mapping Library (reserved for future map features) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
+
+    <!-- canvas-confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
     <!-- JS Interops -->
     <script src="js/iosPwaInterop.js"></script>
-    
-    <script type="importmap"></script>
+
+    <style>
+        /* ===================================================
+           ZLA vs SaaS Gamified Mercial — Design System
+           Ported 1:1 from Pages/Index.razor.css
+        =================================================== */
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+        :root {
+            --bg-deep-charcoal: #0a0a0c;
+            --bg-pure-black: #000000;
+            --neon-blue: #00f0ff;
+            --neon-green: #39ff14;
+            --neon-red: #ff0055;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: var(--bg-deep-charcoal);
+            color: #ffffff;
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* ── Scroll-Snapping Pipeline Container ── */
+        .pipeline-container {
+            width: 100vw;
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+        }
+        .pipeline-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* ── Scene Base ── */
+        .scene {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 2rem;
+            transition: background 0.5s ease;
+        }
+
+        /* ── Individual Scenes ── */
+        .scene-1 { background: radial-gradient(circle at center, #1a1a24 0%, var(--bg-pure-black) 100%); }
+        .scene-2 { background: radial-gradient(circle at center, #2a0810 0%, var(--bg-pure-black) 100%); }
+        .scene-3 { background: radial-gradient(circle at center, #081a2a 0%, var(--bg-pure-black) 100%); }
+        .scene-4 { background: radial-gradient(circle at center, #082a15 0%, var(--bg-pure-black) 100%); }
+        .scene-5 { background: radial-gradient(circle at center, #1a1a24 0%, var(--bg-pure-black) 100%); }
+
+        /* ── Glassmorphic Cards ── */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        /* ── Neon Text Utilities ── */
+        .neon-text-blue {
+            color: #fff;
+            text-shadow:
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px var(--neon-blue),
+                0 0 40px var(--neon-blue),
+                0 0 80px var(--neon-blue);
+            font-weight: 800;
+        }
+        .neon-text-green {
+            color: #fff;
+            text-shadow:
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px var(--neon-green),
+                0 0 40px var(--neon-green),
+                0 0 80px var(--neon-green);
+            font-weight: 800;
+        }
+        .neon-text-red {
+            color: #fff;
+            text-shadow:
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px var(--neon-red),
+                0 0 40px var(--neon-red),
+                0 0 80px var(--neon-red);
+            font-weight: 800;
+        }
+
+        /* ── Shared Button Base ── */
+        .btn-next {
+            margin-top: 1.5rem;
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            padding: 0.75rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+        .btn-next:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        .btn-next:active { transform: scale(0.96); }
+
+        /* ── Scene 1: Slow Upload Button ── */
+        .slow-upload-btn {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin-top: 1rem;
+        }
+        .slow-upload-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .slow-upload-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 0%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: width 0.2s linear;
+        }
+        .slow-upload-btn.uploading::before {
+            animation: sluggish-progress 2s linear forwards;
+        }
+        @keyframes sluggish-progress {
+            0%   { width: 0%; }
+            50%  { width: 45%; }
+            100% { width: 100%; opacity: 0; }
+        }
+
+        /* ── Scene 2: Attack Fortress & Siren ── */
+        .attack-fortress {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 20px var(--neon-red));
+            animation: shake 0.5s infinite alternate;
+            display: block;
+        }
+        @keyframes shake {
+            0%   { transform: translateX(-2px) rotate(-1deg); }
+            100% { transform: translateX(2px) rotate(1deg); }
+        }
+        .siren-alert {
+            animation: siren-blink 1s infinite alternate;
+            border: 2px solid var(--neon-red) !important;
+            background: rgba(255, 0, 85, 0.1);
+        }
+        @keyframes siren-blink {
+            0%   { box-shadow: 0 0 10px rgba(255, 0, 85, 0.2); }
+            100% { box-shadow: 0 0 50px var(--neon-red), inset 0 0 20px var(--neon-red); }
+        }
+
+        /* ── Scene 3: Wireframe Jig ── */
+        .wireframe-jig {
+            border: 1px dashed var(--neon-blue);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(0, 240, 255, 0.05),
+                rgba(0, 240, 255, 0.05) 10px,
+                transparent 10px,
+                transparent 20px
+            );
+            animation: wireframe-pulse 3s infinite linear;
+        }
+        @keyframes wireframe-pulse {
+            0%   { background-position: 0 0;       border-color: rgba(0, 240, 255, 0.5); }
+            100% { background-position: 40px 40px; border-color: var(--neon-blue); }
+        }
+
+        /* ── Scene 4: Data Pour Container ── */
+        .data-pour-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .pour-state-label {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.7);
+            margin: 0.5rem 0 1rem;
+        }
+        .pour-btn {
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--neon-green);
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+        .pour-btn:hover {
+            background: var(--neon-green);
+            color: var(--bg-pure-black);
+            box-shadow: 0 0 20px var(--neon-green);
+            transform: translateY(-2px);
+        }
+        .pour-btn:active { transform: scale(0.96); }
+
+        /* ── Scene 5: Celebration Button ── */
+        .celebration-btn {
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--neon-green);
+            padding: 1rem 3rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--neon-green);
+            transition: all 0.2s ease;
+            font-family: inherit;
+            margin-top: 1rem;
+        }
+        .celebration-btn:hover {
+            background: var(--neon-green);
+            color: var(--bg-pure-black);
+            box-shadow: 0 0 30px var(--neon-green), 0 0 60px var(--neon-green);
+            transform: scale(1.05);
+        }
+        .celebration-btn:active { transform: scale(0.95); }
+
+        /* ── Confetti Message ── */
+        .confetti-msg {
+            margin-top: 1.25rem;
+            font-size: 1.3rem;
+            display: none;
+        }
+        .confetti-msg.visible { display: block; }
+
+        /* ── Upload Progress Indicator ── */
+        .upload-progress-bar-wrap {
+            width: 100%;
+            max-width: 360px;
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 99px;
+            margin: 1rem auto 0;
+            overflow: hidden;
+            display: none;
+        }
+        .upload-progress-bar-wrap.visible { display: block; }
+        .upload-progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
+            border-radius: 99px;
+            width: 0%;
+            transition: width 0.2s linear;
+        }
+
+        /* ── Scene transition fade ── */
+        @keyframes scene-fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .glass-card {
+            animation: scene-fade-in 0.5s ease both;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <div class="shotstack-loader">
-            <div class="spinner"></div>
-            <span class="loading-text">Mounting WaZWeather...</span>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" style="width: var(--blazor-load-percentage, 0%)"></div>
+
+    <!-- ════════════════════════════════════════════
+         5-SCENE SCROLL-SNAP PIPELINE
+    ════════════════════════════════════════════ -->
+    <div class="pipeline-container" id="pipeline">
+
+        <!-- ── SCENE 1: The Hook — Sluggish SaaS Monument ── -->
+        <div class="scene scene-1" id="scene-1">
+            <div class="glass-card">
+                <h1 class="neon-text-red">The Hook: Sluggish SaaS Monument</h1>
+                <span class="attack-fortress" aria-label="Locked Fortress">🏰</span>
+                <button
+                    class="slow-upload-btn"
+                    id="upload-btn"
+                    onclick="simulateUpload()"
+                >Simulate SaaS Upload</button>
+                <div class="upload-progress-bar-wrap" id="upload-progress-wrap">
+                    <div class="upload-progress-bar-fill" id="upload-progress-fill"></div>
+                </div>
+                <p id="upload-pct" style="color:rgba(255,255,255,0.5);font-size:0.9rem;margin:0.5rem 0 0;min-height:1.2em;"></p>
+                <button class="btn-next" id="s1-next" style="display:none" onclick="goToScene(2)">Next Scene →</button>
             </div>
-            <style>
-                .progress-text::after {
-                    content: var(--blazor-load-percentage-text, "0") "%";
-                }
-            </style>
-            <span class="progress-text">Loading... </span>
         </div>
+
+        <!-- ── SCENE 2: The Attack Surface ── -->
+        <div class="scene scene-2" id="scene-2">
+            <div class="glass-card siren-alert">
+                <h1 class="neon-text-red">The Attack Surface</h1>
+                <span class="attack-fortress" aria-label="Broken Fortress">🔓</span>
+                <p style="font-size:1.1rem;margin:0 0 1.5rem;">⚠️ Compliance Warning: Database Breach!</p>
+                <button class="btn-next" onclick="goToScene(3)">Shift Paradigm →</button>
+            </div>
+        </div>
+
+        <!-- ── SCENE 3: The Paradigm Shift ── -->
+        <div class="scene scene-3" id="scene-3">
+            <div class="glass-card">
+                <h1 class="neon-text-blue">The Paradigm Shift</h1>
+                <div class="wireframe-jig">
+                    <p style="color:var(--neon-blue);font-weight:700;margin:0;">Zero-Liability Architecture Blueprint</p>
+                    <p style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin:0.75rem 0 0;">100% client-side · No backend · No data custody</p>
+                </div>
+                <button class="btn-next" onclick="goToScene(4)">See it in Action →</button>
+            </div>
+        </div>
+
+        <!-- ── SCENE 4: Zero Data Custody in Action ── -->
+        <div class="scene scene-4" id="scene-4">
+            <div class="glass-card">
+                <h1 class="neon-text-green">Zero Data Custody in Action</h1>
+                <p class="pour-state-label">Pour State: <strong id="pour-state-val">None</strong></p>
+                <div class="data-pour-container">
+                    <button class="pour-btn" onclick="setPourState('ZLA')">Pour Data (Local)</button>
+                    <button class="pour-btn" onclick="setPourState('Complete')">Finish Pour</button>
+                </div>
+                <button class="btn-next" onclick="goToScene(5)">Generate Output →</button>
+            </div>
+        </div>
+
+        <!-- ── SCENE 5: The Absolute Output ── -->
+        <div class="scene scene-5" id="scene-5">
+            <div class="glass-card">
+                <h1 class="neon-text-blue">The Absolute Output</h1>
+                <p style="font-size:1.05rem;color:rgba(255,255,255,0.75);">Local processing complete. 100% Private PDF generated.</p>
+                <button class="celebration-btn" id="celebrate-btn" onclick="celebrate()">Celebrate! 🎉</button>
+                <p class="neon-text-green confetti-msg" id="confetti-msg">🎉 Confetti Deployed 🎉</p>
+            </div>
+        </div>
+
+    </div><!-- /.pipeline-container -->
+
+    <!-- ── iOS Add to Home Screen Prompt ── -->
+    <div id="ios-pwa-prompt" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:16px;border-radius:12px;z-index:9999;text-align:center;width:90%;max-width:400px;font-family:sans-serif;backdrop-filter:blur(10px);">
+        <p style="margin:0 0 10px 0;font-size:14px;">Install this app on your iPhone: tap the <strong>Share</strong> icon below and select <strong>Add to Home Screen</strong>.</p>
+        <button onclick="document.getElementById('ios-pwa-prompt').style.display='none'" style="background:#007aff;color:white;border:none;padding:8px 16px;border-radius:8px;font-weight:bold;cursor:pointer;">Got it</button>
     </div>
 
-    <div id="blazor-error-ui">
-        An unhandled exception occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">✕</a>
-    </div>
-
-    <!-- iOS Add to Home Screen Guidance -->
-    <div id="ios-pwa-prompt" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 16px; border-radius: 12px; z-index: 9999; text-align: center; width: 90%; max-width: 400px; font-family: sans-serif;">
-        <p style="margin: 0 0 10px 0; font-size: 14px;">Install this app on your iPhone: tap the <strong>Share</strong> icon below and select <strong>Add to Home Screen</strong>.</p>
-        <button onclick="document.getElementById('ios-pwa-prompt').style.display='none'" style="background: #007aff; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold;">Got it</button>
-    </div>
     <script>
-        // Show prompt only on iOS Safari if not in standalone mode
-        const isIos = () => {
-            const userAgent = window.navigator.userAgent.toLowerCase();
-            return /iphone|ipad|ipod/.test(userAgent);
-        };
+        // ── iOS PWA prompt ──
+        const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
         const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
         if (isIos() && !isInStandaloneMode()) {
             document.getElementById('ios-pwa-prompt').style.display = 'block';
         }
-    </script>
 
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
-    <script>
-        // Request persistent storage defensively for iOS 7-day eviction
+        // ── Persistent storage (iOS 7-day eviction guard) ──
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persist().then(granted => {
-                if (granted) console.log("Storage will not be cleared except by explicit user action");
-                else console.log("Storage may be cleared by the UA under storage pressure.");
+                console.log(granted
+                    ? 'Storage will not be cleared except by explicit user action'
+                    : 'Storage may be cleared by the UA under storage pressure.');
             });
         }
 
-        navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' }).then(registration => {
-            registration.onupdatefound = () => {
-                const installingWorker = registration.installing;
-                if (installingWorker == null) {
-                    return;
-                }
-                installingWorker.onstatechange = () => {
-                    if (installingWorker.state === 'installed') {
-                        if (navigator.serviceWorker.controller) {
-                            // A new service worker has been installed and is ready to take over.
+        // ── Service Worker Registration ──
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' }).then(registration => {
+                registration.onupdatefound = () => {
+                    const installingWorker = registration.installing;
+                    if (installingWorker == null) return;
+                    installingWorker.onstatechange = () => {
+                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
                             console.log('New or updated content is available. Please refresh the page to update.');
                         }
-                    }
+                    };
                 };
-            };
-        });
-    </script>
-    <script src="js/editorInteractions.js"></script>
-    <script src="js/zla-interop.js"></script>
-    
-    <script>
-        // High-speed blob transmission stream bypass framework
-        window.shotStackSaver = {
-            saveAndDownloadFile: function (filename, byteBase64) {
-                try {
-                    // Convert base64 to byte array
-                    const byteCharacters = atob(byteBase64);
-                    const byteNumbers = new Array(byteCharacters.length);
-                    for (let i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
-                    }
-                    const byteArray = new Uint8Array(byteNumbers);
-                    
-                    // Create File object for sharing
-                    const file = new File([byteArray], filename, { type: 'application/pdf' });
-                    
-                    // Use Web Share API if supported (critical for mobile PWA standalone mode)
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        navigator.share({
-                            files: [file],
-                            title: 'ShotStack Studio PDF',
-                            text: 'Your compiled PDF document is ready.'
-                        }).catch(err => {
-                            console.log('User canceled or share failed, falling back to download:', err);
-                            window.shotStackSaver.triggerFallbackDownload(filename, byteArray);
-                        });
-                    } else {
-                        window.shotStackSaver.triggerFallbackDownload(filename, byteArray);
-                    }
-                } catch (error) {
-                    console.error('File saving failed:', error);
+            });
+        }
+
+        // ════════════════════════════════════════════
+        //  SCENE STATE MACHINE
+        // ════════════════════════════════════════════
+
+        let uploadInProgress = false;
+
+        /**
+         * Scene 1 — Simulate a sluggish SaaS upload over ~2 seconds,
+         * then reveal the "Next Scene" button.
+         */
+        function simulateUpload() {
+            if (uploadInProgress) return;
+            uploadInProgress = true;
+
+            const btn      = document.getElementById('upload-btn');
+            const wrap     = document.getElementById('upload-progress-wrap');
+            const fill     = document.getElementById('upload-progress-fill');
+            const pct      = document.getElementById('upload-pct');
+            const nextBtn  = document.getElementById('s1-next');
+
+            btn.disabled = true;
+            btn.textContent = 'Uploading... 0%';
+            btn.classList.add('uploading');
+            wrap.classList.add('visible');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                fill.style.width = progress + '%';
+                btn.textContent  = `Uploading... ${progress}%`;
+                pct.textContent  = `${progress}% complete`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    btn.textContent     = 'Upload Complete ✓';
+                    pct.textContent     = '100% — Upload finished (finally)';
+                    uploadInProgress    = false;
+                    nextBtn.style.display = '';
                 }
-            },
-            triggerFallbackDownload: function (filename, byteArray) {
-                const blob = new Blob([byteArray], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                
-                const link = document.createElement('a');
-                link.download = filename;
-                link.href = url;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                setTimeout(() => URL.revokeObjectURL(url), 2000);
+            }, 200); // 10 steps × 200ms = ~2s total
+        }
+
+        /**
+         * Scroll the pipeline to the target scene (1-based index).
+         */
+        function goToScene(sceneNumber) {
+            const pipeline = document.getElementById('pipeline');
+            const scene    = document.getElementById('scene-' + sceneNumber);
+            if (scene) {
+                scene.scrollIntoView({ behavior: 'smooth' });
             }
-        };
+        }
+
+        /**
+         * Scene 4 — Update pour state label.
+         */
+        function setPourState(state) {
+            document.getElementById('pour-state-val').textContent = state;
+        }
+
+        /**
+         * Scene 5 — Trigger canvas-confetti celebration.
+         */
+        function celebrate() {
+            const msg = document.getElementById('confetti-msg');
+            msg.classList.add('visible');
+
+            // Burst 1
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+
+            // Burst 2 — left cannon
+            setTimeout(() => {
+                confetti({
+                    particleCount: 60,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+            }, 250);
+
+            // Burst 3 — right cannon
+            setTimeout(() => {
+                confetti({
+                    particleCount: 60,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+            }, 400);
+        }
     </script>
+
 </body>
 </html>
-
