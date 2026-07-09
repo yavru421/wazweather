@@ -140,17 +140,7 @@ export default {
         console.error(`Failed to poll ${api}:`, e);
       }
       
-      const latency = Date.now() - start;
-      const timestamp = new Date().toISOString();
-      
-      ctx.waitUntil(
-        env.waz_analytics.prepare(`
-          INSERT INTO analytics (
-            timestamp, endpoint, latency_ms, status_code, client_ip, event_type, user_uuid
-          ) 
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).bind(timestamp, api, latency, status, 'cron', 'background_poll', 'system').run()
-      );
+
     }
   }
 };
