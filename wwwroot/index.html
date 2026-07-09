@@ -2827,17 +2827,8 @@ Check live hydrology & weather flow: ${shareUrl}`;
     }
     
     function resetActiveGateway() {
-      // Hide content views
-      document.querySelectorAll('.content-section').forEach(v => v.classList.remove('active'));
-      
-      // waz-dots hidden automatically when section is hidden
-
-      // Reset gateway
-      const portal = document.getElementById('portal-split');
-      portal.classList.remove('hidden-gateway');
-      
-      const wrap = document.getElementById('split-wrapper');
-      if (wrap) wrap.className = 'theme-split';
+      // Redirect back to primary portal domain
+      window.location.href = 'https://dondlingergc.com';
     }
     
     function playMechanicalClick() {
