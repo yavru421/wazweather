@@ -1,3 +1,107 @@
+// Helper functions for VAPID token generation and push sending
+function base64UrlEncode(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let str = '';
+  for (let i = 0; i < bytes.byteLength; i++) str += String.fromCharCode(bytes[i]);
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+async function createVapidToken(audience, privateJwk) {
+  const header  = { typ: 'JWT', alg: 'ES256' };
+  const payload = { aud: audience, exp: Math.floor(Date.now() / 1000) + 12 * 60 * 60, sub: 'mailto:john@dondlingergc.com' };
+  const enc = (o) => base64UrlEncode(new TextEncoder().encode(JSON.stringify(o)));
+  const dataToSign = new TextEncoder().encode(`${enc(header)}.${enc(payload)}`);
+  const key = await crypto.subtle.importKey('jwk', privateJwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: { name: 'SHA-256' } }, key, dataToSign);
+  return `${enc(header)}.${enc(payload)}.${base64UrlEncode(sig)}`;
+}
+
+async function pushToAll(env, title, body) {
+  console.log(`[cron] PUSH: ${title} | ${body}`);
+  await env.waz_analytics.prepare('INSERT INTO notifications (title, message, timestamp) VALUES (?, ?, ?)').bind(title, body, Date.now()).run();
+  
+  const { results: subs } = await env.waz_analytics.prepare('SELECT endpoint FROM subscriptions').all();
+  if (!subs?.length) return;
+  
+  const vapidPub = env.VAPID_PUBLIC_KEY || "BMb36GOhjyJJzODjpDxXhmv7PZxyR-e2miXbuOakZESk83z-TgtgobvOXYIWGkgaDTREY9A5XcaXDTBfWQToHOM";
+  let privateJwk;
+  try {
+    privateJwk = JSON.parse(env.VAPID_PRIVATE_KEY);
+  } catch (e) {
+    console.error('[cron] Bad or missing VAPID private key:', e.message);
+    return;
+  }
+  
+  await Promise.all(subs.map(async (row) => {
+    try {
+      const url = new URL(row.endpoint);
+      const vapidToken = await createVapidToken(`${url.protocol}//${url.host}`, privateJwk);
+      const res = await fetch(row.endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `vapid t=${vapidToken}, k=${vapidPub}`,
+          'TTL': '86400',
+          'Content-Length': '0'
+        },
+      });
+      if (res.status === 410 || res.status === 404) {
+        await env.waz_analytics.prepare('DELETE FROM subscriptions WHERE endpoint = ?').bind(row.endpoint).run();
+      }
+    } catch (e) {
+      console.error('[cron] push failed:', e.message);
+    }
+  }));
+}
+
+// State helpers (using D1 database instead of KV)
+async function readState(env) {
+  try {
+    const row = await env.waz_analytics.prepare('SELECT val FROM cron_state WHERE key = ?').bind('state').first();
+    return row ? JSON.parse(row.val) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+async function writeState(env, s) {
+  await env.waz_analytics.prepare('INSERT OR REPLACE INTO cron_state (key, val) VALUES (?, ?)')
+    .bind('state', JSON.stringify(s))
+    .run();
+}
+
+async function generateAlert(env, context) {
+  if (!env.AI) return context;
+  try {
+    const resp = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+      messages: [
+        {
+          role: 'system',
+          content: `You write push notification alerts for a Lake Wazeecha weather app. Tone: direct, casual. One sentence max.`
+        },
+        {
+          role: 'user',
+          content: `Write a push notification for this situation: ${context}`
+        }
+      ],
+      max_tokens: 80,
+    });
+    return resp?.response?.trim() || context;
+  } catch (e) {
+    return context;
+  }
+}
+
+function isEscalating(history = [], currentValue, threshold = 1.1) {
+  if (history.length < 2) return true;
+  const avg = history.reduce((a, b) => a + b, 0) / history.length;
+  return currentValue >= avg * threshold;
+}
+
+function pushHistory(history = [], value, maxLen = 4) {
+  const updated = [...history, value];
+  return updated.slice(-maxLen);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -6,6 +110,124 @@ export default {
     const cf = request.cf || {};
     const client_ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const user_agent = request.headers.get('user-agent') || 'unknown';
+    const origin = request.headers.get('Origin');
+    
+    // Setup strict CORS matching wazweather and dondlingergc domains
+    let allowedOrigin = 'https://wazweather.dondlingergc.com';
+    if (origin && (
+        origin === 'https://wazweather.dondlingergc.com' ||
+        origin === 'https://dondlingergc.com' ||
+        origin.endsWith('.dondlingergc.com') ||
+        origin.startsWith('http://localhost')
+    )) {
+      allowedOrigin = origin;
+    }
+    
+    const CORS_HEADERS = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': allowedOrigin,
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Vary': 'Origin',
+    };
+
+    if (url.pathname === '/subscribe') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: CORS_HEADERS });
+      }
+      if (request.method === 'POST') {
+        try {
+          const body = await request.json();
+          const { endpoint, keys, preferences } = body;
+          
+          if (!endpoint || !keys || !keys.p256dh || !keys.auth || !preferences) {
+            return new Response(JSON.stringify({ error: 'Invalid subscription object' }), { status: 400, headers: CORS_HEADERS });
+          }
+
+          let endpointUrl;
+          try {
+            endpointUrl = new URL(endpoint);
+          } catch (e) {
+            return new Response(JSON.stringify({ error: 'Invalid endpoint URL' }), { status: 400, headers: CORS_HEADERS });
+          }
+
+          const allowedHosts = ['googleapis.com', 'mozilla.com', 'apple.com', 'windows.net', 'windows.com'];
+          const isValidHost = allowedHosts.some(host => endpointUrl.hostname === host || endpointUrl.hostname.endsWith('.' + host));
+          if (!isValidHost) {
+            return new Response(JSON.stringify({ error: 'Unsupported push service provider' }), { status: 400, headers: CORS_HEADERS });
+          }
+
+          const pref_river = preferences.river ? 1 : 0;
+          const pref_aqi = preferences.aqi ? 1 : 0;
+          const pref_weather = preferences.weather ? 1 : 0;
+          const timestamp = new Date().toISOString();
+
+          await env.waz_analytics.prepare(`
+            INSERT INTO subscriptions (endpoint, p256dh, auth, preferences_river, preferences_aqi, preferences_weather, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(endpoint) DO UPDATE SET
+              p256dh = excluded.p256dh,
+              auth = excluded.auth,
+              preferences_river = excluded.preferences_river,
+              preferences_aqi = excluded.preferences_aqi,
+              preferences_weather = excluded.preferences_weather,
+              created_at = excluded.created_at
+          `).bind(endpoint, keys.p256dh, keys.auth, pref_river, pref_aqi, pref_weather, timestamp).run();
+
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: CORS_HEADERS });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS_HEADERS });
+        }
+      }
+    }
+
+    if (url.pathname === '/unsubscribe') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: CORS_HEADERS });
+      }
+      if (request.method === 'POST') {
+        try {
+          const body = await request.json();
+          const endpoint = body?.endpoint;
+          const auth = body?.keys?.auth ?? body?.auth;
+
+          if (!endpoint || !auth) {
+            return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: CORS_HEADERS });
+          }
+
+          const stored = await env.waz_analytics.prepare('SELECT auth FROM subscriptions WHERE endpoint = ?').bind(endpoint).first();
+          if (!stored) {
+            return new Response(JSON.stringify({ success: true }), { status: 200, headers: CORS_HEADERS });
+          }
+
+          if (stored.auth !== auth) {
+            return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: CORS_HEADERS });
+          }
+
+          await env.waz_analytics.prepare('DELETE FROM subscriptions WHERE endpoint = ?').bind(endpoint).run();
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: CORS_HEADERS });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS_HEADERS });
+        }
+      }
+    }
+
+    if (url.pathname === '/api/latest-notification') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: CORS_HEADERS });
+      }
+      if (request.method === 'GET') {
+        try {
+          const { results } = await env.waz_analytics.prepare('SELECT title, message as body, timestamp FROM notifications ORDER BY id DESC LIMIT 1').all();
+          if (!results || results.length === 0) {
+            return new Response(JSON.stringify({ title: 'Update', body: 'New data available' }), { status: 200, headers: CORS_HEADERS });
+          }
+          return new Response(JSON.stringify(results[0]), { status: 200, headers: CORS_HEADERS });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS_HEADERS });
+        }
+      }
+    }
     
     if (url.pathname === '/api/analytics') {
       if (request.method === 'POST') {
@@ -121,26 +343,182 @@ export default {
       }
     }
 
+    if (url.pathname === '/check-weather') {
+      const providedSecret = request.headers.get('X-Cron-Secret');
+      if (env.CRON_SECRET && providedSecret !== env.CRON_SECRET) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+      }
+      ctx.waitUntil(runChecks(env));
+      return new Response(JSON.stringify({ ok: true, triggered: new Date().toISOString() }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     return env.ASSETS.fetch(request);
   },
 
   async scheduled(event, env, ctx) {
-    const WEATHER_APIS = ["https://api.weather.gov/"];
-    
-    for (const api of WEATHER_APIS) {
-      const start = Date.now();
-      let status = 500;
-      
-      try {
-        const res = await fetch(api, {
-          headers: { 'User-Agent': 'WazWeather Edge Worker' }
-        });
-        status = res.status;
-      } catch (e) {
-        console.error(`Failed to poll ${api}:`, e);
-      }
-      
-
-    }
+    ctx.waitUntil(runChecks(env));
   }
 };
+
+async function runChecks(env) {
+  const WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=44.3936&longitude=-89.8173&current=temperature_2m,precipitation,weather_code,wind_gusts_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=America%2FChicago&wind_speed_unit=mph&precipitation_unit=inch&temperature_unit=fahrenheit';
+  const USGS_URL    = 'https://waterservices.usgs.gov/nwis/iv/?format=json&sites=05400760&parameterCd=00060,00065&siteStatus=all';
+  const NWS_URL     = 'https://api.weather.gov/alerts/active?point=44.3936,-89.8173';
+
+  const NWS_COOLDOWNS = {
+    'Tornado Warning':              0,
+    'Tornado Watch':                15 * 60 * 1000,
+    'Severe Thunderstorm Warning':  0,
+    'Severe Thunderstorm Watch':    15 * 60 * 1000,
+    'Flash Flood Warning':          0,
+    'Flash Flood Watch':            15 * 60 * 1000,
+    'Winter Storm Warning':         30 * 60 * 1000,
+    'Winter Storm Watch':           60 * 60 * 1000,
+    'Special Weather Statement':    15 * 60 * 1000,
+  };
+  const DEFAULT_NWS_COOLDOWN = 30 * 60 * 1000;
+
+  try {
+    const [weatherRes, usgsRes, nwsRes] = await Promise.all([
+      fetch(WEATHER_URL),
+      fetch(USGS_URL).catch(() => null),
+      fetch(NWS_URL, { headers: { 'User-Agent': 'wazweather-worker (contact@dondlingergc.com)' } }).catch(() => null),
+    ]);
+
+    const weather = await weatherRes.json();
+    const usgs = usgsRes ? await usgsRes.json().catch(() => null) : null;
+    const nws = nwsRes ? await nwsRes.json().catch(() => null) : null;
+
+    const current = weather?.current;
+    const daily   = weather?.daily;
+    if (!current || !daily) { console.error('[cron] No weather data'); return; }
+
+    const state = await readState(env);
+    const [todayDate, timePart] = current.time.split('T');
+    const localHour = parseInt(timePart.split(':')[0], 10);
+    const now = Date.now();
+    const ONE_HOUR = 60 * 60 * 1000;
+
+    // 1. NWS Alerts
+    if (nws?.features) {
+      if (!state.sent_nws_alerts) state.sent_nws_alerts = {};
+      for (const feature of nws.features) {
+        const props   = feature.properties;
+        const alertId = props.id || feature.id;
+        if (!alertId) continue;
+        const expires = props.expires ? new Date(props.expires).getTime() : now + ONE_HOUR;
+        const cooldown = NWS_COOLDOWNS[props.event] ?? DEFAULT_NWS_COOLDOWN;
+        const lastSent = state.sent_nws_alerts[alertId]?.sent || 0;
+        if (now - lastSent < cooldown) continue;
+
+        const raw = `NWS issued a ${props.event} for Wood County / Lake Wazeecha area. ${props.headline || ''}`.trim();
+        const body = await generateAlert(env, raw);
+        await pushToAll(env, `⚠️ ${props.event}`, body);
+        state.sent_nws_alerts[alertId] = { sent: now, expires };
+      }
+      for (const id of Object.keys(state.sent_nws_alerts)) {
+        if (state.sent_nws_alerts[id].expires < now) delete state.sent_nws_alerts[id];
+      }
+    }
+
+    // 2. Daily Forecast
+    if (localHour >= 7 && state.daily_forecast_sent_date !== todayDate) {
+      const raw = `Today at Lake Wazeecha: high of ${daily.temperature_2m_max[0]}°F, low ${daily.temperature_2m_min[0]}°F, ${daily.precipitation_sum[0]} inches rain expected.`;
+      const body = await generateAlert(env, raw);
+      await pushToAll(env, '🌤️ Morning Forecast', body);
+      state.daily_forecast_sent_date = todayDate;
+    }
+
+    // 3. Rain Start/Stop
+    const isRaining = current.precipitation > 0;
+    if (!state.rain_history) state.rain_history = [];
+    state.rain_history = pushHistory(state.rain_history, current.precipitation);
+
+    const RAIN_COOLDOWN = 15 * 60 * 1000;
+    if (isRaining && !state.is_raining && (now - (state.last_rain_start || 0)) > RAIN_COOLDOWN) {
+      const raw = `Rain just started at Lake Wazeecha. Current: ${current.precipitation} inches in last 15 min.`;
+      const body = await generateAlert(env, raw);
+      await pushToAll(env, '🌧️ Rain Started', body);
+      state.is_raining = true;
+      state.last_rain_start = now;
+    } else if (!isRaining && state.is_raining && (now - (state.last_rain_stop || 0)) > RAIN_COOLDOWN) {
+      const body = await generateAlert(env, 'Rain has stopped at Lake Wazeecha. Radar looks clear for now.');
+      await pushToAll(env, '🌤️ Rain Stopped', body);
+      state.is_raining = false;
+      state.last_rain_stop = now;
+    }
+
+    // 4. Thunderstorms
+    const isThunderstorm = current.weather_code >= 95;
+    const THUNDERSTORM_COOLDOWN = 30 * 60 * 1000;
+    if (isThunderstorm && !state.is_thunderstorm) {
+      const raw = `Severe thunderstorms detected at Lake Wazeecha. Secure the site.`;
+      const body = await generateAlert(env, raw);
+      await pushToAll(env, '⚡ Thunderstorm Alert', body);
+      state.is_thunderstorm = true;
+      state.last_thunderstorm_alert = now;
+    } else if (!isThunderstorm && state.is_thunderstorm) {
+      state.is_thunderstorm = false;
+    } else if (isThunderstorm && state.is_thunderstorm && (now - (state.last_thunderstorm_alert || 0)) > THUNDERSTORM_COOLDOWN) {
+      const raw = `Thunderstorms continue at Lake Wazeecha. Wind gusts are ${current.wind_gusts_10m} mph.`;
+      const body = await generateAlert(env, raw);
+      await pushToAll(env, '⚡ Thunderstorm Update', body);
+      state.last_thunderstorm_alert = now;
+    }
+
+    // 5. Wind Gusts
+    const wind = current.wind_gusts_10m;
+    if (state.wind_date !== todayDate) { state.wind_date = todayDate; state.highest_wind_gust_seen_today = 0; state.wind_history = []; }
+    if (!state.wind_history) state.wind_history = [];
+    state.wind_history = pushHistory(state.wind_history, wind);
+    const highestGust = state.highest_wind_gust_seen_today || 0;
+    let windThreshold = null;
+    if (wind >= 50 && highestGust < 50) windThreshold = 50;
+    else if (wind >= 35 && highestGust < 35) windThreshold = 35;
+    else if (wind >= 25 && highestGust < 25) windThreshold = 25;
+    else if (wind >= 15 && highestGust < 15) windThreshold = 15;
+
+    if (windThreshold && isEscalating(state.wind_history, wind)) {
+      const raw = `Wind gusts hitting ${wind}mph at Lake Wazeecha and escalating.`;
+      const body = await generateAlert(env, raw);
+      await pushToAll(env, '💨 High Winds', body);
+      state.highest_wind_gust_seen_today = Math.max(highestGust, wind);
+    }
+
+    // 6. River Alert
+    if (usgs?.value?.timeSeries) {
+      let discharge = null, gauge = null;
+      for (const ts of usgs.value.timeSeries) {
+        const code = ts.variable.variableCode[0].value;
+        const vals = ts.values[0].value;
+        if (vals?.length) {
+          const v = parseFloat(vals[vals.length - 1].value);
+          if (code === '00060') discharge = v;
+          if (code === '00065') gauge = v;
+        }
+      }
+      if (discharge > 10000 && state.last_high_discharge_alert !== todayDate) {
+        const body = await generateAlert(env, `Wisconsin River discharge is critically high at ${discharge} cfs. Flood risk elevated.`);
+        await pushToAll(env, '🌊 River Alert', body);
+        state.last_high_discharge_alert = todayDate;
+      }
+      if (gauge > 15 && state.last_high_gauge_alert !== todayDate) {
+        const body = await generateAlert(env, `Wisconsin River gauge height at ${gauge} ft — critically high. Watch the banks.`);
+        await pushToAll(env, '🌊 River Gauge Critical', body);
+        state.last_high_gauge_alert = todayDate;
+      }
+    }
+
+    await writeState(env, state);
+
+    // Prune notifications older than 30 days
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    await env.waz_analytics.prepare('DELETE FROM notifications WHERE timestamp < ?').bind(thirtyDaysAgo).run();
+
+    console.log('[cron] Done.');
+  } catch (err) {
+    console.error('[cron] Fatal:', err);
+  }
+}
