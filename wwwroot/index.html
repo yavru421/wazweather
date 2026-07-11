@@ -2767,7 +2767,8 @@ Check live hydrology & weather flow: ${shareUrl}`;
     }
 
     function closeDialog() {
-      overlay.classList.remove('open');
+      const overlay = document.getElementById('dialog-overlay');
+      if (overlay) overlay.classList.remove('open');
       // Reset animations safely
       const fillPm10 = document.getElementById('fill-pm10');
       if (fillPm10) fillPm10.style.width = '0%';
@@ -2800,7 +2801,10 @@ Check live hydrology & weather flow: ${shareUrl}`;
       });
     }
 
-    overlay.addEventListener('click', e => { if (e.target === overlay) closeDialog(); });
+    const overlayEl = document.getElementById('dialog-overlay');
+    if (overlayEl) {
+      overlayEl.addEventListener('click', e => { if (e.target === overlayEl) closeDialog(); });
+    }
     
     // Init Page Details
     document.getElementById('footer-year').textContent = new Date().getFullYear();
@@ -2940,6 +2944,7 @@ Check live hydrology & weather flow: ${shareUrl}`;
     }
 
 
+    window.toggleWeatherPush = toggleWeatherPush;
     async function toggleWeatherPush() {
       const btn = document.getElementById('btn-weather-push');
       const status = document.getElementById('weather-push-status');
@@ -3049,6 +3054,6 @@ Check live hydrology & weather flow: ${shareUrl}`;
         }, { threshold: 0.5 }).observe(lastCard);
       }
     });
-
+})();
 </script>
 </body></html>
