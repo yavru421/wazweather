@@ -218,11 +218,69 @@ export default {
       }
       if (request.method === 'GET') {
         try {
-          const { results } = await env.waz_analytics.prepare('SELECT title, message as body, timestamp FROM notifications ORDER BY id DESC LIMIT 1').all();
+          const { results } = await env.waz_analytics.prepare('SELECT title, message as body, link, timestamp FROM notifications ORDER BY id DESC LIMIT 1').all();
           if (!results || results.length === 0) {
             return new Response(JSON.stringify({ title: 'Update', body: 'New data available' }), { status: 200, headers: CORS_HEADERS });
           }
           return new Response(JSON.stringify(results[0]), { status: 200, headers: CORS_HEADERS });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS_HEADERS });
+        }
+      }
+    }
+    
+    if (url.pathname === '/api/broadcast') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: CORS_HEADERS });
+      }
+      if (request.method === 'POST') {
+        const auth = request.headers.get('Authorization');
+        if (!env.SHARED_SECRET || auth !== env.SHARED_SECRET) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: CORS_HEADERS });
+        }
+        try {
+          const body = await request.json();
+          const { title, body: message, link } = body;
+          
+          if (!title || !message) {
+            return new Response(JSON.stringify({ error: 'Missing title or body' }), { status: 400, headers: CORS_HEADERS });
+          }
+          
+          await env.waz_analytics.prepare('INSERT INTO notifications (title, message, link, timestamp) VALUES (?, ?, ?, ?)').bind(title, message, link || null, Date.now()).run();
+          
+          const { results: subs } = await env.waz_analytics.prepare('SELECT endpoint FROM subscriptions').all();
+          if (!subs?.length) {
+             return new Response(JSON.stringify({ success: true, count: 0 }), { status: 200, headers: CORS_HEADERS });
+          }
+          
+          const vapidPub = env.VAPID_PUBLIC_KEY || "BMb36GOhjyJJzODjpDxXhmv7PZxyR-e2miXbuOakZESk83z-TgtgobvOXYIWGkgaDTREY9A5XcaXDTBfWQToHOM";
+          let privateJwk;
+          try {
+            privateJwk = JSON.parse(env.VAPID_PRIVATE_KEY);
+          } catch (e) {
+            return new Response(JSON.stringify({ error: 'Bad VAPID key' }), { status: 500, headers: CORS_HEADERS });
+          }
+          
+          let sent = 0;
+          await Promise.allSettled(subs.map(async (row) => {
+            const url = new URL(row.endpoint);
+            const vapidToken = await createVapidToken(`${url.protocol}//${url.host}`, privateJwk);
+            const res = await fetch(row.endpoint, {
+              method: 'POST',
+              headers: {
+                'Authorization': `vapid t=${vapidToken}, k=${vapidPub}`,
+                'TTL': '86400',
+                'Content-Length': '0'
+              },
+            });
+            if (res.status === 410 || res.status === 404) {
+              await env.waz_analytics.prepare('DELETE FROM subscriptions WHERE endpoint = ?').bind(row.endpoint).run();
+            } else if (res.ok) {
+              sent++;
+            }
+          }));
+          
+          return new Response(JSON.stringify({ success: true, count: sent }), { status: 200, headers: CORS_HEADERS });
         } catch (e) {
           return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS_HEADERS });
         }

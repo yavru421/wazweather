@@ -1,9 +1,11 @@
 # Workspace Logbook
 
 ## 2026-07-11 Investigation: User Notifications Failure
+- **Findings**: Handlers for `/subscribe` and `/unsubscribe` were missing from the backend worker, tables were missing from D1, and service workers had no push listener.
 
-### Findings:
-1. **Frontend Request**: The PWA notification setup in `wwwroot/index.html` calls `fetch('/subscribe')` and `fetch('/unsubscribe')` relative to `BACKEND_URL` (which is empty `""`).
-2. **Backend Mismatch**: The Cloudflare Worker (`worker.js`) does not implement route handling for `/subscribe` or `/unsubscribe`. These requests fall through to static assets fetch and fail with 404 or page loads.
-3. **Database Missing**: The D1 schema migrations (`schema.sql` through `schema_v4.sql`) do not define any table to store push subscriptions.
-4. **Service Worker No-Op**: The Service Worker `sw.js` explicitly remarks that push handling is a gracefully silenced no-op on standalone because no subscription endpoints exist.
+## 2026-07-11 Execution: Enable Web Push Notifications
+- **Database Schema**: Created `schema_v5.sql` and `cron_state` table and executed on remote D1.
+- **Service Worker**: Updated `sw.js` and `wwwroot/sw.js` with `push` listeners and fallback `/api/latest-notification` fetch code.
+- **Worker JS**: Implemented `/subscribe`, `/unsubscribe`, and `/api/latest-notification` endpoints. Configured VAPID encryption & Open-Meteo/NWS/USGS river alert scheduling logic.
+- **Secrets Configured**: Set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `CRON_SECRET` on wrangler.
+- **Deployment**: Pushed commits to git to trigger Cloudflare build pipeline.
