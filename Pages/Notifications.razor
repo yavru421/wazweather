@@ -1,5 +1,6 @@
 @page "/notifications"
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Notifications</PageTitle>
 
@@ -49,6 +50,33 @@
             No recent notifications found.
         </div>
     }
+
+    <div class="mt-8 bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Subscribe to Push Alerts</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+            Get instant alerts for severe weather, rain, and river conditions at Lake Wazeecha.
+        </p>
+        
+        <div class="space-y-3 mb-6">
+            <label class="flex items-center space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                <input type="checkbox" id="pref-weather-alerts" class="form-checkbox h-4 w-4 text-blue-600" checked>
+                <span>Severe Weather (Tornadoes, Thunderstorms, High Winds)</span>
+            </label>
+            <label class="flex items-center space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                <input type="checkbox" id="pref-river-alerts" class="form-checkbox h-4 w-4 text-blue-600" checked>
+                <span>River Alerts (High Discharge, Critical Gauge Height)</span>
+            </label>
+            <label class="flex items-center space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                <input type="checkbox" id="pref-aqi-alerts" class="form-checkbox h-4 w-4 text-blue-600" checked>
+                <span>Air Quality Alerts</span>
+            </label>
+        </div>
+
+        <button id="btn-weather-push" @onclick="TogglePush" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors mb-2">
+            Loading Subscription Status...
+        </button>
+        <div id="weather-push-status" class="text-center text-xs text-gray-500 dark:text-gray-400 mt-2"></div>
+    </div>
 </div>
 
 @code {
@@ -71,6 +99,21 @@
         {
             _loading = false;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // The JS function is defined in index.html globally.
+            // When this page renders, we tell the JS to attach to these new DOM elements.
+            await JSRuntime.InvokeVoidAsync("initWeatherPush");
+        }
+    }
+
+    private async Task TogglePush()
+    {
+        await JSRuntime.InvokeVoidAsync("toggleWeatherPush");
     }
 
     public class NotificationModel
