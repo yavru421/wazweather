@@ -12,4 +12,7 @@ cp ./publish_temp/wwwroot/WaZWeather.styles.css ./wwwroot/ || true
 cp ./publish_temp/wwwroot/index.html ./wwwroot/
 cp ./publish_temp/wwwroot/service-worker-assets.js ./wwwroot/ || true
 
+echo "Allowing Wrangler to upload compiled assets..."
+sed -i '/wwwroot/d' .gitignore || true
+
 echo "Build complete."
