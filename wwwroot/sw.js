@@ -27,17 +27,32 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
+  const url = new URL(event.request.url);
+
+  // Bypass API and non-GET requests to let them fetch from network directly
+  if (event.request.method !== 'GET') return;
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/api/') || 
+      url.pathname === '/subscribe' || 
+      url.pathname === '/unsubscribe' || 
+      url.pathname === '/check-weather' ||
+      url.pathname === '/telemetry') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
         return response || fetch(event.request).then(fetchRes => {
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request.url, fetchRes.clone());
-            return fetchRes;
-          });
+          if (fetchRes && fetchRes.status === 200) {
+            const clone = fetchRes.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return fetchRes;
         });
       }).catch(() => {
         // Fallback or offline page can go here if needed
+        return caches.match('/index.html');
       })
   );
 });

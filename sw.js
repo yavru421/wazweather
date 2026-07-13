@@ -39,6 +39,13 @@ self.addEventListener('fetch', event => {
   // Skip non-GET and cross-origin API requests — let them go through directly
   if (event.request.method !== 'GET') return;
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/api/') || 
+      url.pathname === '/subscribe' || 
+      url.pathname === '/unsubscribe' || 
+      url.pathname === '/check-weather' ||
+      url.pathname === '/telemetry') {
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)

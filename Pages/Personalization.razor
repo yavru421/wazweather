@@ -3,6 +3,7 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <div class="pers-container">
     <div class="pers-header">
@@ -32,47 +33,116 @@
                 <div class="pers-success">Preferences Saved Successfully!</div>
             }
 
-            <div class="pers-group">
-                <label class="pers-label">Unique Username</label>
-                <input class="pers-input" type="text" @bind="username" placeholder="e.g. stormchaser99" maxlength="30" />
-                <p class="pers-help">Choose a unique handle for community features.</p>
+            <div class="pers-tabs">
+                <button class="pers-tab-btn @(currentTab == "personalization" ? "active" : "")" @onclick='() => SwitchTab("personalization")'>Preferences</button>
+                <button class="pers-tab-btn @(currentTab == "notifications" ? "active" : "")" @onclick='() => SwitchTab("notifications")'>Alerts & Push</button>
             </div>
 
-            <div class="pers-group">
-                <label class="pers-label">Default Zip Code</label>
-                <input class="pers-input" type="text" @bind="defaultZip" placeholder="e.g. 54494" maxlength="10" />
-            </div>
-
-            <div class="pers-group">
-                <label class="pers-label">Temperature Units</label>
-                <div class="pers-toggle">
-                    <button class="pers-toggle-btn @(tempUnits == "F" ? "active" : "")" @onclick='() => tempUnits = "F"'>°F</button>
-                    <button class="pers-toggle-btn @(tempUnits == "C" ? "active" : "")" @onclick='() => tempUnits = "C"'>°C</button>
+            @if (currentTab == "personalization")
+            {
+                <div class="pers-group">
+                    <label class="pers-label">Unique Username</label>
+                    <input class="pers-input" type="text" @bind="username" placeholder="e.g. stormchaser99" maxlength="30" />
+                    <p class="pers-help">Choose a unique handle for community features.</p>
                 </div>
-            </div>
 
-            <div class="pers-group">
-                <label class="pers-label">Theme Preference</label>
-                <div class="pers-select-wrap">
-                    <select class="pers-select" @bind="themePreference">
-                        <option value="Dark">Obsidian Dark (Default)</option>
-                        <option value="Light">Glacier Light</option>
-                        <option value="OLED">OLED Pure Black</option>
-                    </select>
+                <div class="pers-group">
+                    <label class="pers-label">Default Zip Code</label>
+                    <input class="pers-input" type="text" @bind="defaultZip" placeholder="e.g. 54494" maxlength="10" />
                 </div>
-            </div>
 
-            <button class="pers-save-btn" @onclick="SavePreferences" disabled="@isSaving">
-                @if (isSaving)
-                {
-                    <span>Saving...</span>
-                }
-                else
-                {
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                    <span>Save Preferences</span>
-                }
-            </button>
+                <div class="pers-group">
+                    <label class="pers-label">Temperature Units</label>
+                    <div class="pers-toggle">
+                        <button class="pers-toggle-btn @(tempUnits == "F" ? "active" : "")" @onclick='() => tempUnits = "F"'>°F</button>
+                        <button class="pers-toggle-btn @(tempUnits == "C" ? "active" : "")" @onclick='() => tempUnits = "C"'>°C</button>
+                    </div>
+                </div>
+
+                <div class="pers-group">
+                    <label class="pers-label">Theme Preference</label>
+                    <div class="pers-select-wrap">
+                        <select class="pers-select" @bind="themePreference">
+                            <option value="Dark">Obsidian Dark (Default)</option>
+                            <option value="Light">Glacier Light</option>
+                            <option value="OLED">OLED Pure Black</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="pers-save-btn" @onclick="SavePreferences" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span>Saving...</span>
+                    }
+                    else
+                    {
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        <span>Save Preferences</span>
+                    }
+                </button>
+            }
+            else if (currentTab == "notifications")
+            {
+                <div class="pers-group">
+                    <label class="pers-label">Latest Broadcast Alert</label>
+                    @if (_loadingNotification)
+                    {
+                        <div class="pers-loading" style="padding: 20px 0;">
+                            <div class="pers-spinner" style="width:30px; height:30px; margin-bottom:8px;"></div>
+                            <p style="font-size:0.95rem;">Checking Broadcast Stream...</p>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(_notificationError))
+                    {
+                        <div class="pers-error">@_notificationError</div>
+                    }
+                    else if (_notification != null)
+                    {
+                        <div class="alert-card">
+                            <div class="alert-card-title">@_notification.Title</div>
+                            <div class="alert-card-body">@_notification.Body</div>
+                            @if (_notification.Timestamp > 0)
+                            {
+                                <span class="alert-card-time">
+                                    @DateTimeOffset.FromUnixTimeMilliseconds(_notification.Timestamp).ToLocalTime().ToString("g")
+                                </span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p style="color:#98989d; font-size:1rem; text-align:center; padding: 10px 0;">No active broadcast alerts.</p>
+                    }
+                </div>
+
+                <div class="pers-group">
+                    <label class="pers-label">Push Notification Subscriptions</label>
+                    <p style="color: #98989d; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4;">
+                        Receive real-time alerts for severe weather warnings, critical hydrology discharge levels, and local air quality.
+                    </p>
+                    
+                    <div class="pers-checkbox-group" style="margin-bottom: 24px;">
+                        <label class="pers-checkbox-label">
+                            <input type="checkbox" id="pref-weather-alerts" class="pers-checkbox" checked />
+                            <span>Severe Weather Warnings</span>
+                        </label>
+                        <label class="pers-checkbox-label">
+                            <input type="checkbox" id="pref-river-alerts" class="pers-checkbox" checked />
+                            <span>Hydrology & Flow Alerts</span>
+                        </label>
+                        <label class="pers-checkbox-label">
+                            <input type="checkbox" id="pref-aqi-alerts" class="pers-checkbox" checked />
+                            <span>Air Quality Alerts</span>
+                        </label>
+                    </div>
+
+                    <button id="btn-weather-push" @onclick="TogglePush" class="pers-save-btn" style="width: 100%; text-transform: uppercase;">
+                        Enable Weather Alerts
+                    </button>
+                    <div id="weather-push-status" style="text-align: center; font-size: 0.85rem; color: #98989d; margin-top: 12px; line-height: 1.4;"></div>
+                </div>
+            }
         </div>
     }
 </div>
@@ -89,15 +159,20 @@
     private string errorMessage = "";
     private bool showSuccess = false;
 
+    private string currentTab = "personalization";
+    private bool _loadingNotification = true;
+    private string? _notificationError;
+    private NotificationModel? _notification;
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            uuid = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "waz_user_uuid");
+            uuid = await JSRuntime.InvokeAsync<string>("wazGetLocalStorage", "waz_user_uuid");
             if (string.IsNullOrEmpty(uuid))
             {
                 uuid = Guid.NewGuid().ToString();
-                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "waz_user_uuid", uuid);
+                await JSRuntime.InvokeVoidAsync("wazSetLocalStorage", "waz_user_uuid", uuid);
             }
 
             var response = await Http.GetAsync($"/api/preferences?uuid={uuid}");
@@ -121,6 +196,40 @@
         {
             isLoading = false;
         }
+    }
+
+    private async Task SwitchTab(string tab)
+    {
+        currentTab = tab;
+        if (currentTab == "notifications")
+        {
+            await LoadLatestNotification();
+            // Give Blazor time to render the checkbox DOM elements before init push
+            await Task.Delay(50);
+            await JSRuntime.InvokeVoidAsync("initWeatherPush");
+        }
+    }
+
+    private async Task LoadLatestNotification()
+    {
+        try
+        {
+            _loadingNotification = true;
+            _notification = await Http.GetFromJsonAsync<NotificationModel>("/api/latest-notification");
+        }
+        catch (Exception ex)
+        {
+            _notificationError = ex.Message;
+        }
+        finally
+        {
+            _loadingNotification = false;
+        }
+    }
+
+    private async Task TogglePush()
+    {
+        await JSRuntime.InvokeVoidAsync("toggleWeatherPush");
     }
 
     private async Task SavePreferences()
@@ -197,5 +306,13 @@
         public string? default_zip { get; set; }
         public string? temp_units { get; set; }
         public string? theme_preference { get; set; }
+    }
+
+    public class NotificationModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Body { get; set; } = string.Empty;
+        public string? Link { get; set; }
+        public long Timestamp { get; set; }
     }
 }

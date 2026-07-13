@@ -1,4 +1,22 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>WaZWeather</title><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link href="WaZWeather.styles.css" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script><script src="js/telemetry.js"></script><style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: system-ui, -apple-system, sans-serif; background-color: #12141c; color: #ffffff; margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }</style></head><body>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>WaZWeather</title><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link href="WaZWeather.styles.css" rel="stylesheet"><script type="importmap">{
+  "imports": {
+    "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.66stpp682q.js",
+    "./_framework/dotnet.native.js": "./_framework/dotnet.native.rjbmzc4jpg.js",
+    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.r2kbxkuujc.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.wbosgb0xlu.js"
+  },
+  "scopes": {},
+  "integrity": {
+    "./_framework/blazor.webassembly.66stpp682q.js": "sha256-3lCWrko3zwspV40aQhs2S/IMkRSarnHRKIdkHhuXIBA=",
+    "./_framework/blazor.webassembly.js": "sha256-3lCWrko3zwspV40aQhs2S/IMkRSarnHRKIdkHhuXIBA=",
+    "./_framework/dotnet.js": "sha256-1DnJL84y6wrKH1lFaRV5lmz2SjT1qufv+Kx2wbcK74w=",
+    "./_framework/dotnet.native.js": "sha256-95bE510j3EADMNW2OKa/DMBhu8N632dl5HGeBfXNEf4=",
+    "./_framework/dotnet.native.rjbmzc4jpg.js": "sha256-95bE510j3EADMNW2OKa/DMBhu8N632dl5HGeBfXNEf4=",
+    "./_framework/dotnet.runtime.js": "sha256-YyudibIWETMKrLb+nAZdJ+xDY7HY6BWf6s32UAdcvCU=",
+    "./_framework/dotnet.runtime.r2kbxkuujc.js": "sha256-YyudibIWETMKrLb+nAZdJ+xDY7HY6BWf6s32UAdcvCU=",
+    "./_framework/dotnet.wbosgb0xlu.js": "sha256-1DnJL84y6wrKH1lFaRV5lmz2SjT1qufv+Kx2wbcK74w="
+  }
+}</script><script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script><script src="js/telemetry.js"></script><style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: system-ui, -apple-system, sans-serif; background-color: #12141c; color: #ffffff; margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }</style></head><body>
                               <!-- WaZWeather v5 — Rain Intel + Split Radar + 7-Day Forecast -->
      <section id="wazeecha-telemetry" class="telemetry-section content-section" style="position:fixed;inset:0;z-index:9999;background:#12141c;margin:0;padding:0;display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;">
 
@@ -242,6 +260,14 @@
       <div class="ri-sun-item"><span style="font-size:1.2rem;">🌅</span><div><div class="ri-sun-lbl">Sunrise</div><div class="ri-sun-val" id="waz-sunrise">--:--</div></div></div>
       <div class="ri-sun-sep"></div>
       <div class="ri-sun-item"><div style="text-align:right;"><div class="ri-sun-lbl">Sunset</div><div class="ri-sun-val" id="waz-sunset">--:--</div></div><span style="font-size:1.2rem;">🌇</span></div>
+    </div>
+
+    <!-- Personalization Button -->
+    <div style="margin-top: 14px; pointer-events: auto;">
+      <button onclick="openPersonalization()" style="width: 100%; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 13px; padding: 14px; color: #ffffff; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Personalize Settings
+      </button>
     </div>
   </div>
 </div>
@@ -2807,7 +2833,10 @@ Check live hydrology & weather flow: ${shareUrl}`;
     }
     
     // Init Page Details
-    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    const footerYearEl = document.getElementById('footer-year');
+    if (footerYearEl) {
+      footerYearEl.textContent = new Date().getFullYear();
+    }
     // fetchTelemetry() disabled — WaZWeather v4 self-contained IIFE handles all data fetching
 
     // Smooth scroll navigation to specific WaZWeather snap cards
@@ -2943,7 +2972,9 @@ Check live hydrology & weather flow: ${shareUrl}`;
       }
     }
 
-
+    window.initWeatherPush = initWeatherPush;
+    window.wazGetLocalStorage = (key) => localStorage.getItem(key);
+    window.wazSetLocalStorage = (key, value) => localStorage.setItem(key, value);
     window.toggleWeatherPush = toggleWeatherPush;
     async function toggleWeatherPush() {
       const btn = document.getElementById('btn-weather-push');
@@ -3054,5 +3085,24 @@ Check live hydrology & weather flow: ${shareUrl}`;
         }, { threshold: 0.5 }).observe(lastCard);
       }
     });
+</script>
+
+<div id="blazor-app" style="display:none; position:fixed; inset:0; z-index:100000; background:#12141c; overflow-y:auto; overflow-x:hidden;"></div>
+
+<script src="_framework/blazor.webassembly.66stpp682q.js"></script>
+
+<script>
+window.openPersonalization = function() {
+    const el = document.getElementById('blazor-app');
+    if (el) {
+        el.style.display = 'block';
+    }
+}
+window.closePersonalization = function() {
+    const el = document.getElementById('blazor-app');
+    if (el) {
+        el.style.display = 'none';
+    }
+}
 </script>
 </body></html>

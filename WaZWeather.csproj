@@ -11,6 +11,8 @@
     <EmccMaximumHeapSize>268435456</EmccMaximumHeapSize>
     <UsingBrowserRuntimeWorkload>false</UsingBrowserRuntimeWorkload>
     <BlazorCacheBootResources>false</BlazorCacheBootResources>
+    <CompressionEnabled>false</CompressionEnabled>
+    <WriteImportMapToHtml>true</WriteImportMapToHtml>
     <DefaultItemExcludes>$(DefaultItemExcludes);output\**;publish_temp\**;dist\**;tap\**;LiveCrewMap\**</DefaultItemExcludes>
     <NuGetAudit>false</NuGetAudit>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>

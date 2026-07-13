@@ -151,12 +151,6 @@ export default {
             return new Response(JSON.stringify({ error: 'Invalid endpoint URL' }), { status: 400, headers: CORS_HEADERS });
           }
 
-          const allowedHosts = ['googleapis.com', 'mozilla.com', 'apple.com', 'windows.net', 'windows.com'];
-          const isValidHost = allowedHosts.some(host => endpointUrl.hostname === host || endpointUrl.hostname.endsWith('.' + host));
-          if (!isValidHost) {
-            return new Response(JSON.stringify({ error: 'Unsupported push service provider' }), { status: 400, headers: CORS_HEADERS });
-          }
-
           const pref_river = preferences.river ? 1 : 0;
           const pref_aqi = preferences.aqi ? 1 : 0;
           const pref_weather = preferences.weather ? 1 : 0;
@@ -343,6 +337,36 @@ export default {
           });
         } catch (e) {
           return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+        }
+      }
+    }
+
+    if (url.pathname === '/telemetry') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: CORS_HEADERS });
+      }
+      if (request.method === 'POST') {
+        try {
+          const payload = await request.json();
+          await env.waz_analytics.prepare(`
+            INSERT OR REPLACE INTO cron_state (key, val) VALUES (?, ?)
+          `).bind('latest_forecast', JSON.stringify(payload)).run();
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: CORS_HEADERS });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS_HEADERS });
+        }
+      } else if (request.method === 'GET') {
+        try {
+          const row = await env.waz_analytics.prepare(`
+            SELECT val FROM cron_state WHERE key = ?
+          `).bind('latest_forecast').first();
+          const latest_forecast = row ? JSON.parse(row.val) : null;
+          return new Response(JSON.stringify({ latest_forecast }), {
+            status: 200,
+            headers: CORS_HEADERS
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS_HEADERS });
         }
       }
     }
