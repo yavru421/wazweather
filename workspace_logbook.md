@@ -44,3 +44,8 @@
 - **Subscription Preferences Bug**: Verified that `pushToAll` fetches all endpoints unconditionally using `SELECT endpoint FROM subscriptions` without filtering by user preferences (`preferences_weather`, `preferences_river`, `preferences_aqi`), completely ignoring user preference choices.
 - **Cron Trigger Execution**: Verified that the cron trigger is active and running every minute (`* * * * *`) in `wrangler.toml`, successfully fetching from NWS and open-meteo, but database records confirm empty remote subscriptions, preventing active web push execution to client browsers.
 
+## 2026-07-13 Execution: Synchronizing Personalization URL Path and Fixing Blank Page
+- **Findings**: The Blazor `Personalization` component is mounted directly to `#blazor-app` in `Program.cs`. By default, this container has `display: none` in `index.html`. Direct navigation or reloading on `/personalization` resulted in a blank screen because `openPersonalization()` was never executed to show the container.
+- **Fix**: Modified `wwwroot/index.html` to update the browser history with `pushState` when opening/closing settings, and added an initialization check to automatically display `#blazor-app` if `window.location.pathname === '/personalization'` on load.
+
+

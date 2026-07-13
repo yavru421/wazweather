@@ -3096,13 +3096,24 @@ window.openPersonalization = function() {
     const el = document.getElementById('blazor-app');
     if (el) {
         el.style.display = 'block';
+        if (window.location.pathname !== '/personalization') {
+            window.history.pushState(null, '', '/personalization');
+        }
     }
 }
 window.closePersonalization = function() {
     const el = document.getElementById('blazor-app');
     if (el) {
         el.style.display = 'none';
+        if (window.location.pathname === '/personalization') {
+            window.history.pushState(null, '', '/');
+        }
     }
+}
+
+// Automatically open on load if URL is /personalization
+if (window.location.pathname === '/personalization') {
+    window.openPersonalization();
 }
 </script>
 </body></html>
