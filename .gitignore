@@ -26,6 +26,3 @@ Thumbs.db
 dotnet/
 node_modules/
 .wrangler/
-wwwroot/_framework/
-wwwroot/service-worker-assets.js
-wwwroot/WaZWeather.styles.css
