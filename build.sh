@@ -9,5 +9,7 @@ echo "Publishing Blazor WebAssembly app..."
 echo "Copying published Blazor assets to wwwroot..."
 cp -R ./publish_temp/wwwroot/_framework ./wwwroot/
 cp ./publish_temp/wwwroot/WaZWeather.styles.css ./wwwroot/ || true
+cp ./publish_temp/wwwroot/index.html ./wwwroot/
+cp ./publish_temp/wwwroot/service-worker-assets.js ./wwwroot/ || true
 
 echo "Build complete."
