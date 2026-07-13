@@ -16,11 +16,16 @@ async function createVapidToken(audience, privateJwk) {
   return `${enc(header)}.${enc(payload)}.${base64UrlEncode(sig)}`;
 }
 
-async function pushToAll(env, title, body) {
+async function pushToAll(env, title, body, preferenceColumn = null) {
   console.log(`[cron] PUSH: ${title} | ${body}`);
   await env.waz_analytics.prepare('INSERT INTO notifications (title, message, timestamp) VALUES (?, ?, ?)').bind(title, body, Date.now()).run();
   
-  const { results: subs } = await env.waz_analytics.prepare('SELECT endpoint FROM subscriptions').all();
+  let query = 'SELECT endpoint FROM subscriptions';
+  if (preferenceColumn === 'preferences_weather' || preferenceColumn === 'preferences_river' || preferenceColumn === 'preferences_aqi') {
+    query += ` WHERE ${preferenceColumn} = 1`;
+  }
+  
+  const { results: subs } = await env.waz_analytics.prepare(query).all();
   if (!subs?.length) return;
   
   const vapidPub = env.VAPID_PUBLIC_KEY || "BMb36GOhjyJJzODjpDxXhmv7PZxyR-e2miXbuOakZESk83z-TgtgobvOXYIWGkgaDTREY9A5XcaXDTBfWQToHOM";
@@ -450,17 +455,19 @@ async function runChecks(env) {
   const NWS_URL     = 'https://api.weather.gov/alerts/active?point=44.3936,-89.8173';
 
   const NWS_COOLDOWNS = {
-    'Tornado Warning':              0,
+    'Tornado Warning':              6 * 60 * 60 * 1000, // 6 hours
     'Tornado Watch':                15 * 60 * 1000,
-    'Severe Thunderstorm Warning':  0,
+    'Severe Thunderstorm Warning':  6 * 60 * 60 * 1000, // 6 hours
     'Severe Thunderstorm Watch':    15 * 60 * 1000,
-    'Flash Flood Warning':          0,
+    'Flash Flood Warning':          6 * 60 * 60 * 1000, // 6 hours
     'Flash Flood Watch':            15 * 60 * 1000,
-    'Winter Storm Warning':         30 * 60 * 1000,
+    'Winter Storm Warning':         6 * 60 * 60 * 1000, // 6 hours
     'Winter Storm Watch':           60 * 60 * 1000,
     'Special Weather Statement':    15 * 60 * 1000,
+    'Heat Advisory':                6 * 60 * 60 * 1000, // 6 hours
+    'Excessive Heat Warning':       6 * 60 * 60 * 1000, // 6 hours
   };
-  const DEFAULT_NWS_COOLDOWN = 30 * 60 * 1000;
+  const DEFAULT_NWS_COOLDOWN = 12 * 60 * 60 * 1000; // 12 hours
 
   try {
     const [weatherRes, usgsRes, nwsRes] = await Promise.all([
@@ -497,7 +504,7 @@ async function runChecks(env) {
 
         const raw = `NWS issued a ${props.event} for Wood County / Lake Wazeecha area. ${props.headline || ''}`.trim();
         const body = await generateAlert(env, raw);
-        await pushToAll(env, `⚠️ ${props.event}`, body);
+        await pushToAll(env, `⚠️ ${props.event}`, body, 'preferences_weather');
         state.sent_nws_alerts[alertId] = { sent: now, expires };
       }
       for (const id of Object.keys(state.sent_nws_alerts)) {
@@ -509,7 +516,7 @@ async function runChecks(env) {
     if (localHour >= 7 && state.daily_forecast_sent_date !== todayDate) {
       const raw = `Today at Lake Wazeecha: high of ${daily.temperature_2m_max[0]}°F, low ${daily.temperature_2m_min[0]}°F, ${daily.precipitation_sum[0]} inches rain expected.`;
       const body = await generateAlert(env, raw);
-      await pushToAll(env, '🌤️ Morning Forecast', body);
+      await pushToAll(env, '🌤️ Morning Forecast', body, 'preferences_weather');
       state.daily_forecast_sent_date = todayDate;
     }
 
@@ -522,12 +529,12 @@ async function runChecks(env) {
     if (isRaining && !state.is_raining && (now - (state.last_rain_start || 0)) > RAIN_COOLDOWN) {
       const raw = `Rain just started at Lake Wazeecha. Current: ${current.precipitation} inches in last 15 min.`;
       const body = await generateAlert(env, raw);
-      await pushToAll(env, '🌧️ Rain Started', body);
+      await pushToAll(env, '🌧️ Rain Started', body, 'preferences_weather');
       state.is_raining = true;
       state.last_rain_start = now;
     } else if (!isRaining && state.is_raining && (now - (state.last_rain_stop || 0)) > RAIN_COOLDOWN) {
       const body = await generateAlert(env, 'Rain has stopped at Lake Wazeecha. Radar looks clear for now.');
-      await pushToAll(env, '🌤️ Rain Stopped', body);
+      await pushToAll(env, '🌤️ Rain Stopped', body, 'preferences_weather');
       state.is_raining = false;
       state.last_rain_stop = now;
     }
@@ -538,7 +545,7 @@ async function runChecks(env) {
     if (isThunderstorm && !state.is_thunderstorm) {
       const raw = `Severe thunderstorms detected at Lake Wazeecha. Secure the site.`;
       const body = await generateAlert(env, raw);
-      await pushToAll(env, '⚡ Thunderstorm Alert', body);
+      await pushToAll(env, '⚡ Thunderstorm Alert', body, 'preferences_weather');
       state.is_thunderstorm = true;
       state.last_thunderstorm_alert = now;
     } else if (!isThunderstorm && state.is_thunderstorm) {
@@ -546,7 +553,7 @@ async function runChecks(env) {
     } else if (isThunderstorm && state.is_thunderstorm && (now - (state.last_thunderstorm_alert || 0)) > THUNDERSTORM_COOLDOWN) {
       const raw = `Thunderstorms continue at Lake Wazeecha. Wind gusts are ${current.wind_gusts_10m} mph.`;
       const body = await generateAlert(env, raw);
-      await pushToAll(env, '⚡ Thunderstorm Update', body);
+      await pushToAll(env, '⚡ Thunderstorm Update', body, 'preferences_weather');
       state.last_thunderstorm_alert = now;
     }
 
@@ -565,7 +572,7 @@ async function runChecks(env) {
     if (windThreshold && isEscalating(state.wind_history, wind)) {
       const raw = `Wind gusts hitting ${wind}mph at Lake Wazeecha and escalating.`;
       const body = await generateAlert(env, raw);
-      await pushToAll(env, '💨 High Winds', body);
+      await pushToAll(env, '💨 High Winds', body, 'preferences_weather');
       state.highest_wind_gust_seen_today = Math.max(highestGust, wind);
     }
 
@@ -583,12 +590,12 @@ async function runChecks(env) {
       }
       if (discharge > 10000 && state.last_high_discharge_alert !== todayDate) {
         const body = await generateAlert(env, `Wisconsin River discharge is critically high at ${discharge} cfs. Flood risk elevated.`);
-        await pushToAll(env, '🌊 River Alert', body);
+        await pushToAll(env, '🌊 River Alert', body, 'preferences_river');
         state.last_high_discharge_alert = todayDate;
       }
       if (gauge > 15 && state.last_high_gauge_alert !== todayDate) {
         const body = await generateAlert(env, `Wisconsin River gauge height at ${gauge} ft — critically high. Watch the banks.`);
-        await pushToAll(env, '🌊 River Gauge Critical', body);
+        await pushToAll(env, '🌊 River Gauge Critical', body, 'preferences_river');
         state.last_high_gauge_alert = todayDate;
       }
     }

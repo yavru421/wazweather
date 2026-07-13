@@ -34,3 +34,13 @@
 - **Wrangler Dev Server**: Booted wrangler dev server to host the static assets locally and route requests.
 
 2026-07-12: Server restarted. All integration blockers and D1 database issues for Settings & Alerts Modal were resolved prior to restart. Walkthrough artifact generated.
+2026-07-12: Pushed Settings & Alerts modal integration and .NET 10 asset pipeline fixes to GitHub origin main. .gitignore updated to exclude local miniflare state and compiled wwwroot assets. Cloudflare CI deployment triggered.
+2026-07-12: Fixed critical production deployment bug where build.sh failed to copy the compiled index.html and service-worker-assets.js to wwwroot, causing a blank screen and SyntaxError. Fix committed and pushed.
+2026-07-12: Discovered secondary production bug where Wrangler ignored the compiled Blazor WASM assets because they were in .gitignore. Added a sed command to build.sh to dynamically strip wwwroot from .gitignore during the CI pipeline. Fix committed and pushed.
+
+## 2026-07-13 Audit: NWS Alert Cron Scheduler Verification
+- **Heat Advisory Verification**: Confirmed active Heat Advisories are successfully parsed. Response parsing of NWS GeoJSON properties (`props.id`, `props.event`, `props.expires`, `props.headline`) works correctly.
+- **Cooldown Bug / Spamming**: Found that since "Heat Advisory" is not defined in `NWS_COOLDOWNS`, it defaults to `DEFAULT_NWS_COOLDOWN` (30 minutes). This causes the exact same Heat Advisory to be re-sent as a new push notification every 30 minutes, spamming users. Furthermore, high-severity events like "Tornado Warning" have a cooldown of `0`, causing them to spam every minute if the cron trigger is active and the warning remains in the NWS feed.
+- **Subscription Preferences Bug**: Verified that `pushToAll` fetches all endpoints unconditionally using `SELECT endpoint FROM subscriptions` without filtering by user preferences (`preferences_weather`, `preferences_river`, `preferences_aqi`), completely ignoring user preference choices.
+- **Cron Trigger Execution**: Verified that the cron trigger is active and running every minute (`* * * * *`) in `wrangler.toml`, successfully fetching from NWS and open-meteo, but database records confirm empty remote subscriptions, preventing active web push execution to client browsers.
+
