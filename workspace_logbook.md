@@ -48,4 +48,9 @@
 - **Findings**: The Blazor `Personalization` component is mounted directly to `#blazor-app` in `Program.cs`. By default, this container has `display: none` in `index.html`. Direct navigation or reloading on `/personalization` resulted in a blank screen because `openPersonalization()` was never executed to show the container.
 - **Fix**: Modified `wwwroot/index.html` to update the browser history with `pushState` when opening/closing settings, and added an initialization check to automatically display `#blazor-app` if `window.location.pathname === '/personalization'` on load.
 
+## 2026-07-17 Execution: Fix Cache Pollution & Service Worker Cache-First Fetch Crashes
+- **Findings**: The previous service worker implementation used a strict Cache-First strategy that intercepted all GET requests. If a request failed or took too long, it caught the error and returned the cached `index.html`. This resulted in the browser caching `index.html` (MIME `text/html`) under the filenames of stylesheets (`WaZWeather.styles.css`) and frameworks (`blazor.webassembly.js`), completely breaking the app.
+- **Fix**: Replaced the Cache-First strategy in `wwwroot/sw.js` and `sw.js` with a Network-First fallback strategy. Bumped the cache name to `wazweather-v2` in both service worker files to force immediate activation, clear out old polluted cache scopes for all clients, and prevent MIME-type errors on load. Committed and pushed to GitHub main branch to trigger Cloudflare CI deployment.
+
+
 
