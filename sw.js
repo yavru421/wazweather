@@ -1,7 +1,7 @@
 // sw.js — WaZWeather Minimal Service Worker (PWA installability only)
 // No push subscription endpoints exist on standalone — all push logic gracefully silenced.
 
-const CACHE_NAME = 'wazweather-v1';
+const CACHE_NAME = 'wazweather-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

@@ -1,35 +1,42 @@
-const CACHE_NAME = "wazweather-v1";
-const ASSETS = [
-  "/",
-  "/index.html",
-  "/radar-worker.js",
-  "/manifest.webmanifest",
-  "/icon-192.png",
-  "/icon-512.png"
+// sw.js — WaZWeather Minimal Service Worker (PWA installability only)
+// No push subscription endpoints exist on standalone — all push logic gracefully silenced.
+
+const CACHE_NAME = 'wazweather-v2';
+const STATIC_ASSETS = [
+  '/',
+  '/index.html',
+  '/radar-worker.js',
+  '/manifest.webmanifest'
 ];
 
-self.addEventListener("install", event => {
+self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(STATIC_ASSETS).catch(() => {
+        // Silently ignore cache failures (network-first anyway)
+      });
+    })
   );
 });
 
-self.addEventListener("activate", event => {
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.map(key => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      })
-    )).then(() => self.clients.claim())
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
-self.addEventListener("fetch", event => {
+// Network-first strategy: always try network, fall back to cache for HTML
+self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Bypass API and non-GET requests to let them fetch from network directly
+  // Skip non-GET and cross-origin API requests — let them go through directly
   if (event.request.method !== 'GET') return;
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/') || 
@@ -41,18 +48,20 @@ self.addEventListener("fetch", event => {
   }
 
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        return response || fetch(event.request).then(fetchRes => {
-          if (fetchRes && fetchRes.status === 200) {
-            const clone = fetchRes.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return fetchRes;
+        // Cache successful same-origin responses
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      })
+      .catch(() => {
+        // Offline fallback: serve from cache
+        return caches.match(event.request).then(cached => {
+          return cached || caches.match('/index.html');
         });
-      }).catch(() => {
-        // Fallback or offline page can go here if needed
-        return caches.match('/index.html');
       })
   );
 });
