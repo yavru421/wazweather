@@ -13,7 +13,7 @@
     <BlazorCacheBootResources>false</BlazorCacheBootResources>
     <CompressionEnabled>false</CompressionEnabled>
     <WriteImportMapToHtml>true</WriteImportMapToHtml>
-    <DefaultItemExcludes>$(DefaultItemExcludes);output\**;publish_temp\**;dist\**;tap\**;LiveCrewMap\**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);output\**;publish_temp\**;dist\**;tap\**;LiveCrewMap\**;wwwroot\_framework\**;wwwroot\WaZWeather.styles.css;wwwroot\service-worker-assets.js</DefaultItemExcludes>
     <NuGetAudit>false</NuGetAudit>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

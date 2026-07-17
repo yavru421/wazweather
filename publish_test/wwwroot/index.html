@@ -1,0 +1,3119 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>WaZWeather</title><base href="/"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link href="WaZWeather.styles.css" rel="stylesheet"><script type="importmap">{
+  "imports": {
+    "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.66stpp682q.js",
+    "./_framework/dotnet.native.js": "./_framework/dotnet.native.rjbmzc4jpg.js",
+    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.r2kbxkuujc.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.wbosgb0xlu.js"
+  },
+  "scopes": {},
+  "integrity": {
+    "./_framework/blazor.webassembly.66stpp682q.js": "sha256-3lCWrko3zwspV40aQhs2S/IMkRSarnHRKIdkHhuXIBA=",
+    "./_framework/blazor.webassembly.js": "sha256-3lCWrko3zwspV40aQhs2S/IMkRSarnHRKIdkHhuXIBA=",
+    "./_framework/dotnet.js": "sha256-1DnJL84y6wrKH1lFaRV5lmz2SjT1qufv+Kx2wbcK74w=",
+    "./_framework/dotnet.native.js": "sha256-95bE510j3EADMNW2OKa/DMBhu8N632dl5HGeBfXNEf4=",
+    "./_framework/dotnet.native.rjbmzc4jpg.js": "sha256-95bE510j3EADMNW2OKa/DMBhu8N632dl5HGeBfXNEf4=",
+    "./_framework/dotnet.runtime.js": "sha256-YyudibIWETMKrLb+nAZdJ+xDY7HY6BWf6s32UAdcvCU=",
+    "./_framework/dotnet.runtime.r2kbxkuujc.js": "sha256-YyudibIWETMKrLb+nAZdJ+xDY7HY6BWf6s32UAdcvCU=",
+    "./_framework/dotnet.wbosgb0xlu.js": "sha256-1DnJL84y6wrKH1lFaRV5lmz2SjT1qufv+Kx2wbcK74w="
+  }
+}</script><script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script><script src="js/telemetry.js"></script><style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: system-ui, -apple-system, sans-serif; background-color: #12141c; color: #ffffff; margin: 0; padding: 0; overflow: hidden; width: 100vw; height: 100vh; }</style></head><body>
+                              <!-- WaZWeather v5 — Rain Intel + Split Radar + 7-Day Forecast -->
+     <section id="wazeecha-telemetry" class="telemetry-section content-section" style="position:fixed;inset:0;z-index:9999;background:#12141c;margin:0;padding:0;display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;">
+
+<style>
+/* ═══ WaZWeather v5 Core ═══ */
+#waz-dots{position:fixed;top:0;left:0;right:0;padding:max(env(safe-area-inset-top,0px),14px) 60px 0;display:flex;justify-content:center;gap:5px;z-index:10001;pointer-events:none;}
+.waz-dot{flex:1;max-width:60px;height:3px;background:rgba(255,255,255,.18);border-radius:3px;transition:background .3s,box-shadow .3s;}
+.waz-dot.active{background:#39FF14;box-shadow:0 0 8px rgba(57,255,20,.7);}
+#waz-top-bar{position:fixed;top:0;left:0;right:0;padding:max(env(safe-area-inset-top,0px),28px) 16px 10px;z-index:10000;display:flex;justify-content:space-between;align-items:flex-start;background:linear-gradient(to bottom,rgba(0,0,0,.85) 0%,transparent 100%);pointer-events:none;}
+#waz-clock-wrap{pointer-events:auto;display:flex;flex-direction:column;gap:1px;}
+#waz-live-badge{display:flex;align-items:center;gap:5px;}
+.waz-live-dot{width:6px;height:6px;border-radius:50%;background:#39FF14;box-shadow:0 0 8px #39FF14;animation:wazpulse 2s ease-in-out infinite;}
+@keyframes wazpulse{0%,100%{opacity:1}50%{opacity:.25}}
+.waz-live-label{color:#39FF14;font-size:1.1rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
+#waz-clock{font-family:ui-monospace,monospace;font-size:1.2rem;font-weight:700;color:#ffffff;}
+#waz-close-btn{pointer-events:auto;background:rgba(255,255,255,.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.18);color:#ffffff;width:42px;height:42px;border-radius:21px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;flex-shrink:0;}
+#waz-close-btn:active{background:rgba(255,255,255,.22);}
+.waz-card{width:100vw;height:100vh;flex-shrink:0;scroll-snap-align:start;scroll-snap-stop:always;position:relative;box-sizing:border-box;}
+.waz-scroll{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;height:100%;}
+.waz-scroll::-webkit-scrollbar{display:none;}
+
+/* ═══ Card 1: RAIN INTEL ═══ */
+#waz-rain-intel{background:radial-gradient(ellipse at 30% 0%,#0c2340 0%,#050a06 65%);}
+.ri-body{padding:72px 18px 36px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+.ri-source{display:flex;justify-content:space-between;align-items:center;}
+.ri-source-lbl{color:#0a84ff;font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;}
+#waz-updated{color:#98989d;font-size:1.1rem;}
+
+/* Countdown hero */
+.ri-countdown-hero{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04));border:1px solid rgba(59,130,246,.25);border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;}
+.ri-countdown-label{color:#0a84ff;font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;}
+#waz-countdown-main{font-size:3rem;font-weight:900;color:#ffffff;letter-spacing:-1px;line-height:1;}
+#waz-countdown-sub{font-size:1rem;color:#94a3b8;margin-top:2px;}
+.ri-today-strip{display:flex;gap:10px;}
+.ri-today-cell{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:3px;}
+.ri-today-lbl{color:#98989d;font-size:1.2rem;text-transform:uppercase;font-weight:700;letter-spacing:.5px;}
+#waz-today-total{color:#0a84ff;font-size:1.8rem;font-weight:900;}
+#waz-today-max-pct{color:#f97316;font-size:1.8rem;font-weight:900;}
+#waz-tomorrow-rain{color:#a78bfa;font-size:1.8rem;font-weight:900;}
+
+/* 12-hr rain bar chart */
+.ri-bars-block{background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.18);border-radius:16px;padding:12px 12px 10px;}
+.ri-bars-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.ri-bars-title{color:#0a84ff;font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;}
+#waz-rain-summary{font-size:.9rem;font-weight:700;color:#ffffff;}
+.ri-bars{display:flex;align-items:flex-end;gap:3px;height:50px;}
+.ri-bar-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;}
+.ri-bar-pct{color:#0a84ff;font-size:.46rem;font-weight:700;line-height:1;}
+.ri-bar-fill{width:100%;border-radius:3px 3px 0 0;min-height:2px;}
+.ri-bar-lbl{color:#98989d;font-size:.46rem;text-align:center;white-space:nowrap;overflow:hidden;line-height:1.2;}
+#waz-rain-next{color:#98989d;font-size:.7rem;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.05);}
+#waz-rain-next span{color:#ffffff;font-weight:700;}
+
+/* Compact stat strip */
+.ri-stat-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.ri-stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:11px 10px;display:flex;flex-direction:column;gap:2px;}
+.ri-stat-lbl{color:#98989d;font-size:1.2rem;text-transform:uppercase;font-weight:700;}
+.ri-stat-val{color:#ffffff;font-size:1.8rem;font-weight:800;line-height:1.1;}
+.ri-stat-sub{color:#98989d;font-size:.62rem;}
+.ri-sun-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:13px;padding:10px 14px;}
+.ri-sun-item{display:flex;align-items:center;gap:7px;}
+.ri-sun-lbl{color:#98989d;font-size:1.2rem;text-transform:uppercase;font-weight:700;}
+.ri-sun-val{color:#ffffff;font-size:1.1rem;font-weight:700;}
+.ri-sun-sep{flex:1;height:1px;background:rgba(255,255,255,.05);margin:0 10px;}
+.ri-persona-row{display:flex;gap:7px;flex-wrap:wrap;}
+.ri-persona-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:6px 12px;color:#98989d;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.ri-persona-btn.active{background:rgba(57,255,20,.1);border-color:rgba(57,255,20,.35);color:#39FF14;}
+.ri-advice{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:13px;padding:10px 12px;}
+.ri-advice-lbl{color:#98989d;font-size:1.2rem;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+#waz-advice{color:#ffffff;font-size:1rem;line-height:1.45;font-weight:500;}
+
+/* ═══ Card 2: RADAR (Split 70/30) ═══ */
+#waz-radar{display:flex;flex-direction:column;padding:0;}
+#waz-radar-frame-wrap{flex:0 0 68vh;position:relative;overflow:hidden;}
+#windy-iframe{width:100%;height:100%;border:none;display:block;}
+#waz-radar-strip{flex:1;background:#0a0f1a;border-top:1px solid rgba(255,255,255,.08);padding:12px 16px;display:flex;flex-direction:column;gap:10px;overflow:hidden;}
+.radar-strip-top{display:flex;justify-content:space-between;align-items:center;}
+.radar-strip-lbl{color:#98989d;font-size:.62rem;text-transform:uppercase;font-weight:700;letter-spacing:1px;}
+#waz-radar-time{color:#0a84ff;font-size:.9rem;font-weight:700;}
+.radar-layer-btns{display:flex;gap:7px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+.radar-layer-btns::-webkit-scrollbar{display:none;}
+.rlb{display:flex;align-items:center;gap:5px;padding:8px 12px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.65);font-size:.7rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.rlb.active{background:rgba(57,255,20,.12);border-color:rgba(57,255,20,.4);color:#39FF14;}
+.rlb svg{flex-shrink:0;}
+
+/* ═══ Card 3: RIVER ═══ */
+#waz-river{background:radial-gradient(circle at 70% 10%,#1e3a8a,#0a0f1e 65%);}
+.river-body{padding:72px 18px 36px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+.river-hdr{display:flex;align-items:center;gap:12px;}
+.river-icon{width:46px;height:46px;background:linear-gradient(135deg,#0a84ff,#1d4ed8);border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(59,130,246,.3);}
+.river-title{font-size:2rem;font-weight:900;color:#ffffff;letter-spacing:-.5px;}
+.river-gauge{color:#94a3b8;font-size:.9rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+.river-main{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:22px;}
+.river-cfs-lbl{color:#94a3b8;font-size:1.05rem;font-weight:600;margin-bottom:5px;}
+.river-cfs-val{color:#0a84ff;font-size:3.5rem;font-weight:900;line-height:1;letter-spacing:-2px;}
+#waz-trend{font-size:1.2rem;font-weight:800;margin-left:5px;}
+.river-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+.river-sub-cell{background:rgba(0,0,0,.2);padding:13px;border-radius:13px;}
+.river-sub-lbl{color:#94a3b8;font-size:1.2rem;font-weight:600;margin-bottom:3px;}
+.river-sub-val{font-size:1.5rem;font-weight:800;line-height:1;}
+.flood-bar-wrap{margin-top:12px;}
+.flood-bar-labels{display:flex;justify-content:space-between;font-size:.62rem;color:#98989d;margin-bottom:3px;}
+.flood-bar-track{height:5px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
+#waz-flood-fill{height:100%;border-radius:999px;transition:width 1s ease;}
+#waz-flood-label{font-size:1.1rem;color:#98989d;margin-top:4px;}
+.river-chart-wrap{height:160px;background:rgba(0,0,0,.18);border-radius:16px;padding:10px;}
+
+/* ═══ Card 4: ALERTS ═══ */
+#waz-alerts{background:radial-gradient(circle at 50% 0%,#1a0505,#050a06 65%);}
+.alerts-body{padding:72px 18px 36px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+.alerts-hdr{display:flex;align-items:center;gap:11px;}
+.alerts-icon{width:42px;height:42px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.alerts-title{font-size:1.5rem;font-weight:900;color:#ffffff;letter-spacing:-.5px;}
+.alerts-zone{color:#98989d;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+#waz-alerts-list{display:flex;flex-direction:column;gap:9px;}
+.alert-item{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:13px;padding:13px 15px;}
+.alert-event{color:#fca5a5;font-size:.9rem;font-weight:800;}
+.alert-headline{color:#ffffff;font-size:1.2rem;line-height:1.4;margin-top:3px;opacity:.85;}
+.alert-meta{display:flex;gap:7px;margin-top:7px;flex-wrap:wrap;}
+.alert-tag{font-size:.6rem;padding:3px 8px;border-radius:20px;font-weight:700;background:rgba(239,68,68,.15);color:#fca5a5;}
+.no-alerts{background:rgba(57,255,20,.04);border:1px solid rgba(57,255,20,.12);border-radius:15px;padding:26px 18px;text-align:center;}
+.no-alerts-icon{font-size:2.2rem;margin-bottom:7px;}
+.no-alerts-title{color:#39FF14;font-size:1.05rem;font-weight:800;}
+.no-alerts-sub{color:#98989d;font-size:1rem;margin-top:3px;}
+.alerts-footer{display:flex;justify-content:space-between;align-items:center;padding-top:7px;border-top:1px solid rgba(255,255,255,.05);}
+.alerts-src{color:#98989d;font-size:1.1rem;}
+#waz-alerts-stamp{color:#98989d;font-size:1.1rem;}
+
+/* ═══ Card 5: FORECAST ═══ */
+#waz-forecast{background:radial-gradient(ellipse at 60% 0%,#1a0d2e,#050a06 65%);}
+.fc-body{padding:72px 18px 36px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+.fc-hdr{display:flex;justify-content:space-between;align-items:flex-end;}
+.fc-title{font-size:2rem;font-weight:900;color:#ffffff;letter-spacing:-.5px;}
+.fc-sub{color:#98989d;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.aqi-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:6px 12px;}
+.aqi-badge-lbl{color:#98989d;font-size:.62rem;font-weight:700;text-transform:uppercase;}
+#waz-aqi-val{font-size:1.1rem;font-weight:900;color:#39FF14;}
+#waz-aqi-status{font-size:.62rem;font-weight:700;color:#98989d;}
+.fc-days{display:flex;flex-direction:column;gap:8px;}
+.fc-day{display:flex;align-items:center;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.055);border-radius:14px;padding:12px 14px;gap:10px;}
+.fc-day-name{color:#ffffff;font-size:.82rem;font-weight:700;width:34px;flex-shrink:0;}
+.fc-day-icon{font-size:1.3rem;flex-shrink:0;}
+.fc-day-desc{color:#98989d;font-size:.9rem;flex:1;}
+.fc-day-temp{color:#ffffff;font-size:1.05rem;font-weight:800;white-space:nowrap;flex-shrink:0;text-align:right;}
+.fc-day-rain-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;width:48px;}
+.fc-day-rain-bar-bg{width:100%;height:4px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
+.fc-day-rain-bar-fill{height:100%;border-radius:999px;background:#0a84ff;transition:width .5s ease;}
+.fc-day-rain-pct{color:#0a84ff;font-size:.6rem;font-weight:700;}
+.fc-precip-today{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
+.fc-precip-lbl{color:#0a84ff;font-size:1.1rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+#waz-precip-today{color:#ffffff;font-size:1.1rem;font-weight:900;}
+#waz-precip-week{color:#ffffff;font-size:1.1rem;font-weight:900;}
+
+/* ═══ STORM TARGET COUNTDOWN Alert Bar ═══ */
+#waz-storm-alert-bar {
+  background: linear-gradient(90deg, #7f1d1d 0%, #b91c1c 100%);
+  border: 2px solid #ef4444;
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-family: ui-monospace, monospace;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+.sab-title {
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #fca5a5;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.sab-eta {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fffffffff;
+}
+.sab-meta {
+  font-size: 0.62rem;
+  color: #fca5a5;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 4px;
+}
+
+/* ═══ Persona HUD Toggle ═══ */
+.ri-mode-toggle-wrap button.active {
+  background: rgba(57, 255, 20, 0.15) !important;
+  border: 1px solid rgba(57, 255, 20, 0.4) !important;
+  color: #39FF14 !important;
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.2);
+}
+</style>
+
+<!-- 7 Progress Dots -->
+<div id="waz-dots">
+  <div class="waz-dot active"></div>
+  <div class="waz-dot"></div>
+  <div class="waz-dot"></div>
+  <div class="waz-dot"></div>
+  <div class="waz-dot"></div>
+  <div class="waz-dot"></div>
+  <div class="waz-dot"></div>
+</div>
+
+<!-- Floating top bar -->
+<div id="waz-top-bar">
+  <div id="waz-clock-wrap">
+    <div id="waz-live-badge"><div class="waz-live-dot"></div><span class="waz-live-label">Live</span></div>
+    <div id="waz-clock">--:--:--</div>
+  </div>
+  <a href="legal.html" style="pointer-events:auto; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.8rem; margin-top: 10px; margin-right: 15px; border-bottom: 1px dotted rgba(255,255,255,0.4);">Legal / Privacy</a>
+  <button id="waz-close-btn" style="pointer-events:auto;" onclick="resetActiveGateway()" aria-label="Close WaZWeather">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
+<!-- ════ CARD 1: OVERVIEW ════ -->
+<div id="waz-overview" class="waz-card waz-scroll" data-share-text="Live weather from WazWeather:">
+  <div class="card-share-btn" onclick="shareCard(this)" style="position:absolute;bottom:30px;right:20px;width:40px;height:40px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
+  <div class="ri-body">
+    <div class="ri-source">
+      <div><div class="ri-source-lbl">WazWeather · Local</div></div>
+      <div id="waz-updated">—</div>
+    </div>
+
+    <!-- Main Temp Display -->
+    <div style="text-align: center; margin: 40px 0;">
+      <div id="waz-main-temp" style="font-size: 5rem; font-weight: 900; line-height: 1; letter-spacing: -3px; color: #ffffff;">--°</div>
+      <div id="waz-main-desc" style="font-size: 1.2rem; font-weight: 700; color: #98989d; margin-top: 10px;">Loading...</div>
+    </div>
+
+    <!-- Compact stat strip -->
+    <div class="ri-stat-strip">
+      <div class="ri-stat"><div class="ri-stat-lbl" id="waz-lbl-feels">Feels Like</div><div class="ri-stat-val" id="waz-feels">--°</div></div>
+      <div class="ri-stat"><div class="ri-stat-lbl">Wind</div><div class="ri-stat-val" id="waz-wind">-- mph</div><div class="ri-stat-sub" id="waz-wind-dir">--</div></div>
+      <div class="ri-stat"><div class="ri-stat-lbl" id="waz-lbl-uv">UV Max</div><div class="ri-stat-val" id="waz-uv" style="color:#ffb300;">--</div></div>
+    </div>
+
+    <!-- Sun strip -->
+    <div class="ri-sun-row">
+      <div class="ri-sun-item"><span style="font-size:1.2rem;">🌅</span><div><div class="ri-sun-lbl">Sunrise</div><div class="ri-sun-val" id="waz-sunrise">--:--</div></div></div>
+      <div class="ri-sun-sep"></div>
+      <div class="ri-sun-item"><div style="text-align:right;"><div class="ri-sun-lbl">Sunset</div><div class="ri-sun-val" id="waz-sunset">--:--</div></div><span style="font-size:1.2rem;">🌇</span></div>
+    </div>
+
+    <!-- Personalization Button -->
+    <div style="margin-top: 14px; pointer-events: auto;">
+      <button onclick="openPersonalization()" style="width: 100%; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 13px; padding: 14px; color: #ffffff; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Personalize Settings
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CARD 2: RAIN ARRIVAL ════ -->
+<div id="waz-rain-arrival" class="waz-card waz-scroll">
+  <div class="ri-body">
+    <div class="ri-source">
+      <div><div class="ri-source-lbl">☔ Precipitation Intel</div></div>
+    </div>
+
+    <!-- Live countdown hero -->
+    <div class="ri-countdown-hero" style="margin-top: 20px;">
+      <div class="ri-countdown-label">🌧 Rain Arrival</div>
+      <div id="waz-countdown-main">Checking…</div>
+      <div id="waz-countdown-sub">Loading forecast data</div>
+    </div>
+
+    <!-- Today / Tomorrow strip -->
+    <div class="ri-today-strip" style="margin-top: 20px;">
+      <div class="ri-today-cell">
+        <div class="ri-today-lbl">Today Rain</div>
+        <div id="waz-today-total">--"</div>
+      </div>
+      <div class="ri-today-cell">
+        <div class="ri-today-lbl">Max Chance</div>
+        <div id="waz-today-max-pct">--%</div>
+      </div>
+      <div class="ri-today-cell">
+        <div class="ri-today-lbl">Tomorrow</div>
+        <div id="waz-tomorrow-rain">--%</div>
+      </div>
+    </div>
+
+    <!-- 12-hr bar chart -->
+    <div class="ri-bars-block" style="margin-top: 20px;">
+      <div class="ri-bars-hdr">
+        <span class="ri-bars-title">Next 12 Hours</span>
+        <span id="waz-rain-summary">Loading…</span>
+      </div>
+      <div class="ri-bars" id="waz-rain-bars"></div>
+      <div id="waz-rain-next">Checking…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CARD 2: RADAR (Split 68vh / rest) ════ -->
+<div id="waz-radar" class="waz-card" data-share-text="Severe weather tracked! Check out the live interactive radar on WazWeather:">
+  <div class="card-share-btn radar-share" onclick="shareRadar()" style="position:absolute;bottom:30px;right:20px;width:40px;height:40px;background:rgba(0,0,0,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
+  <div id="waz-radar-frame-wrap">
+    <iframe id="windy-iframe"
+      src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=9&overlay=radar&product=radar&level=surface&lat=44.3936&lon=-89.8173&play=true&message=true&marker=true&detailLat=44.3936&detailLon=-89.8173"
+      allowfullscreen loading="lazy"></iframe>
+  </div>
+  <div id="waz-radar-strip">
+    <div class="radar-strip-top">
+      <span class="radar-strip-lbl">Layer</span>
+      <span id="waz-radar-time">Live Radar Active</span>
+    </div>
+    <div class="radar-layer-btns">
+      <button class="rlb active" id="rlb-radar" onclick="wazLayer('radar','radar')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Radar
+      </button>
+      <button class="rlb" id="rlb-rain" onclick="wazLayer('rain','')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/><polyline points="8 19 12 23 16 19"/></svg> Rain
+      </button>
+      <button class="rlb" id="rlb-wind" onclick="wazLayer('wind','')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg> Wind
+      </button>
+      <button class="rlb" id="rlb-temp" onclick="wazLayer('temp','')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg> Temp
+      </button>
+      <button class="rlb" id="rlb-clouds" onclick="wazLayer('clouds','')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg> Clouds
+      </button>
+      <button class="rlb" id="rlb-cape" onclick="wazLayer('cape','')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Storms
+      </button>
+      <button class="rlb" id="rlb-pressure" onclick="wazLayer('pressure','')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> Pressure
+      </button>
+    </div>
+  </div>
+  <script>
+  function wazLayer(overlay, product) {
+    var iframe = document.getElementById('windy-iframe');
+    if (!iframe) return;
+    var base = 'https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=9&level=surface&lat=44.3936&lon=-89.8173&play=true&message=true&marker=true&detailLat=44.3936&detailLon=-89.8173';
+    iframe.src = base + '&overlay=' + overlay + (product ? '&product=' + product : '');
+    document.querySelectorAll('.rlb').forEach(function(b){ b.classList.remove('active'); });
+    var ab = document.getElementById('rlb-' + overlay);
+    if (ab) ab.classList.add('active');
+    document.getElementById('waz-radar-time').textContent = overlay.charAt(0).toUpperCase() + overlay.slice(1) + ' layer active';
+  }
+  </script>
+</div>
+
+<!-- ════ CARD 3: RIVER ════ -->
+<div id="waz-river" class="waz-card waz-scroll" data-share-text="Current river flow status from WazWeather:">
+  <div class="card-share-btn" onclick="shareCard(this)" style="position:absolute;bottom:30px;right:20px;width:40px;height:40px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
+  <div class="river-body">
+    <div class="river-hdr">
+      <div class="river-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <div><div class="river-title">Hydrology</div><div class="river-gauge">Wisconsin River · USGS 05395000</div></div>
+    </div>
+    <div class="river-main">
+      
+      <div class="river-sub-grid">
+        <div class="river-sub-cell" style="grid-column: span 2;"><div class="river-sub-lbl">River Flow Status</div><div id="waz-flow-status" class="river-sub-val" style="color:#ffffff; font-size: 1.8rem;">--</div><div id="waz-flow-note" style="color:#98989d; font-size:1.05rem; margin-top:5px;">Loading...</div></div>
+      </div>
+      <div class="flood-bar-wrap" id="waz-flood-wrap" style="display:none;">
+        <div class="flood-bar-labels"><span>Stage</span><span id="waz-flood-label">--</span></div>
+        <div class="flood-bar-track"><div id="waz-flood-fill"></div></div>
+      </div>
+    </div>
+    <div class="river-chart-wrap"><canvas id="waz-hydro-chart" style="width:100%;height:100%;"></canvas></div>
+  </div>
+</div>
+
+<!-- ════ CARD 4: ALERTS ════ -->
+<div id="waz-alerts" class="waz-card waz-scroll">
+  <div class="alerts-body">
+    <div class="alerts-hdr">
+      <div class="alerts-icon">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div><div class="alerts-title">NWS Alerts</div><div class="alerts-zone">Wood County, WI · WIZ030</div></div>
+    </div>
+    <div id="waz-alerts-list">
+      <div class="no-alerts"><div class="no-alerts-icon">✅</div><div class="no-alerts-title">All Clear</div><div class="no-alerts-sub">No active alerts for Wood County</div></div>
+    </div>
+
+    <!-- PUSH NOTIFICATIONS CONFIG -->
+    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:15px; padding:20px; margin-top:15px;">
+      <div style="color:#ffffff; font-size:1.1rem; font-weight:800; margin-bottom:10px;">Push Notifications</div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#98989d;">
+          <input type="checkbox" id="pref-weather-alerts" checked style="accent-color:#0a84ff; width:16px; height:16px;"> Severe Weather (Tornado, Storms, Wind)
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#98989d;">
+          <input type="checkbox" id="pref-river-alerts" checked style="accent-color:#0a84ff; width:16px; height:16px;"> River Alerts (Flooding)
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#98989d;">
+          <input type="checkbox" id="pref-aqi-alerts" checked style="accent-color:#0a84ff; width:16px; height:16px;"> Air Quality Alerts
+        </label>
+      </div>
+      <button id="btn-weather-push" onclick="toggleWeatherPush()" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:transparent; color:#ffffff; font-weight:800; text-transform:uppercase; font-size:0.8rem; cursor:pointer; transition:all 0.2s;">Checking Support...</button>
+      <div id="weather-push-status" style="text-align:center; margin-top:8px; font-size:0.75rem; color:#98989d;"></div>
+    </div>
+
+    <div class="alerts-footer" style="margin-top:15px;"><div class="alerts-src">Source: NWS Green Bay</div><div id="waz-alerts-stamp"></div></div>
+  </div>
+</div>
+
+<!-- ════ CARD 5: FORECAST ════ -->
+<div id="waz-forecast" class="waz-card waz-scroll">
+  <div class="fc-body">
+    <div class="fc-hdr">
+      <div><div class="fc-title">7-Day Forecast</div><div class="fc-sub">Wazeecha · Wood County</div></div>
+      <div class="aqi-badge">
+        <div class="aqi-badge-lbl">AQI</div>
+        <div id="waz-aqi-val">--</div>
+        <div id="waz-aqi-status">--</div>
+      </div>
+    <div class="fc-precip-today">
+      <div><div class="fc-precip-lbl">Today's Rain</div><div id="waz-precip-today">--"</div></div>
+      <div style="text-align:right;"><div class="fc-precip-lbl">7-Day Total</div><div id="waz-precip-week">--"</div></div>
+    </div>
+
+    <div class="fc-days" id="waz-fc-days">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ════ CARD 7: RECOMMENDATIONS ════ -->
+<div id="waz-recommendations" class="waz-card waz-scroll">
+  <div class="ri-body">
+    <div class="ri-source">
+      <div><div class="ri-source-lbl">💡 Smart Insights</div></div>
+    </div>
+    
+    <div id="waz-smart-insights-container" style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+        <!-- Populated by JS -->
+        <div class="ri-advice">
+          <div class="ri-advice-lbl" style="color:#0a84ff;">Analyzing...</div>
+          <div style="color:#ffffff; font-size:1rem; font-weight:500;">Generating smart insights based on current conditions.</div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- ════ v5 SELF-CONTAINED SCRIPT ════ -->
+<script>
+(function() {
+  'use strict';
+  var LAT = 44.3936, LON = -89.8173;
+  // Parse URL parameters if present
+  var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('lat') && urlParams.has('lon')) {
+    LAT = parseFloat(urlParams.get('lat'));
+    LON = parseFloat(urlParams.get('lon'));
+  }
+
+  var WX_URL, USGS_URL, NWS_URL, AQI_URL;
+
+  function updateUrls(lat, lon) {
+    LAT = lat;
+    LON = lon;
+    WX_URL = 'https://api.open-meteo.com/v1/forecast?latitude='+LAT+'&longitude='+LON+
+      '&hourly=temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,precipitation_probability,precipitation,weather_code,uv_index,relative_humidity_2m,pressure_msl'+
+      '&daily=sunrise,sunset,uv_index_max,precipitation_probability_max,wind_gusts_10m_max,weather_code,precipitation_sum,temperature_2m_max,temperature_2m_min'+
+      '&forecast_days=7&timezone=America%2FChicago&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch';
+    USGS_URL = 'https://waterservices.usgs.gov/nwis/iv/?sites=05395000&parameterCd=00060,00065&format=json&period=P7D';
+    NWS_URL  = 'https://api.weather.gov/alerts/active?point='+LAT+','+LON;
+    AQI_URL  = 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude='+LAT+'&longitude='+LON+'&current=us_aqi,uv_index';
+  }
+  updateUrls(LAT, LON);
+
+  var persona = 'lake';
+  var wxCache = null;
+  var usgsCache = null;
+  var hudMode = 'foreman';
+  var countdownInterval = null;
+  var rainArrivalTime = null;
+  var radarWorker = null;
+
+  function el(id){ return document.getElementById(id); }
+  function setText(id, v){ var e=el(id); if(e) e.textContent=v; }
+
+  /* Clock */
+  function tickClock(){ setText('waz-clock', new Date().toLocaleTimeString('en-US',{hour12:false})); }
+  setInterval(tickClock, 1000); tickClock();
+
+
+
+  
+  /* Dynamic Sharing */
+  window.shareCard = function(btn) {
+    if(!window.html2canvas) { alert('Screenshot engine loading...'); return; }
+    var card = btn.closest('.waz-card');
+    var shareText = card.getAttribute('data-share-text') || 'WazWeather Update:';
+    shareText += ' ' + window.location.origin;
+    
+    // hide the button temporarily for the screenshot
+    btn.style.display = 'none';
+    
+    html2canvas(card, { backgroundColor: '#12141c', scale: 2 }).then(function(canvas) {
+      btn.style.display = 'flex';
+      canvas.toBlob(function(blob) {
+        if(!blob) return;
+        var file = new File([blob], 'wazweather_share.png', { type: 'image/png' });
+        if(navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            text: shareText,
+            files: [file]
+          }).catch(function(e){ console.warn(e); });
+        } else {
+          navigator.clipboard.writeText(shareText);
+          alert('Link copied! (Your browser does not support image sharing)');
+        }
+      }, 'image/png');
+    });
+  };
+
+  window.shareRadar = function() {
+    fetch('/assets/radar-share.gif').then(function(res) {
+      return res.blob();
+    }).then(function(blob) {
+      var file = new File([blob], 'radar-share.gif', { type: 'image/gif' });
+      var shareText = 'Severe weather tracked! Check out the live interactive radar on WazWeather: ' + window.location.origin;
+      if(navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          text: shareText,
+          files: [file]
+        }).catch(function(e){ console.warn(e); });
+      } else {
+        navigator.clipboard.writeText(shareText);
+        alert('Link copied! (Your browser does not support GIF sharing)');
+      }
+    }).catch(function(e) {
+      console.error(e);
+      var shareText = 'Check out the live interactive radar on WazWeather: ' + window.location.origin;
+      if(navigator.share) navigator.share({ text: shareText }).catch(function(e){});
+      else navigator.clipboard.writeText(shareText);
+    });
+  };
+
+  /* Dot sync */
+  var container = el('wazeecha-telemetry');
+  var dots = document.querySelectorAll('.waz-dot');
+  function updateDots(){
+    if(!container) return;
+    var idx = Math.round(container.scrollLeft / window.innerWidth);
+    dots.forEach(function(d,i){ d.classList.toggle('active', i===idx); });
+  }
+  if(container) container.addEventListener('scroll', updateDots, {passive:true});
+
+  /* Utilities */
+  function degToCardinal(d){ return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8]||'--'; }
+  function relTime(ts){ var d=Date.now()-ts; if(d<60000) return 'just now'; if(d<3600000) return Math.floor(d/60000)+'m ago'; return Math.floor(d/3600000)+'h ago'; }
+  function wCode(c){
+    if(c<=1)  return {emoji:'☀️', label:'Clear',       color:'#ffb300'};
+    if(c<=3)  return {emoji:'⛅', label:'Partly Cloudy',color:'#98989d'};
+    if(c<=48) return {emoji:'🌫️', label:'Foggy',        color:'#6b7280'};
+    if(c<=67) return {emoji:'🌧️', label:'Rain',         color:'#0a84ff'};
+    if(c<=77) return {emoji:'❄️', label:'Snow',         color:'#bfdbfe'};
+    if(c<=82) return {emoji:'🌦️', label:'Showers',      color:'#0a84ff'};
+    if(c<=99) return {emoji:'⛈️', label:'Thunderstorm', color:'#ef4444'};
+    return {emoji:'🌡️', label:'Unknown', color:'#98989d'};
+  }
+  function dayName(dateStr, i){
+    if(i===0) return 'Today';
+    if(i===1) return 'Tmrw';
+    return new Date(dateStr+'T12:00:00').toLocaleDateString([],{weekday:'short'});
+  }
+
+  /* Persona */
+  window.wazSetPersona = function(p){
+    persona = p;
+    document.querySelectorAll('.ri-persona-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.persona===p); });
+    if(wxCache) renderRainIntel(wxCache);
+  };
+
+  window.shareForemanDiagnostics = function() {
+    var pStatus = el('foreman-pour-status') ? el('foreman-pour-status').textContent : '--';
+    var pDetails = el('foreman-pour-details') ? el('foreman-pour-details').textContent : '--';
+    var rStatus = el('foreman-roofing-status') ? el('foreman-roofing-status').textContent : '--';
+    var rDetails = el('foreman-roofing-details') ? el('foreman-roofing-details').textContent : '--';
+
+    var canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    var ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = '#f97316';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+
+    ctx.fillStyle = '#f97316';
+    ctx.font = 'bold 24px monospace';
+    ctx.fillText('🏗️ JOBSITE FOREMAN DIAGNOSTICS', 30, 50);
+
+    ctx.fillStyle = '#98989d';
+    ctx.font = '14px monospace';
+    ctx.fillText('Time: ' + new Date().toLocaleString(), 30, 80);
+    ctx.fillText('Location: ' + LAT.toFixed(4) + ', ' + LON.toFixed(4), 30, 100);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(30, 120); ctx.lineTo(570, 120); ctx.stroke();
+
+    ctx.fillStyle = '#fffffffff';
+    ctx.font = 'bold 18px monospace';
+    ctx.fillText('POUR READY INDEX:', 30, 160);
+
+    ctx.fillStyle = pStatus.includes('SAFE') || pStatus === 'OPTIMAL' ? '#39FF14' : '#ef4444';
+    ctx.font = 'bold 18px monospace';
+    ctx.fillText(pStatus, 450, 160);
+
+    ctx.fillStyle = '#d1d5db';
+    ctx.font = '14px monospace';
+    ctx.fillText(pDetails, 30, 190);
+
+    ctx.beginPath(); ctx.moveTo(30, 220); ctx.lineTo(570, 220); ctx.stroke();
+
+    ctx.fillStyle = '#fffffffff';
+    ctx.font = 'bold 18px monospace';
+    ctx.fillText('ROOFING & SIDING SAFETY:', 30, 260);
+
+    ctx.fillStyle = rStatus.includes('SAFE') ? '#39FF14' : '#ef4444';
+    ctx.font = 'bold 18px monospace';
+    ctx.fillText(rStatus, 450, 260);
+
+    ctx.fillStyle = '#d1d5db';
+    ctx.font = '14px monospace';
+    ctx.fillText(rDetails, 30, 290);
+
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '12px monospace';
+    ctx.fillText('WaZWeather ZLA Kinematic Forecasting Engine', 30, 360);
+
+    canvas.toBlob(function(blob) {
+      if (!blob) return;
+      var file = new File([blob], 'foreman-diagnostics.png', { type: 'image/png' });
+      var shareData = {
+        title: 'WaZWeather Jobsite Diagnostics',
+        text: 'Live weather diagnostic report for coordinates ' + LAT.toFixed(4) + ', ' + LON.toFixed(4),
+        url: window.location.origin + window.location.pathname + '?lat=' + LAT + '&lon=' + LON,
+        files: [file]
+      };
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        navigator.share(shareData).catch(function(err) {
+          console.warn('[ZLA] Web Share failed:', err);
+        });
+      } else {
+        navigator.clipboard.writeText(shareData.url);
+        alert('Web Share not supported. Location URL copied to clipboard!');
+      }
+    }, 'image/png');
+  };
+
+  window.setWazMode = function(m){
+    hudMode = m;
+    localStorage.setItem('waz_hud_mode', m);
+    var btnForeman = el('mode-btn-foreman');
+    var btnOutdoorsman = el('mode-btn-outdoorsman');
+    if(btnForeman) btnForeman.classList.toggle('active', m === 'foreman');
+    if(btnOutdoorsman) btnOutdoorsman.classList.toggle('active', m === 'outdoorsman');
+    var cardForeman = el('hud-foreman-card');
+    var cardOutdoorsman = el('hud-outdoorsman-card');
+    if(cardForeman) cardForeman.style.display = m === 'foreman' ? 'block' : 'none';
+    if(cardOutdoorsman) cardOutdoorsman.style.display = m === 'outdoorsman' ? 'block' : 'none';
+    updateHudStats();
+  };
+
+  
+  // Generate Smart Recommendations
+  function generateRecommendations(h) {
+    if(!h || !h.temperature_2m) return;
+    var container = el('waz-smart-insights-container');
+    if(!container) return;
+    
+    var now = new Date();
+    var curHr = 0;
+    for(var i=0; i<h.time.length; i++){
+      if(new Date(h.time[i]) <= now) curHr = i;
+      else break;
+    }
+    
+    var insights = [];
+    
+    // 1. The "Bring It" Metric
+    var rainRisk = false;
+    for(var i=curHr; i<curHr+6; i++){
+        if(h.precipitation_probability[i] > 40) {
+            rainRisk = true; break;
+        }
+    }
+    if(rainRisk) {
+        insights.push({title: '☔ Precipitation Risk', text: 'Grab an umbrella or rain shell before you head out. Rain likely in the next 6 hours.'});
+    }
+    
+    // 2. The "Window" Metric
+    var windowFound = false;
+    for(var i=curHr; i<curHr+12; i++){
+        if(h.precipitation_probability[i] === 0 && h.weather_code[i] <= 3) {
+            var startHr = new Date(h.time[i]).getHours();
+            var ampm = startHr >= 12 ? 'PM' : 'AM';
+            var hr12 = startHr % 12 || 12;
+            insights.push({title: '🌤️ Perfect Window', text: 'Perfect window for outdoor activities/walks around ' + hr12 + ' ' + ampm + '.'});
+            windowFound = true;
+            break;
+        }
+    }
+    
+    // 3. The "Layer" Metric
+    var tCur = h.temperature_2m[curHr];
+    var tEve = null;
+    for(var i=curHr; i<curHr+12; i++){
+        var d = new Date(h.time[i]);
+        if(d.getHours() >= 18) {
+            tEve = h.temperature_2m[i]; break;
+        }
+    }
+    if(tCur > 70 && tEve && tEve < 55) {
+        insights.push({title: '🧥 Layer Up', text: 'Warm afternoon, but it\'s going to get chilly fast after sunset. Pack a light jacket.'});
+    }
+    
+    // 4. The "Car Window" Metric
+    if(h.precipitation_probability[curHr] > 50 || h.precipitation_probability[curHr+1] > 50) {
+        insights.push({title: '🚗 Sudden Shower', text: 'Rain approaching soon. Make sure car windows are rolled up!'});
+    }
+    
+    if(insights.length === 0) {
+        insights.push({title: '✨ All Clear', text: 'Conditions look great. Enjoy the day!'});
+    }
+    
+    var html = '';
+    insights.forEach(function(ins) {
+        html += '<div class="ri-advice" style="margin-bottom: 15px;"><div class="ri-advice-lbl" style="color:#0a84ff; font-size:0.75rem; font-weight:700; margin-bottom:5px;">' + ins.title + '</div><div style="color:#ffffff; font-size:1.1rem; line-height:1.4; font-weight:500;">' + ins.text + '</div></div>';
+    });
+    container.innerHTML = html;
+  }
+  function updateHudStats(){
+    if(!wxCache) return;
+    try {
+      var h = wxCache.hourly || {};
+      var now = new Date();
+      var times = h.time || [];
+      var curHr = 0;
+      for(var i=0; i<times.length; i++){
+        if(new Date(times[i]) <= now) curHr = i;
+        else break;
+      }
+      
+      var t = (h.temperature_2m && h.temperature_2m[curHr]!=null) ? h.temperature_2m[curHr] : null;
+      var rh = (h.relative_humidity_2m && h.relative_humidity_2m[curHr]!=null) ? h.relative_humidity_2m[curHr] : null;
+      var wind = (h.wind_speed_10m && h.wind_speed_10m[curHr]!=null) ? h.wind_speed_10m[curHr] : null;
+
+      // Foreman Calculations
+      if(t !== null && rh !== null){
+        var pourStatus = "OPTIMAL";
+        var pourColor = "#39FF14";
+        var pourReason = "No risks detected";
+        if(t < 40){
+          pourStatus = "CRITICAL (FREEZING)";
+          pourColor = "#ef4444";
+          pourReason = "Temp too low (< 40°F)";
+        } else if(t > 90){
+          pourStatus = "WARNING (FLASH SET)";
+          pourColor = "#ef4444";
+          pourReason = "Temp too high (> 90°F)";
+        } else if(rh > 85){
+          pourStatus = "CAUTION (SLOW CURE)";
+          pourColor = "#f97316";
+          pourReason = "High humidity (> 85% RH)";
+        } else if(rh < 30){
+          pourStatus = "CAUTION (DRY CURING)";
+          pourColor = "#ffb300";
+          pourReason = "Low humidity (< 30% RH)";
+        }
+        var pourStatusEl = el('foreman-pour-status');
+        if(pourStatusEl){ pourStatusEl.textContent = pourStatus; pourStatusEl.style.color = pourColor; }
+        var pourDetailsEl = el('foreman-pour-details');
+        if(pourDetailsEl){ pourDetailsEl.textContent = "Temp: " + Math.round(t) + "°F | RH: " + Math.round(rh) + "% (" + pourReason + ")"; }
+      }
+
+      if(wind !== null && t !== null){
+        var roofStatus = "SAFE";
+        var roofColor = "#39FF14";
+        var roofReason = "Conditions clear";
+        if(wind > 20){
+          roofStatus = "DANGER (HIGH WIND)";
+          roofColor = "#ef4444";
+          roofReason = "Wind speed exceeds 20 mph";
+        } else if(t < 35 || t > 95){
+          roofStatus = "UNSAFE TEMP";
+          roofColor = "#ef4444";
+          roofReason = "Extreme temperature limit (" + Math.round(t) + "°F)";
+        } else if(wind > 15){
+          roofStatus = "CAUTION";
+          roofColor = "#f97316";
+          roofReason = "Gusty winds: " + Math.round(wind) + " mph";
+        }
+        var roofStatusEl = el('foreman-roofing-status');
+        if(roofStatusEl){ roofStatusEl.textContent = roofStatus; roofStatusEl.style.color = roofColor; }
+        var roofDetailsEl = el('foreman-roofing-details');
+        if(roofDetailsEl){ roofDetailsEl.textContent = "Wind: " + Math.round(wind) + " mph | Temp: " + Math.round(t) + "°F (" + roofReason + ")"; }
+      }
+
+      // Outdoorsman Calculations
+      var cfs = null;
+      if (usgsCache) {
+        try {
+          var series = (usgsCache.value && usgsCache.value.timeSeries) || [];
+          series.forEach(function(s) {
+            var code = (s.variable && s.variable.variableCode && s.variable.variableCode[0]) ? s.variable.variableCode[0].value : '';
+            var vals = (s.values && s.values[0] && s.values[0].value) ? s.values[0].value : [];
+            if (code === '00060' && vals.length) {
+              cfs = parseFloat(vals[vals.length - 1].value);
+            }
+          });
+        } catch(e) {}
+      }
+      if(cfs === null) cfs = 15700; // Fallback
+
+      var stabilityStatus = "STABLE";
+      var stabilityColor = "#39FF14";
+      var stabilityReason = "Normal seasonal flow";
+      if(cfs > 12000){
+        stabilityStatus = "TURBULENT (HIGH FLOW)";
+        stabilityColor = "#ef4444";
+        stabilityReason = "USGS river flow exceeds 12,000 CFS";
+      } else if(cfs > 8000){
+        stabilityStatus = "ELEVATED FLOW";
+        stabilityColor = "#f97316";
+        stabilityReason = "Strong currents: 8,000 - 12,000 CFS";
+      }
+      var stabStatusEl = el('outdoors-stability-status');
+      if(stabStatusEl){ stabStatusEl.textContent = stabilityStatus; stabStatusEl.style.color = stabilityColor; }
+      var stabDetailsEl = el('outdoors-stability-details');
+      if(stabDetailsEl){ stabDetailsEl.textContent = "Flow Rate: " + cfs.toLocaleString() + " CFS (" + stabilityReason + ")"; }
+
+      if(h.pressure_msl){
+        var pCur = h.pressure_msl[curHr];
+        var p3HrAgo = curHr >= 3 ? h.pressure_msl[curHr - 3] : pCur;
+        var pDelta = pCur - p3HrAgo;
+        var strikeStatus = "MODERATE";
+        var strikeColor = "#0a84ff";
+        var strikeReason = "Stable barometric pressure";
+        if(pDelta < -1.5){
+          strikeStatus = "PRIME STRIKE";
+          strikeColor = "#39FF14";
+          strikeReason = "Pressure drop of " + Math.abs(pDelta).toFixed(1) + " hPa triggers feeding";
+        } else if(pDelta > 1.5){
+          strikeStatus = "SLOW BITE";
+          strikeColor = "#98989d";
+          strikeReason = "Rising pressure: " + pDelta.toFixed(1) + " hPa";
+        }
+        var strikeStatusEl = el('outdoors-strike-status');
+        if(strikeStatusEl){ strikeStatusEl.textContent = strikeStatus; strikeStatusEl.style.color = strikeColor; }
+        var strikeDetailsEl = el('outdoors-strike-details');
+        if(strikeDetailsEl){ strikeDetailsEl.textContent = "3hr Delta: " + pDelta.toFixed(1) + " hPa (" + strikeReason + ")"; }
+      }
+    } catch(err){ console.warn('[ZLA HUD] updateHudStats:', err); }
+  }
+
+  /* Countdown timer */
+  function startCountdown(targetMs){
+    rainArrivalTime = targetMs;
+    if(countdownInterval) clearInterval(countdownInterval);
+    function tick(){
+      var rem = rainArrivalTime - Date.now();
+      if(rem <= 0){
+        setText('waz-countdown-main', '🌧 Rain Now');
+        setText('waz-countdown-sub', 'Check the radar for current coverage');
+        clearInterval(countdownInterval);
+        return;
+      }
+      var h = Math.floor(rem/3600000);
+      var m = Math.floor((rem%3600000)/60000);
+      var s = Math.floor((rem%60000)/1000);
+      var parts = [];
+      if(h>0) parts.push(h+'h');
+      parts.push(('0'+m).slice(-2)+'m');
+      parts.push(('0'+s).slice(-2)+'s');
+      setText('waz-countdown-main', parts.join(' '));
+    }
+    tick();
+    countdownInterval = setInterval(tick, 1000);
+  }
+
+  /* Render Rain Intel */
+  function renderRainIntel(wx){
+    wxCache = wx;
+    try {
+      var h = wx.hourly || {}, d = wx.daily || {};
+      var now = new Date();
+      var times = h.time || [];
+      var curHr = 0;
+      for(var i=0;i<times.length;i++){ if(new Date(times[i])<=now) curHr=i; else break; }
+
+      if (el('waz-main-temp')) el('waz-main-temp').textContent = Math.round(h.temperature_2m[curHr]) + '°';
+      if (el('waz-main-desc')) el('waz-main-desc').textContent = wCode(h.weather_code[curHr]).label;
+      generateRecommendations(h);
+
+      var feelsLike = (h.apparent_temperature && h.apparent_temperature[curHr]!=null) ? Math.round(h.apparent_temperature[curHr]) : null;
+      var windSpd   = (h.wind_speed_10m && h.wind_speed_10m[curHr]!=null) ? Math.round(h.wind_speed_10m[curHr]) : null;
+      var windDir   = (h.wind_direction_10m && h.wind_direction_10m[curHr]!=null) ? degToCardinal(h.wind_direction_10m[curHr]) : '--';
+      var uvMax     = (d.uv_index_max && d.uv_index_max[0]!=null) ? d.uv_index_max[0] : null;
+      var sunrise   = (d.sunrise && d.sunrise[0]) ? new Date(d.sunrise[0]).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}) : '--';
+      var sunset    = (d.sunset  && d.sunset[0])  ? new Date(d.sunset[0]).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}) : '--';
+      var rainProb  = h.precipitation_probability || [];
+      var rainAmt   = h.precipitation || [];
+
+      /* Stats */
+      setText('waz-feels', feelsLike!==null ? feelsLike+'°' : '--°');
+      setText('waz-wind',  windSpd!==null   ? windSpd+' mph' : '-- mph');
+      setText('waz-wind-dir', windDir);
+      if(uvMax!==null){ setText('waz-uv', uvMax.toFixed(1)); }
+      setText('waz-sunrise', sunrise); setText('waz-sunset', sunset);
+      setText('waz-updated', relTime(Date.now()));
+
+      /* Today / tomorrow rain summary */
+      var todayTotal = (d.precipitation_sum && d.precipitation_sum[0]!=null) ? d.precipitation_sum[0].toFixed(2) : '--';
+      var todayMaxPct = (d.precipitation_probability_max && d.precipitation_probability_max[0]!=null) ? d.precipitation_probability_max[0] : '--';
+      var tomorrowPct = (d.precipitation_probability_max && d.precipitation_probability_max[1]!=null) ? d.precipitation_probability_max[1] : '--';
+      setText('waz-today-total', todayTotal !== '--' ? todayTotal+'"' : '--"');
+      setText('waz-today-max-pct', todayMaxPct !== '--' ? todayMaxPct+'%' : '--%');
+      el('waz-today-max-pct') && (el('waz-today-max-pct').style.color = todayMaxPct>=60?'#ef4444':todayMaxPct>=30?'#f97316':'#0a84ff');
+      setText('waz-tomorrow-rain', tomorrowPct !== '--' ? tomorrowPct+'%' : '--%');
+      el('waz-tomorrow-rain') && (el('waz-tomorrow-rain').style.color = tomorrowPct>=60?'#ef4444':tomorrowPct>=30?'#f97316':'#a78bfa');
+
+      /* 12-hour bar chart + countdown */
+      var maxProb=0;
+      var isRainingNow = false;
+      var kiswRaw = localStorage.getItem('kisw_obs_v1');
+      if(kiswRaw){
+        try {
+          var props = JSON.parse(kiswRaw).data || {};
+          var desc = (props.textDescription || '').toLowerCase();
+          if (desc.indexOf('rain') !== -1 || desc.indexOf('drizzle') !== -1 || desc.indexOf('shower') !== -1 || desc.indexOf('thunderstorm') !== -1 || desc.indexOf('precipitation') !== -1) {
+            isRainingNow = true;
+          }
+          var pw = props.presentWeather || [];
+          for (var i = 0; i < pw.length; i++) {
+            var w = (pw[i].weather || '').toLowerCase();
+            if (w.indexOf('rain') !== -1 || w.indexOf('drizzle') !== -1 || w.indexOf('shower') !== -1 || w.indexOf('thunderstorm') !== -1) {
+              isRainingNow = true;
+            }
+          }
+        } catch(e){}
+      }
+      var firstRainHr = isRainingNow ? 0 : -1;
+      var barHTML='';
+      for(var ri=0;ri<12;ri++){
+        var hi=curHr+ri;
+        if(hi>=rainProb.length) break;
+        var prob=rainProb[hi]||0;
+        var amt=rainAmt[hi]||0;
+        
+        var hasRain = false;
+        if (ri === 0) {
+          hasRain = isRainingNow || (prob >= 25 && amt > 0);
+        } else {
+          hasRain = (prob >= 20 || amt > 0.01);
+        }
+        
+        if(hasRain && firstRainHr===-1) firstRainHr=ri;
+        if(prob>maxProb) maxProb=prob;
+        var barH=Math.max(2,Math.round((prob/100)*44));
+        var col=prob>=70?'#ef4444':prob>=40?'#f97316':prob>=20?'#0a84ff':'rgba(255,255,255,0.1)';
+        var t=new Date(h.time[hi]);
+        var tLbl=t.toLocaleTimeString([],{hour:'numeric'}).replace(' ','').toLowerCase();
+        barHTML+='<div class="ri-bar-col">'+
+          '<div class="ri-bar-pct">'+(prob>0?prob+'%':'')+'</div>'+
+          '<div class="ri-bar-fill" style="height:'+barH+'px;background:'+col+';"></div>'+
+          '<div class="ri-bar-lbl">'+tLbl+'</div></div>';
+      }
+      var barsEl=el('waz-rain-bars'); if(barsEl) barsEl.innerHTML=barHTML;
+      var totalAmt=rainAmt.slice(curHr,curHr+12).reduce(function(a,v){return a+(v||0);},0);
+      var summaryEl=el('waz-rain-summary');
+      if(summaryEl){ summaryEl.textContent=maxProb>0?'Max '+maxProb+'% · '+totalAmt.toFixed(2)+'"':'No rain'; summaryEl.style.color=maxProb>=70?'#ef4444':maxProb>=40?'#f97316':maxProb>0?'#0a84ff':'#39FF14'; }
+
+      /* Countdown */
+      var nextEl=el('waz-rain-next');
+      if(firstRainHr===-1){
+        setText('waz-countdown-main','☀️ No Rain');
+        setText('waz-countdown-sub','No rain in the next 12 hours');
+        if(nextEl) nextEl.innerHTML='✅ <span>No rain</span> in the next 12 hours';
+        if(countdownInterval){ clearInterval(countdownInterval); countdownInterval=null; }
+      } else if(firstRainHr===0){
+        setText('waz-countdown-main','🌧 Rain Now');
+        var subText = 'Active precipitation detected. Swipe to radar.';
+        if (maxProb < 50) {
+          subText = 'Active precipitation detected locally (API forecast lag)';
+        }
+        setText('waz-countdown-sub', subText);
+        if(nextEl) nextEl.innerHTML='⚠️ <span>Rain right now</span> — swipe to radar';
+      } else {
+        var arrivalTime = new Date(h.time[curHr+firstRainHr]);
+        var arrStr = arrivalTime.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+        setText('waz-countdown-sub','Arriving around '+arrStr+' · '+maxProb+'% chance');
+        if(nextEl) nextEl.innerHTML='🌧 Rain arriving around <span>'+arrStr+'</span>';
+        startCountdown(arrivalTime.getTime());
+      }
+
+      /* Advice */
+      var advice=[];
+      if(maxProb>=60) advice.push('Rain — bring a jacket.');
+      else if(maxProb>0) advice.push('Rain threat — watch the radar.');
+      if(uvMax!==null && uvMax>=6) advice.push('UV is high — wear sunscreen.');
+      if(windSpd!==null && windSpd>=20) advice.push('Strong winds at '+windSpd+' mph.');
+      if(!advice.length) advice.push('Conditions look good. Enjoy your day.');
+      setText('waz-advice', advice.join(' '));
+      updateHudStats();
+    } catch(err){ console.warn('[WaZv5] renderRainIntel:', err); }
+  }
+
+  /* Render Forecast card */
+  function renderForecast(wx, aqiData){
+    try {
+      var d = wx.daily || {};
+      var daysEl = el('waz-fc-days');
+      if(!daysEl || !d.time) return;
+      var weekTotal=0;
+      daysEl.innerHTML = d.time.slice(0,7).map(function(t,i){
+        var wc   = d.weather_code      && d.weather_code[i]!=null                ? d.weather_code[i] : 0;
+        var tmax = d.temperature_2m_max && d.temperature_2m_max[i]!=null          ? Math.round(d.temperature_2m_max[i]) : '--';
+        var tmin = d.temperature_2m_min && d.temperature_2m_min[i]!=null          ? Math.round(d.temperature_2m_min[i]) : '--';
+        var pct  = d.precipitation_probability_max && d.precipitation_probability_max[i]!=null ? d.precipitation_probability_max[i] : 0;
+        var sum  = d.precipitation_sum && d.precipitation_sum[i]!=null            ? d.precipitation_sum[i] : 0;
+        weekTotal += sum;
+        var info = wCode(wc);
+        var barPct = Math.min(100, pct);
+        var rainColor = pct>=70?'#ef4444':pct>=40?'#f97316':'#0a84ff';
+        return '<div class="fc-day">'+
+          '<div class="fc-day-name">'+dayName(t,i)+'</div>'+
+          '<div class="fc-day-icon">'+info.emoji+'</div>'+
+          '<div class="fc-day-desc">'+info.label+'</div>'+
+          '<div class="fc-day-temp">'+tmax+'° / '+tmin+'°</div>'+
+          '<div class="fc-day-rain-wrap">'+
+            '<div class="fc-day-rain-pct">'+pct+'%</div>'+
+            '<div class="fc-day-rain-bar-bg"><div class="fc-day-rain-bar-fill" style="width:'+barPct+'%;background:'+rainColor+';"></div></div>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+      var todaySum = d.precipitation_sum && d.precipitation_sum[0]!=null ? d.precipitation_sum[0].toFixed(2) : '--';
+      setText('waz-precip-today', todaySum !== '--' ? todaySum+'"' : '--"');
+      setText('waz-precip-week', weekTotal.toFixed(2)+'"');
+    } catch(err){ console.warn('[WaZv5] renderForecast:', err); }
+    /* AQI */
+    try {
+      if(aqiData && aqiData.current){
+        var aqi = aqiData.current.us_aqi || 0;
+        var status = aqi>150?'Unhealthy':aqi>100?'USG':aqi>50?'Moderate':'Good';
+        var aqiColor = aqi>150?'#ef4444':aqi>100?'#f97316':aqi>50?'#eab308':'#39FF14';
+        setText('waz-aqi-val', aqi);
+        setText('waz-aqi-status', status);
+        el('waz-aqi-val') && (el('waz-aqi-val').style.color=aqiColor);
+      }
+    } catch(e){}
+  }
+
+  /* Render River */
+  function renderRiver(data){
+    usgsCache = data;
+    try {
+      var series=(data.value&&data.value.timeSeries)||[];
+      var cfsVals=[],ftVals=[],chartLabels=[],chartData=[];
+      series.forEach(function(s){
+        var code=(s.variable&&s.variable.variableCode&&s.variable.variableCode[0])?s.variable.variableCode[0].value:'';
+        var vals=(s.values&&s.values[0]&&s.values[0].value)?s.values[0].value:[];
+        if(code==='00060'){ cfsVals=vals; var recent=vals.slice(-48); recent.forEach(function(v){ chartLabels.push(new Date(v.dateTime).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})); chartData.push(parseFloat(v.value)); }); }
+        if(code==='00065') ftVals=vals;
+      });
+      var cfs  = cfsVals.length?parseFloat(cfsVals[cfsVals.length-1].value):null;
+      var ft   = ftVals.length?parseFloat(ftVals[ftVals.length-1].value):null;
+      var flowStatus = 'Normal / Calm';
+      var flowNote = 'Great conditions for casual swimming or hanging out by the water.';
+      if(cfs !== null) {
+          if(cfs > 12000) {
+              flowStatus = 'High / Fast Current';
+              flowNote = 'Currents are strong. Not recommended for casual swimming or small craft.';
+          } else if(cfs > 8000) {
+              flowStatus = 'Elevated';
+              flowNote = 'Use caution on the water. Currents are swifter than usual.';
+          } else if (cfs === 0) {
+              flowStatus = 'Data Unavailable';
+              flowNote = 'Awaiting live telemetry from USGS.';
+          }
+      }
+      if (el('waz-flow-status')) el('waz-flow-status').textContent = flowStatus;
+      if (el('waz-flow-note')) el('waz-flow-note').textContent = flowNote;
+      if(ft!==null){
+        var floodMinor=12,floodAction=10;
+        var pct=Math.min(100,Math.max(0,(ft/floodMinor)*100));
+        var fc=ft>=floodMinor?'#ef4444':ft>=floodAction?'#f97316':'#0a84ff';
+        var sl=ft>=floodMinor?'Flood Stage':ft>=floodAction?'Action Stage':'Normal';
+        var wrap=el('waz-flood-wrap'); if(wrap) wrap.style.display='block';
+        var fill=el('waz-flood-fill'); if(fill){fill.style.width=pct+'%';fill.style.background=fc;}
+        setText('waz-flood-label',sl+' · '+ft.toFixed(2)+' ft');
+      }
+      var canvas=el('waz-hydro-chart');
+      if(canvas&&window.Chart&&chartData.length){
+        var ex=Chart.getChart(canvas); if(ex) ex.destroy();
+        new Chart(canvas,{type:'line',data:{labels:chartLabels,datasets:[{data:chartData,borderColor:'#0a84ff',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,pointRadius:0,tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{ticks:{color:'#98989d',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+      }
+      updateHudStats();
+    } catch(err){ console.warn('[WaZv5] renderRiver:',err); }
+  }
+
+  /* Render Alerts */
+  function renderAlerts(features,ts){
+    var list=el('waz-alerts-list'); if(!list) return;
+    if(!features||!features.length){
+      list.innerHTML='<div class="no-alerts"><div class="no-alerts-icon">✅</div><div class="no-alerts-title">All Clear</div><div class="no-alerts-sub">No active alerts for Wood County</div></div>';
+    } else {
+      list.innerHTML=features.slice(0,6).map(function(f){
+        var p=f.properties||{};
+        return '<div class="alert-item"><div class="alert-event">'+(p.event||'Alert')+'</div>'+
+          '<div class="alert-headline">'+(p.headline||'')+'</div>'+
+          '<div class="alert-meta"><span class="alert-tag">'+(p.severity||'')+'</span>'+(p.certainty?'<span class="alert-tag">'+p.certainty+'</span>':'')+'</div></div>';
+      }).join('');
+    }
+    if(ts) setText('waz-alerts-stamp','Updated '+relTime(ts));
+  }
+
+  // ZLA Radar Worker Helper Functions
+  function initRadarWorker() {
+    if (typeof Worker !== 'undefined' && !radarWorker) {
+      radarWorker = new Worker('radar-worker.js');
+      radarWorker.onmessage = function(e) {
+        var data = e.data;
+        var hud = el('rain-countdown-hud');
+        if (!hud) return;
+        
+        if (data.success && data.result) {
+          hud.style.display = 'block';
+          var res = data.result;
+          var mainEl = el('zla-radar-hud-main');
+          var subEl = el('zla-radar-hud-sub');
+          
+          if (res.rainImminent) {
+            if (res.etaMinutes === 0) {
+              mainEl.textContent = '🌧 Rain Intercept Now';
+              mainEl.style.color = res.intensity === 2 ? '#ef4444' : '#f97316';
+              subEl.textContent = 'Precipitation detected overhead. Check the live radar map below.';
+            } else {
+              mainEl.textContent = '🌧 Rain in ' + res.etaMinutes + ' min';
+              mainEl.style.color = '#f97316';
+              subEl.textContent = 'Kinematic vector estimates intercept in ' + res.etaMinutes + ' minutes.';
+            }
+          } else {
+            mainEl.textContent = '☀️ No Rain Intercept';
+            mainEl.style.color = '#39FF14';
+            subEl.textContent = 'Radar clear within 50 miles along trajectory.';
+          }
+        } else {
+          console.warn('[ZLA] Radar worker error or status:', data.error);
+        }
+      };
+    }
+  }
+
+  function triggerRadarWorker() {
+    initRadarWorker();
+    if (radarWorker) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function(pos) {
+            radarWorker.postMessage({ action: 'track', lat: pos.coords.latitude, lon: pos.coords.longitude });
+          },
+          function() {
+            radarWorker.postMessage({ action: 'track', lat: LAT, lon: LON });
+          },
+          { timeout: 5000 }
+        );
+      } else {
+        radarWorker.postMessage({ action: 'track', lat: LAT, lon: LON });
+      }
+    }
+  }
+
+  function fetchTelemetryD1() {
+    fetch('/telemetry?app=wazeecha')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var alertBar = el('waz-storm-alert-bar');
+        if (!alertBar) return;
+        
+        var f = data.latest_forecast;
+        if (f) {
+          var isImminent = f.computed_eta_minutes !== null && f.computed_eta_minutes <= 60;
+          var isOverhead = f.overhead === 1;
+          
+          if (isImminent || isOverhead || f.intensity > 0) {
+            alertBar.style.display = 'block';
+            var title = "⚡ STORM TARGET COUNTDOWN";
+            var etaText = "";
+            var severityColor = "#ef4444";
+            var borderGlow = "0 0 15px rgba(239, 68, 68, 0.6)";
+            
+            if (isOverhead) {
+              etaText = "STORM OVERHEAD - TAKE COVER NOW";
+              alertBar.style.background = "linear-gradient(90deg, #7f1d1d 0%, #ef4444 100%)";
+            } else if (f.computed_eta_minutes !== null) {
+              etaText = "INTERCEPT IN " + f.computed_eta_minutes + " MINUTES";
+              alertBar.style.background = "linear-gradient(90deg, #7c2d12 0%, #ea580c 100%)";
+              severityColor = "#f97316";
+              borderGlow = "0 0 15px rgba(234, 88, 12, 0.6)";
+            } else {
+              etaText = "ACTIVE STORM THREAT IN TRAJECTORY";
+              alertBar.style.background = "linear-gradient(90deg, #111827 0%, #374151 100%)";
+              severityColor = "#98989d";
+              borderGlow = "none";
+            }
+            
+            alertBar.style.boxShadow = borderGlow;
+            alertBar.innerHTML = 
+              '<div class="sab-title" style="font-size: 0.65rem; font-weight: 900; letter-spacing: 1.5px; color: #fca5a5; text-transform: uppercase; margin-bottom: 2px;">' + title + '</div>' +
+              '<div class="sab-eta" style="color: #ffffff; font-size: 1.15rem; font-weight: 900;">' + etaText + '</div>' +
+              '<div class="sab-meta" style="font-size: 0.62rem; color: rgba(255,255,255,0.7); margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 5px;">' +
+                'Vector: [' + f.tracking_vector_x.toFixed(2) + ', ' + f.tracking_vector_y.toFixed(2) + '] | ' +
+                'Intensity: Lvl ' + f.intensity + ' | Grid: ' + f.grid_ref_lat.toFixed(3) + ', ' + f.grid_ref_lon.toFixed(3) +
+              '</div>';
+          } else {
+            alertBar.style.display = 'none';
+          }
+        } else {
+          alertBar.style.display = 'none';
+        }
+      })
+      .catch(function(e) {
+        console.warn('[ZLA] D1 Telemetry Fetch failed:', e);
+      });
+  }
+
+  /* Fetch all */
+  function fetchAll(){
+    // Trigger our ZLA Radar Web Worker for minute-by-minute forecasting
+    triggerRadarWorker();
+
+    // Pull D1 telemetry for STORM TARGET COUNTDOWN
+    fetchTelemetryD1();
+
+    // Live KISW Observation (radar proxy)
+    var kiswRaw=localStorage.getItem('kisw_obs_v1'); var kiswP=kiswRaw?JSON.parse(kiswRaw):null;
+    if(!kiswP || (Date.now()-kiswP.ts > 5*60*1000)){
+      fetch('https://api.weather.gov/stations/KISW/observations/latest', {
+        headers: { 'User-Agent': '(dondlingergc.com, john@dondlingergc.com)' }
+      }).then(function(r){return r.json();}).then(function(json){
+        if(json.properties) {
+          localStorage.setItem('kisw_obs_v1', JSON.stringify({ts:Date.now(), data:json.properties}));
+          var wxRaw=localStorage.getItem('wazv5_wx');
+          if(wxRaw){
+            var wxP=JSON.parse(wxRaw);
+            renderRainIntel(wxP.data);
+          }
+        }
+      }).catch(function(e){ console.warn('[WaZv5] Live KISW fetch error:', e); });
+    }
+
+    /* Weather */
+    var wxRaw=localStorage.getItem('wazv5_wx'); var wxP=wxRaw?JSON.parse(wxRaw):null;
+    var aqiRaw=localStorage.getItem('wazv5_aqi'); var aqiP=aqiRaw?JSON.parse(aqiRaw):null;
+    function doRender(wxData,aqiData){ renderRainIntel(wxData); renderForecast(wxData,aqiData); }
+    if(wxP&&(Date.now()-wxP.ts<30*60*1000)){
+      doRender(wxP.data, aqiP&&(Date.now()-aqiP.ts<4*60*60*1000)?aqiP.data:null);
+    } else {
+      fetch(WX_URL).then(function(r){return r.json();}).then(function(data){
+        localStorage.setItem('wazv5_wx',JSON.stringify({ts:Date.now(),data:data}));
+        fetch(AQI_URL).then(function(r){return r.json();}).then(function(aqi){
+          localStorage.setItem('wazv5_aqi',JSON.stringify({ts:Date.now(),data:aqi}));
+          doRender(data,aqi);
+        }).catch(function(){ doRender(data,null); });
+      }).catch(function(e){console.warn('[WaZv5] wx fetch:',e);});
+    }
+    /* USGS */
+    var usgsRaw=localStorage.getItem('wazv5_usgs'); var usgsP=usgsRaw?JSON.parse(usgsRaw):null;
+    if(usgsP&&(Date.now()-usgsP.ts<15*60*1000)){ renderRiver(usgsP.data); }
+    else { fetch(USGS_URL).then(function(r){return r.json();}).then(function(data){ localStorage.setItem('wazv5_usgs',JSON.stringify({ts:Date.now(),data:data})); renderRiver(data); }).catch(function(e){ console.warn('[WaZv5] USGS:',e); setText('waz-cfs','15,700 CFS'); setText('waz-gauge','10.42 ft'); setText('waz-vel','1.48 ft/s'); }); }
+    /* NWS */
+    fetch(NWS_URL).then(function(r){return r.json();}).then(function(data){ renderAlerts(data.features,Date.now()); }).catch(function(){ renderAlerts([],null); });
+  }
+
+  /* Init */
+  function initWazv5(){
+    setWazMode(localStorage.getItem('waz_hud_mode') || 'foreman');
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        var newLat = pos.coords.latitude;
+        var newLon = pos.coords.longitude;
+        if (Math.abs(LAT - newLat) > 0.01 || Math.abs(LON - newLon) > 0.01) {
+          updateUrls(newLat, newLon);
+          console.log('[WaZv5] Geolocation shifted target:', LAT, LON);
+          localStorage.removeItem('wazv5_wx');
+          localStorage.removeItem('wazv5_aqi');
+          localStorage.removeItem('wazv5_usgs');
+        }
+        fetchAll();
+      }, function() {
+        fetchAll();
+      }, { timeout: 4000 });
+    } else {
+      fetchAll();
+    }
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',initWazv5); } else { initWazv5(); }
+  var sec=el('wazeecha-telemetry');
+  if(sec){ new MutationObserver(function(m){ m.forEach(function(mut){ if(mut.attributeName==='class'&&sec.classList.contains('active')) fetchAll(); }); }).observe(sec,{attributes:true}); }
+})();
+</script>
+</section>
+<style>
+    /* Snapchat style dot indicators */
+    #tinder-dots {
+        position: fixed;
+        top: env(safe-area-inset-top, 16px);
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        z-index: 10000;
+        pointer-events: none;
+        padding-top: 16px;
+    }
+    .tinder-dot {
+        width: 12%;
+        max-width: 40px;
+        height: 4px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 4px;
+        transition: background 0.3s;
+    }
+    .tinder-dot.active {
+        background: rgba(255,255,255,0.9);
+        box-shadow: 0 0 8px rgba(255,255,255,0.5);
+    }
+</style>
+<div id="tinder-dots">
+    <div class="tinder-dot active"></div>
+    <div class="tinder-dot"></div>
+    <div class="tinder-dot"></div>
+    <div class="tinder-dot"></div>
+</div>
+
+ 
+     <!-- TACTICAL BOTTOM BAR -->
+     
+     
+     
+
+
+    <!-- FLOATING UI: Top Header -->
+    <div style="position:fixed; top:0; left:0; right:0; padding:40px 24px 20px 24px; z-index:10000; display:flex; justify-content:space-between; align-items:flex-start; background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%); pointer-events:none;">
+        <div style="display:flex; flex-direction:column; gap:4px; pointer-events:auto;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div style="width:8px; height:8px; background:#10b981; border-radius:50%; box-shadow: 0 0 10px #10b981;"></div>
+                <span style="color:#10b981; font-weight:800; text-transform:uppercase; letter-spacing:2px; font-size:0.75rem;">Live Feed</span>
+            </div>
+            <div id="live-clock" style="color:white; font-family: 'SF Mono', ui-monospace, monospace; font-size:1.1rem; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,0.5);">00:00:00</div>
+        </div>
+        
+        <button onclick="resetActiveGateway()" style="pointer-events:auto; background:rgba(255,255,255,0.1); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.2); color:white; width:44px; height:44px; border-radius:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+    </div>
+    
+    <!-- Scroll Indicator Button -->
+    
+    <style>@keyframes swipeBounce { 0%, 100% {transform: translateY(0) translateX(-50%);} 50% {transform: translateY(-8px) translateX(-50%);} }</style>
+
+    <!-- CARD 0: MODE SELECTION PORTAL -->
+    
+
+    <!-- CARD 1: RIGHT NOW AT THE LAKE -->
+    <div id="card-now" class="swipe-card tinder-card" style="height:100%; width:100%; scroll-snap-align: start; scroll-snap-stop: always; background:radial-gradient(circle at 40% 30%, #052e16 0%, #000 100%); display:flex; flex-direction:column; justify-content:center; padding:24px; position:relative; overflow:hidden; width: 100vw; height: 100vh; flex-shrink: 0; scroll-snap-align: start; scroll-snap-stop: always; overflow-y: auto; padding: 24px; box-sizing: border-box;">
+        <!-- ambient glow orb -->
+        <div id="lake-glow-orb" style="position:absolute; top:-60px; right:-60px; width:280px; height:280px; border-radius:50%; opacity:0.18; filter:blur(60px); transition:background 2s ease; background:#39ff14; pointer-events:none;"></div>
+
+        <div style="max-width:500px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:20px; z-index:2; position:relative;">
+            <!-- Header -->
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                    <div style="color:#98989d; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:2px;">Right Now at the Lake</div>
+                    <div style="color:#98989d; font-size:0.75rem; margin-top:2px;">Live from KISW · Wisconsin Rapids</div>
+                </div>
+                <div id="lake-updated-stamp" style="font-size:0.7rem; color:#98989d;">Loading…</div>
+            </div>
+
+            <!-- Persona Selector (Hidden) -->
+            <div id="waz-persona-container" style="display:none; gap:6px; overflow-x:auto; padding:4px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; scrollbar-width:none; -ms-overflow-style:none; pointer-events:auto;">
+                <style>
+                    #waz-persona-container::-webkit-scrollbar { display: none; }
+                    .persona-btn {
+                        flex: 1 0 auto;
+                        background: rgba(255, 255, 255, 0.05);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        color: #98989d;
+                        padding: 8px 14px;
+                        border-radius: 12px;
+                        font-size: 0.8rem;
+                        font-weight: 700;
+                        cursor: pointer;
+                        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        white-space: nowrap;
+                    }
+                    .persona-btn:hover {
+                        color: white;
+                        background: rgba(255,255,255,0.04);
+                    }
+                    .persona-btn.active {
+                        color: #000;
+                        background: #39ff14;
+                        box-shadow: 0 0 12px rgba(57, 255, 20, 0.4);
+                    }
+                </style>
+                <button class="persona-btn active" onclick="setWeatherMode('fishing')" id="btn-mode-fishing">🎣 Fishing</button>
+                <button class="persona-btn" onclick="setWeatherMode('lake')" id="btn-mode-lake">⛵ Lake</button>
+                <button class="persona-btn" onclick="setWeatherMode('construction')" id="btn-mode-construction">🏗️ Work</button>
+                <button class="persona-btn" onclick="setWeatherMode('family')" id="btn-mode-family">🏖️ Family</button>
+            </div>
+
+            <!-- Verdict Pill -->
+            <div id="lake-verdict" style="display:inline-flex; align-items:center; gap:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:100px; padding:14px 24px; align-self:flex-start; backdrop-filter:blur(12px);">
+                <span id="lake-verdict-emoji" style="font-size:2rem;">🌀</span>
+                <div>
+                    <div id="lake-verdict-label" style="font-size:1.5rem; font-weight:900; color:white; letter-spacing:-0.5px;">Checking…</div>
+                    <div id="lake-verdict-sub" style="font-size:0.8rem; color:#98989d; margin-top:2px;">Fetching conditions</div>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:4px;">
+                    <div id="label-feels" style="color:#98989d; font-size:0.7rem; text-transform:uppercase; font-weight:700;">Feels Like</div>
+                    <div id="lake-feels" style="color:white; font-size:1.8rem; font-weight:800;">--°</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:4px;">
+                    <div id="label-wind" style="color:#98989d; font-size:0.7rem; text-transform:uppercase; font-weight:700;">Wind</div>
+                    <div id="lake-wind" style="color:white; font-size:1.8rem; font-weight:800;">-- mph</div>
+                    <div id="lake-wind-dir" style="color:#98989d; font-size:0.75rem;">--</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:4px;">
+                    <div id="label-uv" style="color:#98989d; font-size:0.7rem; text-transform:uppercase; font-weight:700;">UV Max</div>
+                    <div id="lake-uv" style="color:#ffb300; font-size:1.8rem; font-weight:800;">--</div>
+                </div>
+            </div>
+
+            <!-- Sunrise / Sunset strip -->
+            <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:14px 20px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.2rem;">🌅</span>
+                    <div>
+                        <div style="color:#98989d; font-size:0.65rem; text-transform:uppercase; font-weight:700;">Sunrise</div>
+                        <div id="lake-sunrise" style="color:white; font-size:0.95rem; font-weight:700;">--:--</div>
+                    </div>
+                </div>
+                <div style="height:1px; flex:1; background:rgba(255,255,255,0.06); margin:0 16px;"></div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="text-align:right;">
+                        <div style="color:#98989d; font-size:0.65rem; text-transform:uppercase; font-weight:700;">Sunset</div>
+                        <div id="lake-sunset" style="color:white; font-size:0.95rem; font-weight:700;">--:--</div>
+                    </div>
+                    <span style="font-size:1.2rem;">🌇</span>
+                </div>
+            </div>
+
+             <!-- Visibility row -->
+             <div style="display:flex; align-items:center; justify-content:space-between; padding:0 4px; margin-bottom:4px;">
+                 <div style="color:#98989d; font-size:0.8rem;">Visibility</div>
+                 <div id="lake-visibility" style="color:#98989d; font-size:0.8rem; font-weight:600;">--</div>
+             </div>
+
+             <!-- Action Advice Card Widget -->
+             <div id="waz-advice-widget" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:18px; padding:12px 16px; display:flex; flex-direction:column; gap:6px;">
+                 <div style="color:#98989d; font-size:0.65rem; text-transform:uppercase; font-weight:700; display:flex; align-items:center; gap:6px;">
+                     <span style="font-size:0.8rem;">💡</span> Recommendation
+                 </div>
+                 <div id="waz-advice-content" style="color:white; font-size:0.8rem; line-height:1.4; font-weight:500;">
+                     Loading custom advice...
+                 </div>
+             </div>
+
+             <!-- Jump to Forecast Button -->
+             <button onclick="scrollToWazCard('card-forecast')" style="display:flex; align-items:center; justify-content:center; gap:8px; background:rgba(57, 255, 20, 0.05); border:1px solid rgba(57, 255, 20, 0.3); border-radius:14px; padding:12px 10px; margin-top:8px; color:var(--accent-info); font-weight:800; font-size:0.85rem; cursor:pointer; pointer-events:auto; transition:all 0.2s; width:100%; text-transform:uppercase; letter-spacing:1px;">
+                 Read AI Forecast Briefing ⟶
+             </button>
+
+             <!-- Share forecast button -->
+             <button onclick="shareForecast()" style="display:flex; align-items:center; justify-content:center; gap:8px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px; color:white; font-weight:800; font-size:0.8rem; cursor:pointer; pointer-events:auto; transition:all 0.2s; width:100%;">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Forecast
+             </button>
+        </div>
+    </div>
+
+    <!-- CARD 1: THE RADAR HERO -->
+    <div id="card-radar" class="swipe-card tinder-card" style="height:100%; width:100%; scroll-snap-align: start; scroll-snap-stop: always; position: relative; width: 100vw; height: 100vh; flex-shrink: 0; scroll-snap-align: start; scroll-snap-stop: always; overflow-y: auto; padding: 24px; box-sizing: border-box; padding: 0 !important; margin: 0; border-radius: 0;">
+        <!-- Full Bleed Map Background -->
+        <iframe id="windy-iframe" src="https://embed.windy.com/embed.html?type=map&amp;location=coordinates&amp;metricRain=in&amp;metricTemp=°F&amp;metricWind=mph&amp;zoom=9&amp;overlay=radar&amp;product=radar&amp;level=surface&amp;lat=44.3936&amp;lon=-89.8173&amp;play=true&amp;message=true&amp;marker=true&amp;detailLat=44.3936&amp;detailLon=-89.8173" style="width: 100%; height: 100%; border: none; position: absolute; inset: 0;"></iframe>
+        
+        <!-- Gradient Overlay for Readability -->
+        <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, transparent 100%); pointer-events:none;"></div>
+
+        <!-- Quick Action Lifestyle Cards (Dynamic Island) -->
+        <div id="quick-action-cards" style="position:absolute; top:80px; left:50%; transform:translateX(-50%); z-index:15; display:flex; justify-content:center; pointer-events:auto; white-space:nowrap;">
+            <style>
+                @keyframes popBouncy {
+                    0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+                    100% { opacity: 1; transform: scale(1) translateY(0); }
+                }
+            </style>
+        </div>
+
+        <!-- Radar Layer Controls -->
+        <!-- Radar Layer Controls -->
+        <div id="radar-fab-container" style="position:absolute; bottom:calc(env(safe-area-inset-bottom) + 160px); right:24px; z-index:20; display:flex; flex-direction:column; align-items:flex-end; gap:12px; pointer-events:none;">
+            <div id="radar-layer-menu" style="display:none; flex-direction:column; gap:8px; pointer-events:auto; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); padding:8px; border-radius:24px; border:1px solid rgba(255,255,255,0.2);">
+                <style>
+                    .radar-btn {
+                        background: transparent;
+                        border: none;
+                        color: white;
+                        padding: 8px 16px;
+                        border-radius: 16px;
+                        font-size: 0.85rem;
+                        font-family: inherit;
+                        font-weight: 700;
+                        white-space: nowrap;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    .radar-btn:hover { background: rgba(255,255,255,0.1); }
+                    .radar-btn.active {
+                        background: rgba(56,189,248,0.2);
+                        color: #38bdf8;
+                    }
+                </style>
+                <button id="btn-layer-radar" class="radar-btn active" onclick="changeRadarLayer('radar')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M2 12h20 M12 12m-8 0a8 8 0 1 0 16 0 8 8 0 1 0 -16 0"></path></svg> Radar</button>
+                <button id="btn-layer-wind" class="radar-btn" onclick="changeRadarLayer('wind')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg> Wind</button>
+                <button id="btn-layer-temp" class="radar-btn" onclick="changeRadarLayer('temp')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg> Temp</button>
+                <button id="btn-layer-rain" class="radar-btn" onclick="changeRadarLayer('rain')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25 M16 20l-4-4-4 4 M12 16v8"></path></svg> Rain</button>
+                <button id="btn-layer-clouds" class="radar-btn" onclick="changeRadarLayer('clouds')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg> Clouds</button>
+                <button id="btn-layer-cape" class="radar-btn" onclick="changeRadarLayer('cape')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Storms</button>
+            </div>
+            <button id="radar-fab" onclick="toggleRadarMenu()" style="pointer-events:auto; width:56px; height:56px; border-radius:28px; background:rgba(0,0,0,0.8); color:white; border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(10px); box-shadow:0 8px 16px rgba(0,0,0,0.4); cursor:pointer; display:flex; justify-content:center; align-items:center; transition:background 0.2s;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            </button>
+        </div>
+
+        <script>
+            function toggleRadarMenu() {
+                const menu = document.getElementById('radar-layer-menu');
+                menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+            }
+            function changeRadarLayer(layer) {
+                const iframe = document.getElementById('windy-iframe');
+                const baseSrc = "https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=9&level=surface&lat=44.3936&lon=-89.8173&play=true&message=true&marker=true&detailLat=44.3936&detailLon=-89.8173";
+                
+                let newSrc = baseSrc + "&overlay=" + layer;
+                if (layer === 'radar') {
+                    newSrc += "&product=radar";
+                }
+                iframe.src = newSrc;
+
+                // Update active button state
+                document.querySelectorAll('.radar-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                const activeBtn = document.getElementById('btn-layer-' + layer);
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                }
+            }
+
+            // Canonical site coordinates — used by all weather fetches
+            const WAZ_LAT = 44.3936;
+            const WAZ_LON = -89.8173;
+
+            async function fetchRainCast() {
+                try {
+                    const lat = WAZ_LAT;
+                    const lon = WAZ_LON;
+                    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,cloud_cover&minutely_15=precipitation&precipitation_unit=inch&temperature_unit=fahrenheit&timezone=auto&forecast_days=1`;
+                    
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (!data.minutely_15 || !data.minutely_15.precipitation) return;
+                    
+                    // Find current time index
+                    const now = new Date();
+                    let startIndex = 0;
+                    for (let i=0; i<data.minutely_15.time.length; i++) {
+                        if (new Date(data.minutely_15.time[i]) > now) {
+                            startIndex = Math.max(0, i - 1);
+                            break;
+                        }
+                    }
+                    
+                    // Take next 12 intervals (3 hours)
+                    const times = data.minutely_15.time.slice(startIndex, Math.min(startIndex + 12, data.minutely_15.time.length));
+                    let precip = data.minutely_15.precipitation.slice(startIndex, Math.min(startIndex + 12, data.minutely_15.time.length));
+                    
+                    // Evaluate current weather for Quick Action Cards
+                    const current = data.current;
+                    let cardsHtml = '';
+                    const animStyle = "animation: popBouncy 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;";
+                    const baseCardStyle = "background:rgba(255,255,255,0.95); color:#111; padding:12px 24px; border-radius:30px; font-weight:800; font-size:1rem; box-shadow:0 12px 24px rgba(0,0,0,0.4); display:flex; align-items:center; gap:10px; opacity:0; cursor:pointer;";
+
+                    let willRain = current.precipitation > 0;
+                    // FIX 6: scan all 12 intervals (3 hrs), not just first 4 (1 hr)
+                    for(let i = 0; i < precip.length; i++){
+                        if(precip[i] > 0){ willRain = true; break; }
+                    }
+
+                    if (willRain) {
+                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #0a84ff;"><span style="font-size:1.8rem;">☔</span> Take an Umbrella!</div>`;
+                    } else if (current.temperature_2m < 60) {
+                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #8b5cf6;"><span style="font-size:1.8rem;">🧥</span> Grab a Jacket</div>`;
+                    } else if (current.cloud_cover < 30) {
+                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #f59e0b;"><span style="font-size:1.8rem;">😎</span> Sunglasses On!</div>`;
+                    } else {
+                        cardsHtml += `<div style="${baseCardStyle} ${animStyle} border:2px solid #10b981;"><span style="font-size:1.8rem;">🌤️</span> Perfect Weather</div>`;
+                    }
+
+                    document.getElementById('quick-action-cards').innerHTML = cardsHtml;
+                    
+                    const labels = times.map(t => {
+                        const d = new Date(t);
+                        return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                    });
+
+                    // Clear previous chart instance if it exists
+                    if (window.rainCastInst) window.rainCastInst.destroy();
+                    const ctx = document.getElementById('rainCastChart').getContext('2d');
+                    
+                    // Create gradient
+                    let gradient = ctx.createLinearGradient(0, 0, 0, 100);
+                    gradient.addColorStop(0, 'rgba(57, 255, 20, 0.5)');
+                    gradient.addColorStop(1, 'rgba(57, 255, 20, 0.0)');
+
+                    window.rainCastInst = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Precipitation (in)',
+                                data: precip,
+                                borderColor: '#39ff14',
+                                backgroundColor: gradient,
+                                borderWidth: 2,
+                                pointBackgroundColor: '#000',
+                                pointBorderColor: '#39ff14',
+                                pointBorderWidth: 2,
+                                pointRadius: 3,
+                                pointHoverRadius: 5,
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: 'rgba(0,0,0,0.8)',
+                                    titleColor: '#39ff14',
+                                    bodyColor: '#ffffff',
+                                    borderColor: 'rgba(57, 255, 20, 0.4)',
+                                    borderWidth: 1,
+                                    displayColors: false
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    grid: { display: false, drawBorder: false },
+                                    ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 6, font: {size: 10, family: 'Outfit'} }
+                                },
+                                y: {
+                                    display: false,
+                                    min: 0,
+                                    suggestedMax: 0.1
+                                }
+                            },
+                            interaction: {
+                                intersect: false,
+                                mode: 'index',
+                            },
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error fetching RainCast:', e);
+                }
+            }
+            
+            // Init RainCast when DOM loads
+            window.addEventListener('DOMContentLoaded', () => {
+                setTimeout(fetchRainCast, 200);
+            });
+        </script>
+        
+        <!-- Collapsible Bottom Sheet for RainCast -->
+        <div id="raincast-drawer" style="position:absolute; bottom:0; left:0; right:0; z-index:30; background:rgba(10,15,25,0.85); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-top:1px solid rgba(255,255,255,0.1); border-top-left-radius:32px; border-top-right-radius:32px; padding:24px; padding-bottom:48px; pointer-events:auto; transition:transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1); transform:translateY(calc(100% - 76px)); display:flex; flex-direction:column; box-shadow:0 -10px 40px rgba(0,0,0,0.5);">
+            
+            <!-- Handle -->
+            <div onclick="toggleDrawer()" style="width:100%; height:40px; position:absolute; top:0; left:0; cursor:pointer; display:flex; justify-content:center; align-items:flex-start; padding-top:12px;">
+                <div style="width:40px; height:5px; background:rgba(255,255,255,0.3); border-radius:3px;"></div>
+            </div>
+            
+            <!-- Collapsed Summary -->
+            <div onclick="toggleDrawer()" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; margin-bottom:24px; cursor:pointer;">
+                <div style="font-size:1.2rem; font-weight:800; color:white; letter-spacing:-0.5px;">WaZWeather Radar</div>
+                <div style="color:#39ff14; font-size:0.85rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:6px; background:rgba(57,255,20,0.1); padding:6px 12px; border-radius:20px; border:1px solid rgba(57,255,20,0.3);">RainCast <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg></div>
+            </div>
+            
+            <!-- Expanded Content -->
+            <div id="drawer-content" style="opacity:0; transition:opacity 0.3s; pointer-events:none;">
+                <div style="width:100%; height:140px; position:relative; margin-top:16px;">
+                    <canvas id="rainCastChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            let drawerExpanded = false;
+            function toggleDrawer() {
+                drawerExpanded = !drawerExpanded;
+                const drawer = document.getElementById('raincast-drawer');
+                const content = document.getElementById('drawer-content');
+                if (drawerExpanded) {
+                    drawer.style.transform = 'translateY(0)';
+                    content.style.opacity = '1';
+                    content.style.pointerEvents = 'auto';
+                } else {
+                    drawer.style.transform = 'translateY(calc(100% - 76px))';
+                    content.style.opacity = '0';
+                    content.style.pointerEvents = 'none';
+                }
+            }
+        </script>
+    </div>
+
+    
+    <!-- CARD-ALERTS: NWS ACTIVE ALERTS (hidden by default, shown when alerts exist) -->
+    <div id="nws-alerts-card" class="swipe-card tinder-card" style="height:100%; width:100%; scroll-snap-align: start; scroll-snap-stop: always; background:radial-gradient(circle at top, #1a0505 0%, #000 100%); display:none; flex-direction:column; justify-content:center; padding:24px; position:relative; width: 100vw; height: 100vh; flex-shrink: 0; scroll-snap-align: start; scroll-snap-stop: always; overflow-y: auto; padding: 24px; box-sizing: border-box;">
+        <div style="max-width:500px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:20px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:48px; height:48px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); border-radius:14px; display:flex; align-items:center; justify-content:center;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <div>
+                    <h2 style="font-size:1.8rem; font-weight:900; color:white; margin:0; letter-spacing:-0.5px;">Active Alert</h2>
+                    <div style="color:#98989d; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Wood County, WI · WIZ030</div>
+                </div>
+            </div>
+
+            <div id="nws-alerts-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; padding-top:8px; border-top:1px solid rgba(255,255,255,0.05);">
+                <div style="color:#98989d; font-size:0.75rem;">Source: NWS Green Bay</div>
+                <div id="nws-alerts-stamp" style="color:#98989d; font-size:0.75rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARD 1.5: RAIN & AI FORECAST MASTER DASHBOARD -->
+    
+
+    <!-- CARD 2: HYDROLOGY -->
+    <div id="card-hydro" class="swipe-card tinder-card" style="height:100%; width:100%; scroll-snap-align: start; scroll-snap-stop: always; background:radial-gradient(circle at top right, #1e3a8a 0%, #0f172a 100%); display:flex; flex-direction:column; justify-content:center; padding:24px; position:relative; width: 100vw; height: 100vh; flex-shrink: 0; scroll-snap-align: start; scroll-snap-stop: always; overflow-y: auto; padding: 24px; box-sizing: border-box;">
+        <div style="max-width:500px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:24px;">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:56px; height:56px; background:linear-gradient(135deg, #0a84ff, #1d4ed8); border-radius:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 16px rgba(59,130,246,0.3);">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                </div>
+                <div>
+                    <h2 style="font-size:2.2rem; font-weight:900; color:white; margin:0; letter-spacing:-0.5px;">Hydrology</h2>
+                    <div style="color:#94a3b8; font-size:0.9rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Wisconsin River Metrics</div>
+                </div>
+            </div>
+            
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:32px; padding:32px; backdrop-filter:blur(20px);">
+                <div style="margin-bottom:32px;">
+                    <div style="color:#94a3b8; font-size:1.1rem; font-weight:600; margin-bottom:8px;">Current Flow Rate</div>
+                    <div style="display:flex; align-items:baseline; gap:12px;">
+                        <div id="metric-cfs" style="color:#0a84ff; font-size:4rem; font-weight:900; line-height:1; letter-spacing:-2px;">-- CFS</div>
+                        <div id="metric-trend" style="font-size:1.2rem; font-weight:800; color:#98989d;"></div>
+                    </div>
+                    <!-- Flood Stage Proximity Bar -->
+                    <div id="flood-stage-bar" style="margin-top:12px; display:none;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#98989d; margin-bottom:4px;">
+                            <span>Stage</span>
+                            <span id="flood-stage-label" style="color:#98989d;"></span>
+                        </div>
+                        <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden;">
+                            <div id="flood-stage-fill" style="height:100%; border-radius:999px; transition:width 1s ease;"></div>
+                        </div>
+                        <div id="river-stage-forecast" style="margin-top:8px; font-size:0.75rem; color:#98989d;"></div>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+                    <div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:16px;">
+                        <div style="color:#94a3b8; font-size:0.9rem; font-weight:600; margin-bottom:8px;">River Depth</div>
+                        <div id="metric-gauge" style="color:#a78bfa; font-size:2rem; font-weight:800; line-height:1;">-- ft</div>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.2); padding:16px; border-radius:16px;">
+                        <div style="color:#94a3b8; font-size:0.9rem; font-weight:600; margin-bottom:8px;">Velocity</div>
+                        <div id="metric-vel" style="color:#34d399; font-size:2rem; font-weight:800; line-height:1;">-- ft/s</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="height:220px; width:100%; background:rgba(0,0,0,0.2); border-radius:24px; padding:16px;">
+                <canvas id="hydroChart" style="width:100%; height:100%;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARD 3: ATMOSPHERICS -->
+    
+
+    <!-- CARD 4: PUSH TERMINAL -->
+    
+
+<script>
+    const tinderContainer = document.getElementById('wazeecha-telemetry');
+    const tinderDots = document.querySelectorAll('.tinder-dot');
+    
+    if (tinderContainer) {
+        tinderContainer.addEventListener('scroll', () => {
+            const index = Math.round(tinderContainer.scrollLeft / window.innerWidth);
+            tinderDots.forEach(d => d.classList.remove('active'));
+            if (tinderDots[index]) {
+                tinderDots[index].classList.add('active');
+            }
+        }, { passive: true });
+    }
+</script>
+</section>
+
+<script>
+    /* ============================================================ */
+    /* WAZEECHA WEATHER (WaZWeather) PERSONA & VERDICT SYSTEM        */
+    /* ============================================================ */
+
+    let currentMode = localStorage.getItem('waz_weather_mode') || 'fishing';
+    let globalWxData = null;
+
+    function setWeatherMode(mode) {
+      currentMode = mode;
+      localStorage.setItem('waz_weather_mode', mode);
+
+      // Update button active UI states
+      document.querySelectorAll('.persona-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const activeBtn = document.getElementById('btn-mode-' + mode);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Re-trigger visual cards render
+      if (globalWxData) {
+        renderLakeCard(globalWxData);
+        renderForecastTrack(globalWxData);
+      }
+    }
+
+    // Handle circumstances portal selection click
+    function selectPortalMode(mode) {
+      setWeatherMode(mode);
+      scrollToWazCard('card-now'); // Scroll to Current Conditions card
+    }
+
+    // Rules engine for mode-based verdicts
+    function getModeVerdict(mode, windGusts, precipProb, weatherCode, uvMax) {
+      if (weatherCode >= 95) return { emoji: '⚡', label: 'Storm Warning', sub: 'Lightning risk & heavy storms', color: '#ef4444' };
+      if (weatherCode >= 71 && weatherCode <= 77) return { emoji: '❄️', label: 'Snow Advisory', sub: 'Snow/freezing precip active', color: '#38bdf8' };
+
+      if (mode === 'fishing') {
+        if (windGusts > 22) return { emoji: '🌊', label: 'Rough Waves', sub: 'Strong wind - fish near shore lines', color: '#f97316' };
+        if (precipProb > 65) return { emoji: '🌧️', label: 'Wet Casts', sub: 'Heavy rain - fish might go deep', color: '#6366f1' };
+        if (windGusts < 12 && precipProb < 20) return { emoji: '🎣', label: 'Prime Casting', sub: 'Calm waters, high bite chance', color: '#39ff14' };
+        return { emoji: '🐟', label: 'Fishing Day', sub: 'Manageable breeze & conditions', color: '#38bdf8' };
+      }
+      
+      if (mode === 'construction') {
+        if (windGusts > 20) return { emoji: '🏗️', label: 'High Wind Limit', sub: 'Wind > 20 mph - crane & roof limits', color: '#ef4444' };
+        if (precipProb > 60) return { emoji: '🌧️', label: 'No Pour Day', sub: 'Rain expected - avoid concrete/paint', color: '#f97316' };
+        if (weatherCode >= 51 && weatherCode <= 57) return { emoji: '🌫️', label: 'Drizzle Risk', sub: 'Wet surfaces - watch traction', color: '#eab308' };
+        return { emoji: '🔨', label: 'Build Approved', sub: 'Dry conditions - safe for outdoor work', color: '#39ff14' };
+      }
+
+      if (mode === 'family') {
+        if (uvMax >= 7) return { emoji: '☀️', label: 'Extreme UV', sub: 'Sunscreen required - seek afternoon shade', color: '#f97316' };
+        if (precipProb > 40) return { emoji: '🏖️', label: 'Indoor Play', sub: 'Showers expected - plan indoors', color: '#6366f1' };
+        if (uvMax < 3 && weatherCode >= 1 && weatherCode <= 3) return { emoji: '🌥️', label: 'Overcast Play', sub: 'Good for playground/walks', color: '#38bdf8' };
+        return { emoji: '🧺', label: 'Picnic Perfect', sub: 'Beautiful sky - head to Red Sands!', color: '#39ff14' };
+      }
+
+      // Default/Lake Weekend Mode
+      if (windGusts > 25) return { emoji: '🌊', label: 'Rough Water', sub: `Gusts to ${Math.round(windGusts)} mph - whitecaps`, color: '#f97316' };
+      if (precipProb > 70) return { emoji: '🌧️', label: 'Cabin Day', sub: 'Heavy rain expected', color: '#6366f1' };
+      if (windGusts < 10 && precipProb < 20) return { emoji: '⛵', label: 'Perfect Boating', sub: 'Mirror lake, perfect launch', color: '#39ff14' };
+      return { emoji: '⛵', label: 'Lake Day', sub: 'Decent water, moderate wind', color: '#38bdf8' };
+    }
+
+    // Forward legacy call to getModeVerdict
+    function getLakeVerdict(windGusts, precipProb, weatherCode, uvMax) {
+      return getModeVerdict(currentMode, windGusts, precipProb, weatherCode, uvMax);
+    }
+
+    // Action recommendations generator based on meteorological parameters
+    function getActionAdvice(mode, windSpd, windGusts, precipProb, weatherCode, uvMax, feelsLike) {
+      const isWet = precipProb > 40 || (weatherCode >= 51 && weatherCode <= 67) || weatherCode >= 95;
+      const isCold = feelsLike < 55;
+      const isHot = feelsLike > 85;
+
+      if (mode === 'fishing') {
+        if (weatherCode >= 95) return "⛈️ Heavy storms & lightning risk. STOPOVER IMMEDIATELY. Stay off the water.";
+        if (windGusts > 22) return "💨 Wind gusts hitting over 20mph. Target sheltered coves on the leeward sides of the pine lines.";
+        if (isWet) return "🌧️ Steady rain. Bass and walleye will likely dive deeper or hold tighter to structure. Use slow jigs.";
+        if (windSpd < 8) return "🎣 Perfect calm. Topwater lures, frogs, and spinnerbaits should produce excellent results today.";
+        return "🐟 Decent fishing conditions. Focus weedlines and depth drops off the points.";
+      }
+
+      if (mode === 'construction') {
+        if (weatherCode >= 95) return "⚡ Critical Lightning Threat. Evacuate steel structures, scaffolding, and cranes immediately.";
+        if (windGusts > 20) return "⚠️ High wind advisory. Crane lifting, roofing, and siding work should be suspended (exceeds 20mph).";
+        if (isWet) return "🌧️ Wet conditions. Avoid exterior painting, staining, or pouring concrete. Watch for muddy traction limits.";
+        if (isCold) return "🥶 Cold temperatures. Ensure proper cure times for adhesives and mortar. Keep crews rotated.";
+        return "🔨 Green Light. Dry conditions and manageable winds are ideal for all framing, roofing, and grading operations.";
+      }
+
+      if (mode === 'family') {
+        if (weatherCode >= 95) return "⛈️ Severe weather in area. Cancel outdoor plans. Head to indoor shelters.";
+        if (isWet) return "🌧️ Rain is highly likely. Great day to check out local indoor recreation or museum exhibits.";
+        if (uvMax >= 7) return "☀️ Extreme Sun Intensity. Sunscreen (SPF 30+) is mandatory. Plan swim times early or seek pine shade after noon.";
+        if (isCold) return "🧥 Brisk temperatures. Bring windbreakers and sweaters if walking the trails or beaches.";
+        return "🧺 Phenomenal day for a picnic or trail hike! Head out to Red Sands beach and enjoy the lake views.";
+      }
+
+      // Lake / Recreation Mode
+      if (weatherCode >= 95) return "⛈️ Storms approaching. Get off the open water. Secure watercraft lines.";
+      if (windGusts > 25) return "🌊 Whitecap waves warning. Boat rentals and small watercraft should remain docked.";
+      if (isWet) return "🌧️ Unsettled weather. Pack towels and wind protection; watch radar for sudden squalls.";
+      if (isHot) return "🥵 High heat index. Keep hydrated. Excellent day for tubing, skiing, or floating in the water.";
+      return "⛵ Safe boating and recreation conditions. Perfect day to enjoy the Wisconsin River valley.";
+    }
+
+    // Moon phase (Julian date formula, accurate ±1 day)
+    function getMoonPhase(date) {
+      const jd = (date.getTime() / 86400000) + 2440587.5;
+      const phase = ((jd - 2451550.1) % 29.530588853 + 29.530588853) % 29.530588853;
+      const idx = Math.round((phase / 29.530588853) * 8) % 8;
+      return ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'][idx];
+    }
+
+    // Relative time formatter
+    function relativeTime(tsMs) {
+      const diff = Math.round((Date.now() - tsMs) / 60000);
+      if (diff < 1) return 'Just now';
+      const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+      return rtf.format(-diff, 'minute');
+    }
+
+    // Cardinal wind direction
+    function degToCardinal(deg) {
+      const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+      return dirs[Math.round(deg / 45) % 8];
+    }
+
+    /* ============================================================ */
+    /* NEW DATA FETCHES                                              */
+    /* ============================================================ */
+
+    // Fetch KISW (Alexander Field) live surface observation
+    async function fetchKISW() {
+      const CACHE_KEY = 'kisw_obs_v1';
+      const KISW_TTL  = 55 * 60 * 1000;
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.ts < KISW_TTL) return parsed.data;
+      }
+      const res = await fetch('https://api.weather.gov/stations/KISW/observations/latest', {
+        headers: { 'User-Agent': '(dondlingergc.com, dondlinger@example.com)' }
+      });
+      const json = await res.json();
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: json.properties }));
+      return json.properties;
+    }
+
+    // Fetch NWS active alerts for Wood County, WI (WIZ030)
+    async function fetchNWSAlerts() {
+      const CACHE_KEY = 'nws_alerts_v1';
+      const ALERTS_TTL = 5 * 60 * 1000;
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.ts < ALERTS_TTL) return { features: parsed.data, ts: parsed.ts };
+      }
+      const res = await fetch('https://api.weather.gov/alerts/active?zone=WIZ030', {
+        headers: { 'User-Agent': '(dondlingergc.com, dondlinger@example.com)' }
+      });
+      const json = await res.json();
+      const features = json.features || [];
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: features }));
+      return { features, ts: Date.now() };
+    }
+
+    // Fetch NWS AHPS river stage forecast for WRRW3
+    async function fetchRiverStage() {
+      const CACHE_KEY = 'ahps_stage_v1';
+      const AHPS_TTL  = 60 * 60 * 1000;
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.ts < AHPS_TTL) return parsed.data;
+      }
+      try {
+        const res = await fetch('https://api.water.noaa.gov/nwps/v1/gauges/WRRW3/stageflow');
+        const json = await res.json();
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: json }));
+        return json;
+      } catch(e) {
+        console.warn('AHPS stage fetch failed:', e);
+        return null;
+      }
+    }
+
+    // Render the lake conditions card with dynamic persona configurations
+    async function renderLakeCard(wxData) {
+      try {
+        globalWxData = wxData;
+        const now = new Date();
+        const todayIdx = 0; // first daily entry = today
+        const h = wxData.hourly;
+        const d = wxData.daily;
+
+        // Find current hour index
+        let curHr = 0;
+        for (let i = 0; i < h.time.length; i++) {
+          if (new Date(h.time[i]) <= now) curHr = i;
+          else break;
+        }
+
+        const feelsLike  = h.apparent_temperature ? Math.round(h.apparent_temperature[curHr]) : null;
+        const windSpd    = h.wind_speed_10m ? Math.round(h.wind_speed_10m[curHr]) : null;
+        const windDir    = h.wind_direction_10m ? degToCardinal(h.wind_direction_10m[curHr]) : '--';
+        const uvMax      = d.uv_index_max ? d.uv_index_max[todayIdx] : null;
+        const precipProb = d.precipitation_probability_max ? d.precipitation_probability_max[todayIdx] : 0;
+        const gustMax    = d.wind_gusts_10m_max ? d.wind_gusts_10m_max[todayIdx] : 0;
+        const wCode      = d.weather_code ? d.weather_code[todayIdx] : 0;
+        const sunrise    = d.sunrise ? new Date(d.sunrise[todayIdx]).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : '--';
+        const sunset     = d.sunset ? new Date(d.sunset[todayIdx]).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : '--';
+
+        // Populate telemetry payload & local storage cache logic
+        let riverFlow = null;
+        let riverStage = null;
+        try {
+          const cachedHydro = localStorage.getItem('usgs_hydro_cache_v2');
+          if (cachedHydro) {
+            const parsed = JSON.parse(cachedHydro);
+            if (parsed && parsed.data && parsed.data.value && parsed.data.value.timeSeries) {
+              parsed.data.value.timeSeries.forEach(series => {
+                const code = series.variable.variableCode[0].value;
+                const vals = series.values[0].value;
+                if (vals && vals.length > 0) {
+                  const currentVal = parseFloat(vals[vals.length - 1].value);
+                  if (code === '00060') riverFlow = currentVal;
+                  else if (code === '00065') riverStage = currentVal;
+                }
+              });
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to parse USGS cache in renderLakeCard:", e);
+        }
+
+        let forecastSummary = '';
+        for(let i=0; i<3; i++) {
+          if(!d.time[i]) continue;
+          forecastSummary += `Day ${i+1}: High ${d.temperature_2m_max[i]}F, Low ${d.temperature_2m_min[i]}F, Precip ${d.precipitation_sum[i]}in. `;
+        }
+
+        const payload = {
+          mode: currentMode,
+          temperature: h.temperature_2m ? Math.round(h.temperature_2m[curHr]) : null,
+          apparent_temperature: feelsLike,
+          wind_speed: windSpd,
+          wind_gusts: gustMax,
+          weather_code: wCode,
+          uv_index: uvMax,
+          river_flow: riverFlow,
+          river_stage: riverStage,
+          forecast_summary: forecastSummary
+        };
+
+        const el = id => document.getElementById(id);
+
+        function applyLocalVerdict() {
+          const localVerdict = getModeVerdict(currentMode, gustMax, precipProb, wCode, uvMax);
+          const adviceText = getActionAdvice(currentMode, windSpd, gustMax, precipProb, wCode, uvMax, feelsLike || 70);
+          
+          el('lake-verdict-emoji').textContent = localVerdict.emoji;
+          el('lake-verdict-label').textContent = localVerdict.label;
+          el('lake-verdict-label').style.color = localVerdict.color;
+          el('lake-verdict-sub').textContent = localVerdict.sub;
+          el('lake-glow-orb').style.background = localVerdict.color;
+          el('waz-advice-content').textContent = adviceText;
+        }
+
+        // Reset label defaults
+        el('label-feels').textContent = 'Feels Like';
+        el('label-wind').textContent = 'Wind';
+        el('label-uv').textContent = 'UV Max';
+
+        // Apply Persona dynamic swaps
+        if (currentMode === 'fishing') {
+          el('label-uv').textContent = 'Moon Phase';
+          el('lake-uv').textContent = getMoonPhase(now);
+          el('lake-uv').style.color = '#38bdf8';
+          if (feelsLike !== null) el('lake-feels').textContent = feelsLike + '°';
+        } else if (currentMode === 'construction') {
+          el('label-feels').textContent = 'AQI Index';
+          const aqiVal = el('metric-aqi') ? el('metric-aqi').textContent : '26';
+          el('lake-feels').textContent = aqiVal;
+          if (uvMax !== null) el('lake-uv').textContent = uvMax.toFixed(1);
+          el('lake-uv').style.color = '#ffb300';
+        } else {
+          // Lake & Family defaults
+          if (feelsLike !== null) el('lake-feels').textContent = feelsLike + '°';
+          if (uvMax !== null) el('lake-uv').textContent = uvMax.toFixed(1);
+          el('lake-uv').style.color = '#ffb300';
+        }
+
+        if (windSpd !== null) el('lake-wind').textContent = windSpd + ' mph';
+        el('lake-wind-dir').textContent = windDir;
+        el('lake-sunrise').textContent = sunrise;
+        el('lake-sunset').textContent = sunset;
+        el('lake-updated-stamp').textContent = relativeTime(Date.now());
+
+        // Fetch Edge AI verdict with caching & local fallback
+        let aiSuccess = false;
+        try {
+          const cacheKey = `last_verdict_${currentMode}`;
+          const localCache = localStorage.getItem(cacheKey);
+          const payloadHash = `${payload.mode}_${payload.temperature}_${payload.wind_speed}_${payload.wind_gusts}_${payload.weather_code}_${payload.uv_index}_${payload.river_flow}`;
+          
+          if (localCache) {
+            const cachedObj = JSON.parse(localCache);
+            if (cachedObj.hash === payloadHash && (Date.now() - cachedObj.timestamp < 15 * 60 * 1000)) {
+              const v = cachedObj.verdict;
+              el('lake-verdict-emoji').textContent = v.emoji;
+              el('lake-verdict-label').textContent = v.label;
+              el('lake-verdict-label').style.color = v.color;
+              el('lake-verdict-sub').textContent = `${v.sub} (cached)`;
+              el('lake-glow-orb').style.background = v.color;
+              el('waz-advice-content').textContent = v.advice;
+              // waz-ai-readout removed in v3
+              aiSuccess = true;
+            }
+          }
+
+          if (!aiSuccess) {
+            el('lake-verdict-sub').textContent = "Consulting Edge AI...";
+            el('waz-advice-content').textContent = "Edge AI is analyzing current conditions...";
+
+            const res = await fetch('/functions/weather-ai', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+              const verdict = await res.json();
+              el('lake-verdict-emoji').textContent = verdict.emoji || '🌤️';
+              el('lake-verdict-label').textContent = verdict.label || 'Fair';
+              el('lake-verdict-label').style.color = verdict.color || '#39ff14';
+              el('lake-verdict-sub').textContent = verdict.sub || 'No alerts active';
+              el('lake-glow-orb').style.background = verdict.color || '#39ff14';
+              el('waz-advice-content').textContent = verdict.advice || '';
+              // waz-ai-readout removed in v3
+
+              localStorage.setItem(cacheKey, JSON.stringify({
+                timestamp: Date.now(),
+                hash: payloadHash,
+                verdict: verdict
+              }));
+              aiSuccess = true;
+            } else {
+              console.warn("AI endpoint returned error status:", res.status);
+            }
+          }
+        } catch (e) {
+          console.error("AI verdict query failed:", e);
+        }
+
+        if (!aiSuccess) {
+          applyLocalVerdict();
+          const currentSub = el('lake-verdict-sub').textContent;
+          el('lake-verdict-sub').textContent = `${currentSub} (Offline Fallback)`;
+        }
+
+        // Fetch KISW for visibility
+        try {
+          const kisw = await fetchKISW();
+          const visM  = kisw.visibility && kisw.visibility.value;
+          const visMi = visM ? (visM / 1609.34).toFixed(1) + ' mi' : '--';
+          el('lake-visibility').textContent = 'Visibility: ' + visMi + ' (KISW)';
+          // Feels-like from KISW if available (only if feels-like is the active display)
+          if (kisw.heatIndex && kisw.heatIndex.value && feelsLike === null && currentMode !== 'construction') {
+            el('lake-feels').textContent = Math.round((kisw.heatIndex.value * 9/5) + 32) + '°';
+          }
+        } catch(e) { /* KISW optional */ }
+
+      } catch(err) {
+        console.warn('Lake card render error:', err);
+      }
+    }
+
+    // Render 5-day forecast cards dynamically based on selected mode
+    function renderForecastTrack(wxData) {
+      if (!wxData) return;
+      const h = wxData.hourly;
+      const days = {};
+      h.time.forEach((t, index) => {
+        const dateObj = new Date(t);
+        const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        if (!days[dateStr]) {
+          days[dateStr] = {
+            temps: [],
+            precips: [],
+            winds: [],
+            codes: [],
+            workPrecips: [],
+            workWinds: [],
+            workCodes: [],
+            rawTime: t,
+            startIndex: index  // FIX 4: track global start index for this day
+          };
+        }
+        days[dateStr].temps.push(h.temperature_2m[index]);
+        days[dateStr].precips.push(h.precipitation[index]);
+        days[dateStr].winds.push(h.wind_gusts_10m[index]);
+        days[dateStr].codes.push(h.weather_code[index]);
+        
+        if (dateObj.getHours() <= 18) {
+          days[dateStr].workPrecips.push(h.precipitation[index]);
+          days[dateStr].workWinds.push(h.wind_gusts_10m[index]);
+          days[dateStr].workCodes.push(h.weather_code[index]);
+        }
+      });
+
+      const weatherTrack = document.getElementById('weather-forecast-track');
+      if (weatherTrack) {
+        weatherTrack.innerHTML = Object.keys(days).slice(0, 5).map((dayKey, dayIdx) => {
+          const dayData = days[dayKey];
+          const maxTemp = Math.max(...dayData.temps);
+          const minTemp = Math.min(...dayData.temps);
+          const totalPrecip = dayData.precips.reduce((sum, val) => sum + val, 0);
+          const maxWind = Math.max(...dayData.winds);
+          
+          const workPrecipTotal = dayData.workPrecips.reduce((sum, val) => sum + val, 0);
+          const maxWorkWind = dayData.workWinds.length > 0 ? Math.max(...dayData.workWinds) : 0;
+          const validWorkCodes = dayData.workCodes.filter(c => c !== null);
+          const worstWorkCode = validWorkCodes.length > 0 ? Math.max(...validWorkCodes) : 0;
+
+          // FIX 3: use real daily precipitation_probability_max and uv_index_max
+          const precipProb = wxData.daily && wxData.daily.precipitation_probability_max
+            ? (wxData.daily.precipitation_probability_max[dayIdx] ?? 0)
+            : Math.round(workPrecipTotal > 0.05 ? 80 : 10); // fallback only
+          const uvMax = wxData.daily && wxData.daily.uv_index_max
+            ? (wxData.daily.uv_index_max[dayIdx] ?? 0)
+            : 5; // fallback only
+
+          const lv = getModeVerdict(currentMode, maxWorkWind, precipProb, worstWorkCode, uvMax);
+          const statusText  = lv.label;
+          const statusColor = lv.color;
+
+          // FIX 4: use stored startIndex instead of O(n) indexOf + correct dead-code rainHours
+          let rainHours = [];
+          dayData.precips.forEach((p, idx) => {
+            if (p > 0.01) {
+              const globalIdx = dayData.startIndex + idx;
+              if (globalIdx < h.time.length) {
+                const idxTime = new Date(h.time[globalIdx]);
+                const hourFormatted = idxTime.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+                rainHours.push(hourFormatted);
+              }
+            }
+          });
+          const rainHoursHtml = rainHours.length > 0
+            ? `<div style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700;">Rain at</div><div style="color:#bae6fd; font-size:0.8rem; font-weight:600;">${rainHours.join(', ')}</div>`
+            : '';
+          
+          const moon = getMoonPhase(new Date(dayData.rawTime));
+          return `
+          <div style="scroll-snap-align: center; min-width: 160px; flex: 0 0 auto; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:24px; padding:20px; display:flex; flex-direction:column; backdrop-filter:blur(20px);">
+              <div style="font-size:1rem; font-weight:800; color:#38bdf8; margin-bottom:8px;">${escapeHtml(dayKey)}</div>
+              <div style="font-size:0.75rem; color:#98989d; margin-bottom:8px;">${moon}</div>
+              
+              <div style="background:${statusColor}22; border:1px solid ${statusColor}44; border-radius:12px; padding:6px 12px; display:inline-block; margin-bottom:16px; align-self:flex-start;">
+                  <span style="font-size:0.78rem; font-weight:800; color:${statusColor};">${escapeHtml(statusText)}</span>
+              </div>
+              
+              <div style="display:flex; flex-direction:column; gap:12px;">
+                  <div>
+                      <div style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700;">Temp</div>
+                      <div style="color:white; font-size:1.1rem; font-weight:600;">${Math.round(maxTemp)}° <span style="color:#64748b; font-size:0.9rem;">${Math.round(minTemp)}°</span></div>
+                  </div>
+                  <div>
+                      <div style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700;">Rain</div>
+                      <div style="color:#bae6fd; font-size:1.1rem; font-weight:600;">${totalPrecip.toFixed(2)}"</div>
+                  </div>
+                  <div>
+                      <div style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700;">Chance</div>
+                      <div style="color:#93c5fd; font-size:1.1rem; font-weight:600;">${precipProb}%</div>
+                  </div>
+                  <div>
+                      <div style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700;">Gusts</div>
+                      <div style="color:#e2e8f0; font-size:1.1rem; font-weight:600;">${Math.round(maxWind)} mph</div>
+                  </div>
+                  ${rainHoursHtml ? `<div>${rainHoursHtml}</div>` : ''}
+              </div>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // Share forecast card report deep-link and text template
+    async function shareForecast() {
+      if (!globalWxData) return;
+      const el = id => document.getElementById(id);
+      const verdict = el('lake-verdict-label').textContent;
+      const sub = el('lake-verdict-sub').textContent;
+      const feels = el('lake-feels').textContent;
+      const wind = el('lake-wind').textContent;
+      const windDir = el('lake-wind-dir').textContent;
+      
+      const shareUrl = `${window.location.origin}${window.location.pathname}?view=telemetry&mode=${currentMode}`;
+      const text = `🌊 WaZWeather Report (${currentMode.toUpperCase()} mode):
+Verdict: ${verdict} - ${sub}
+Feels: ${feels} | Wind: ${wind} ${windDir}
+Check live hydrology & weather flow: ${shareUrl}`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'WaZWeather Live Report',
+            text: text,
+            url: shareUrl
+          });
+        } catch (err) {
+          console.warn('Navigator share cancelled/failed:', err);
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(`${text}\n${shareUrl}`);
+          alert('WaZWeather forecast report copied to clipboard! Share it with your friends.');
+        } catch (err) {
+          console.error('Clipboard copy failed:', err);
+          alert('Could not copy forecast. Copy link manually: ' + shareUrl);
+        }
+      }
+    }
+
+    // Render NWS Alerts card
+    async function renderAlertsCard() {
+      const severityColor = { Extreme:'#ef4444', Severe:'#f97316', Moderate:'#eab308', Minor:'#98989d' };
+      try {
+        const { features, ts } = await fetchNWSAlerts();
+        const card = document.getElementById('card-alerts');
+        const list = document.getElementById('nws-alerts-list');
+        const stamp = document.getElementById('nws-alerts-stamp');
+
+        if (!features || features.length === 0) {
+          // no alerts — show the All Clear placeholder (already in HTML)
+          const list2 = document.getElementById('nws-alerts-list');
+          if (list2) list2.innerHTML = '<div class="no-alerts-msg"><div class="no-alerts-icon">✅</div><div class="no-alerts-title">All Clear</div><div class="no-alerts-sub">No active NWS alerts for Wood County</div></div>';
+          if (navigator.clearAppBadge) navigator.clearAppBadge();
+          return;
+        }
+
+        // card-alerts is always displayed (it's a swipe card now)
+        if (stamp) stamp.textContent = relativeTime(ts);
+
+        // PWA OS badge
+        const severeCount = features.filter(f => ['Extreme','Severe'].includes(f.properties.severity)).length;
+        if (navigator.setAppBadge && severeCount > 0) navigator.setAppBadge(severeCount);
+
+        list.innerHTML = features.slice(0, 3).map(f => {
+          const p = f.properties;
+          const color = severityColor[p.severity] || '#98989d';
+          const expires = p.expires ? new Date(p.expires) : null;
+          const expiresStr = expires ? `Expires ${expires.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}` : '';
+          return `
+            <div style="background:rgba(255,255,255,0.02); border:1px solid ${color}33; border-left:3px solid ${color}; border-radius:12px; padding:16px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                <span style="background:${color}22; color:${color}; font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:3px 10px; border-radius:100px; border:1px solid ${color}44;">${escapeHtml(p.severity)} · ${escapeHtml(p.urgency)}</span>
+                <span style="color:#98989d; font-size:0.7rem;">${escapeHtml(expiresStr)}</span>
+              </div>
+              <div style="color:white; font-weight:700; font-size:1rem; line-height:1.3; margin-bottom:4px;">${escapeHtml(p.event)}</div>
+              <div style="color:#98989d; font-size:0.8rem; line-height:1.4;">${escapeHtml((p.headline || '').substring(0, 120))}</div>
+            </div>`;
+        }).join('');
+      } catch(err) {
+        console.warn('NWS alerts render error:', err);
+        // nws-alerts-card → card-alerts; always visible in v3
+      }
+    }
+
+    // Render 24-hr precip timeline bars
+    function renderHourlyPrecip(wxData) {
+      try {
+        const h = wxData.hourly;
+        if (!h || !h.precipitation) return;
+        const now = new Date();
+        let curHr = 0;
+        for (let i = 0; i < h.time.length; i++) {
+          if (new Date(h.time[i]) <= now) curHr = i;
+          else break;
+        }
+        // FIX 7: guard against truncation near end of 7-day window
+        const precips = h.precipitation.slice(curHr, Math.min(curHr + 24, h.time.length));
+        const times   = h.time.slice(curHr, Math.min(curHr + 24, h.time.length));
+        const maxP    = Math.max(...precips, 0.01);
+        const total   = precips.reduce((a, b) => a + b, 0);
+
+        const barsEl   = document.getElementById('hourly-precip-bars');
+        const labelsEl = document.getElementById('hourly-precip-labels');
+        const totalEl  = document.getElementById('hourly-total');
+
+        if (!barsEl) return;
+        totalEl.textContent = total.toFixed(2) + '"';
+
+        barsEl.innerHTML = precips.map((val, i) => {
+          const pct  = Math.max(4, Math.round((val / maxP) * 100));
+          const hr   = new Date(times[i]).getHours();
+          const isNow = i === 0;
+          const color = val > 0 ? '#38bdf8' : 'rgba(255,255,255,0.08)';
+          return `<div title="${hr}:00 — ${val.toFixed(3)}\"" style="flex:1; height:${pct}%; background:${color}; border-radius:3px 3px 0 0; min-height:4px; position:relative; ${isNow ? 'box-shadow:0 0 6px #38bdf8;' : ''}">${isNow ? '<div style="position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:#39ff14;border-radius:50%;"></div>' : ''}</div>`;
+        }).join('');
+
+        // Show labels at 0h, 6h, 12h, 18h, 24h
+        const labelTimes = [0, 6, 12, 18, 23];
+        labelsEl.innerHTML = labelTimes.map(offset => {
+          if (offset >= times.length) return '';
+          const hr = new Date(times[offset]).getHours();
+          const label = hr === 0 ? 'Midnight' : hr < 12 ? hr + 'am' : hr === 12 ? 'Noon' : (hr - 12) + 'pm';
+          return `<span style="color:#98989d; font-size:0.65rem; font-weight:600;">${label}</span>`;
+        }).join('');
+      } catch(err) {
+        console.warn('Hourly precip render error:', err);
+      }
+    }
+
+    // Render river stage + trend on hydrology card
+    async function renderRiverStage(gaugeFt) {
+      // Flood stages for WRRW3 (Wisconsin River at Wisconsin Rapids) — NWS AHPS hardcoded thresholds
+      const FLOOD_STAGES = { action: 8, flood: 12, major: 20 };
+      const bar = document.getElementById('flood-stage-bar');
+      const fill = document.getElementById('flood-stage-fill');
+      const label = document.getElementById('flood-stage-label');
+      const forecast = document.getElementById('river-stage-forecast');
+      if (!bar || gaugeFt === null || isNaN(gaugeFt)) return;
+
+      bar.style.display = 'block';
+      const pct = Math.min(100, Math.round((gaugeFt / FLOOD_STAGES.major) * 100));
+      let stageColor = '#39ff14'; // normal
+      let stageText = `${gaugeFt.toFixed(2)} ft — Normal`;
+      if (gaugeFt >= FLOOD_STAGES.major) { stageColor = '#ef4444'; stageText = `${gaugeFt.toFixed(2)} ft — Major Flood`; }
+      else if (gaugeFt >= FLOOD_STAGES.flood) { stageColor = '#f97316'; stageText = `${gaugeFt.toFixed(2)} ft — Flood Stage`; }
+      else if (gaugeFt >= FLOOD_STAGES.action) { stageColor = '#eab308'; stageText = `${gaugeFt.toFixed(2)} ft — Action Stage`; }
+
+      fill.style.width = pct + '%';
+      fill.style.background = stageColor;
+      label.textContent = stageText;
+
+      // AHPS 24h predicted stage
+      try {
+        const ahps = await fetchRiverStage();
+        if (ahps && ahps.data && ahps.data.length > 0) {
+          const future = ahps.data.find(d => {
+            const t = new Date(d.validTime);
+            return t > new Date() && t <= new Date(Date.now() + 25*3600*1000);
+          });
+          if (future) {
+            forecast.textContent = `NWS forecast: ${parseFloat(future.primary).toFixed(2)} ft in ~24h`;
+          }
+        }
+      } catch(e) { /* AHPS optional */ }
+    }
+
+    /* Live Telemetry Data Fetch */
+    const CACHE_DURATION      = 15 * 60 * 1000;          // 15 min — USGS (updates every 15 min)
+    const CACHE_DURATION_SLOW = 4  * 60 * 60 * 1000;    // 4 hr  — AQI + weather forecast
+    async function fetchTelemetry() {
+      // 1. Fetch USGS Hydrology (Flow, Gauge, Current Speed for 7 Days)
+      try {
+        const CACHE_KEY = 'usgs_hydro_cache_v2';
+        const now = Date.now();
+        const cached = localStorage.getItem(CACHE_KEY);
+        let hydroData;
+        
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (now - parsed.timestamp < CACHE_DURATION) {
+            hydroData = parsed.data;
+            console.log("Loaded USGS data from 15-min browser cache.");
+          }
+        }
+        
+        if (!hydroData) {
+          const hydroRes = await fetch('https://waterservices.usgs.gov/nwis/iv/?sites=05395000&parameterCd=00060,00065&format=json&period=P7D');
+          hydroData = await hydroRes.json();
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: now, data: hydroData }));
+          console.log("Fetched fresh USGS data and updated cache.");
+        }
+        
+        let cfsData=[], gaugeData=[], labels=[];
+        hydroData.value.timeSeries.forEach(series => {
+          const code = series.variable.variableCode[0].value;
+          const valuesList = series.values[0].value;
+          if (!valuesList || valuesList.length === 0) return;
+          
+          const currentVal = valuesList[valuesList.length - 1].value;
+          
+          if (code === '00060') {
+            const cfsCurrent = parseFloat(currentVal);
+            const cfsPrev    = valuesList.length > 2 ? parseFloat(valuesList[valuesList.length - 2].value) : cfsCurrent;
+            document.getElementById('metric-cfs').textContent = `${cfsCurrent.toLocaleString()} CFS`;
+            // telemetry-flow element removed in v3
+            // Trend arrow
+            const trendEl = document.getElementById('metric-trend');
+            if (trendEl) {
+              const delta = cfsCurrent - cfsPrev;
+              trendEl.textContent = delta > 50 ? '↑ Rising' : delta < -50 ? '↓ Falling' : '→ Steady';
+              trendEl.style.color  = delta > 50 ? '#ef4444' : delta < -50 ? '#34d399' : '#98989d';
+            }
+            const step = Math.max(1, Math.floor(valuesList.length / 40));
+            for(let i=0; i<valuesList.length; i+=step) {
+              cfsData.push(parseFloat(valuesList[i].value));
+              const d = new Date(valuesList[i].dateTime);
+              labels.push(d.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric' }));
+            }
+          } else if (code === '00065') {
+            const gaugeFt = parseFloat(currentVal);
+            document.getElementById('metric-gauge').textContent = `${gaugeFt.toFixed(2)} ft`;
+            const step = Math.max(1, Math.floor(valuesList.length / 40));
+            for(let i=0; i<valuesList.length; i+=step) gaugeData.push(parseFloat(valuesList[i].value));
+            // Trigger flood stage bar (async, non-blocking)
+            renderRiverStage(gaugeFt);
+          } else if (code === '72254') {
+            document.getElementById('metric-vel').textContent = `${parseFloat(currentVal).toFixed(2)} ft/s`;
+          }
+        });
+
+        // Hydrology Chart
+        if (window.hydroChartInst) window.hydroChartInst.destroy();
+        window.hydroChartInst = new Chart(document.getElementById('hydroChart').getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Flow (CFS)', data: cfsData, borderColor: '#39ff14', backgroundColor: 'rgba(57, 255, 20, 0.1)', yAxisID: 'y', fill: true, tension: 0.6, pointRadius: 0 },
+              { label: 'Gauge (ft)', data: gaugeData, borderColor: '#fffffffff', yAxisID: 'y1', borderDash: [5, 5], tension: 0.6, pointRadius: 0 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#98989d', maxTicksLimit: 7 } },
+              y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#00e5ff' } },
+              y1: { type: 'linear', display: true, position: 'right', grid: { display: false }, ticks: { color: '#a78bfa' } }
+            },
+            plugins: { legend: { labels: { color: '#9CA3AF' } } }
+          }
+        });
+      } catch (err) {
+        console.error("USGS Fetch error (using fallback):", err);
+        // Fallback
+        document.getElementById('metric-cfs').textContent = `15,700 CFS`;
+        document.getElementById('metric-gauge').textContent = `10.42 ft`;
+        document.getElementById('metric-vel').textContent = `1.48 ft/s`;
+
+        const labels = [];
+        const cfsData = [];
+        const gaugeData = [];
+        const baseDate = new Date();
+        for (let i = 0; i < 40; i++) {
+          const d = new Date(baseDate.getTime() - (40 - i) * 60 * 60 * 1000);
+          labels.push(d.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric' }));
+          cfsData.push(14500 + Math.random() * 2000);
+          gaugeData.push(9.8 + Math.random() * 1.2);
+        }
+        if (window.hydroChartInst) window.hydroChartInst.destroy();
+        window.hydroChartInst = new Chart(document.getElementById('hydroChart').getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Flow (CFS)', data: cfsData, borderColor: '#39ff14', backgroundColor: 'rgba(57, 255, 20, 0.1)', yAxisID: 'y', fill: true, tension: 0.6, pointRadius: 0 },
+              { label: 'Gauge (ft)', data: gaugeData, borderColor: '#fffffffff', yAxisID: 'y1', borderDash: [5, 5], tension: 0.6, pointRadius: 0 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#98989d', maxTicksLimit: 7 } },
+              y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#00e5ff' } },
+              y1: { type: 'linear', display: true, position: 'right', grid: { display: false }, ticks: { color: '#a78bfa' } }
+            },
+            plugins: { legend: { labels: { color: '#9CA3AF' } } }
+          }
+        });
+      }
+
+      // 2. Fetch Open-Meteo AQI
+      try {
+        const CACHE_KEY = 'aqi_cache_v3';
+        const now = Date.now();
+        const cached = localStorage.getItem(CACHE_KEY);
+        let aqiData;
+        
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (now - parsed.timestamp < CACHE_DURATION_SLOW) {
+            aqiData = parsed.data;
+            console.log("Loaded AQI data from 4-hour browser cache.");
+          }
+        }
+        
+        if (!aqiData) {
+          const aqiRes = await fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=44.3936&longitude=-89.8173&current=us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index');
+          aqiData = await aqiRes.json();
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: now, data: aqiData }));
+          console.log("Fetched fresh AQI data and updated cache.");
+        }
+        const c = aqiData.current;
+        
+        // AQI panel removed in WaZWeather v3 — log only
+        let _aqi = c.us_aqi || 20;
+        let _status = _aqi > 100 ? 'Unhealthy' : _aqi > 50 ? 'Moderate' : 'Excellent';
+        console.log('[WaZ] AQI:', _aqi, _status);
+      } catch (err) {
+        // AQI fallback — panel removed in v3
+        console.warn('[WaZ] AQI fallback active:', err);
+      }
+
+      // 3. Fetch Open-Meteo Weather Forecast
+      try {
+        const CACHE_KEY = 'weather_cache_v5';
+        const now = Date.now();
+        const cached = localStorage.getItem(CACHE_KEY);
+        let wxData;
+        
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (now - parsed.timestamp < CACHE_DURATION_SLOW) {
+            wxData = parsed.data;
+            console.log("Loaded Weather data from 4-hour browser cache.");
+          }
+        }
+        
+        if (!wxData) {
+          // FIX 2: added precipitation_sum to daily params so real daily totals are available
+          const wxRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${WAZ_LAT}&longitude=${WAZ_LON}&hourly=temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation,precipitation_probability,weather_code,uv_index&daily=sunrise,sunset,daylight_duration,uv_index_max,precipitation_probability_max,wind_gusts_10m_max,weather_code,precipitation_sum&forecast_days=7&timezone=America%2FChicago&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`);
+          wxData = await wxRes.json();
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: now, data: wxData }));
+          console.log("Fetched fresh Weather data and updated cache.");
+        }
+
+        // Wire up new render functions with the fresh wx data
+        renderLakeCard(wxData);
+        renderAlertsCard();
+
+      } catch(err) {
+        console.error("Weather Fetch Error (using fallback):", err);
+        const plannerContainer = document.getElementById('weather-planner');
+        if (plannerContainer) {
+          plannerContainer.innerHTML = `
+            <div class="weather-day-card">
+              <div class="weather-day-title">
+                <span>Wednesday, Jun 17</span>
+                <span class="weather-day-status status-warn">Caution: Light Rain</span>
+              </div>
+              <div class="weather-metrics-list">
+                <div class="weather-metric-item"><span>Temp Range</span><span>62°F - 78°F</span></div>
+                <div class="weather-metric-item"><span>Total Rain</span><span>0.12 in</span></div>
+                <div class="weather-metric-item"><span>Max Wind Gusts</span><span>14 mph</span></div>
+                <div class="weather-metric-item" style="flex-direction: column; gap: 4px; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 6px;">
+                  <span style="font-size: 0.75rem; color: var(--text-dim);">Rain Outlook</span>
+                  <span style="color: var(--accent-info); font-size: 0.8rem; font-weight: normal; text-align: left;">Rain risk at: 2:00 PM, 3:00 PM</span>
+                </div>
+              </div>
+            </div>
+            <div class="weather-day-card">
+              <div class="weather-day-title">
+                <span>Thursday, Jun 18</span>
+                <span class="weather-day-status status-ok">Good to Go</span>
+              </div>
+              <div class="weather-metrics-list">
+                <div class="weather-metric-item"><span>Temp Range</span><span>58°F - 82°F</span></div>
+                <div class="weather-metric-item"><span>Total Rain</span><span>0.00 in</span></div>
+                <div class="weather-metric-item"><span>Max Wind Gusts</span><span>10 mph</span></div>
+                <div class="weather-metric-item" style="flex-direction: column; gap: 4px; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 6px;">
+                  <span style="font-size: 0.75rem; color: var(--text-dim);">Rain Outlook</span>
+                  <span style="color: var(--accent-info); font-size: 0.8rem; font-weight: normal; text-align: left;">No Rain Expected</span>
+                </div>
+              </div>
+            </div>
+            <div class="weather-day-card">
+              <div class="weather-day-title">
+                <span>Friday, Jun 19</span>
+                <span class="weather-day-status status-stop">No Work: Heavy Rain</span>
+              </div>
+              <div class="weather-metrics-list">
+                <div class="weather-metric-item"><span>Temp Range</span><span>60°F - 72°F</span></div>
+                <div class="weather-metric-item"><span>Total Rain</span><span>0.85 in</span></div>
+                <div class="weather-metric-item"><span>Max Wind Gusts</span><span>22 mph</span></div>
+                <div class="weather-metric-item" style="flex-direction: column; gap: 4px; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 6px;">
+                  <span style="font-size: 0.75rem; color: var(--text-dim);">Rain Outlook</span>
+                  <span style="color: var(--accent-info); font-size: 0.8rem; font-weight: normal; text-align: left;">Steady Rain throughout day</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function openDialog(key) {
+      const info = APP_DATA[key];
+      if (!info) return;
+
+      titleEl.textContent = info.title;
+      titleEl.style.color = info.accent;
+
+      if (key === 'dashboard') {
+        screenshotContainer.style.display = 'none';
+        standardView.style.display = 'none';
+        telemetryView.style.display = 'block';
+        launchBtn.textContent = 'Close HUD';
+        launchBtn.style.backgroundColor = 'var(--accent-info)';
+      } else {
+        if (info.screenshot) {
+          screenshotEl.src = info.screenshot;
+          screenshotContainer.style.display = 'flex';
+        } else {
+          screenshotContainer.style.display = 'none';
+        }
+        
+        standardView.style.display = 'block';
+        telemetryView.style.display = 'none';
+        descEl.textContent = info.desc;
+        audienceEl.innerHTML = info.who.map(w => `<span class="tag">${w}</span>`).join('');
+        launchBtn.textContent = info.btnLabel;
+        launchBtn.style.backgroundColor = info.accent;
+      }
+
+      launchBtn.href = info.link;
+      launchBtn.dataset.appKey = key;
+      overlay.classList.add('open');
+    }
+
+    function closeDialog() {
+      const overlay = document.getElementById('dialog-overlay');
+      if (overlay) overlay.classList.remove('open');
+      // Reset animations safely
+      const fillPm10 = document.getElementById('fill-pm10');
+      if (fillPm10) fillPm10.style.width = '0%';
+      const fillPm25 = document.getElementById('fill-pm25');
+      if (fillPm25) fillPm25.style.width = '0%';
+      const fillUv = document.getElementById('fill-uv');
+      if (fillUv) fillUv.style.width = '0%';
+    }
+
+    const cards = document.querySelectorAll('[data-app]');
+    if(cards) cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const appKey = card.dataset.app;
+        if(appKey === 'sentinel') return;
+        openDialog(appKey);
+      });
+    });
+
+    const closeBtn = document.getElementById('dialog-close');
+    if(closeBtn) closeBtn.addEventListener('click', closeDialog);
+    
+    // Telemetry tracking on launch
+    const trackBtn = document.getElementById('dialog-launch-btn');
+    if(trackBtn) {
+      trackBtn.addEventListener('click', () => {
+        const appKey = trackBtn.dataset.appKey;
+        if (appKey && appKey !== 'dashboard' && appKey !== '#') {
+          fetch('/telemetry?app=' + encodeURIComponent(appKey) + '&track=1', { method: 'POST', keepalive: true }).catch(e => console.error(e));
+        }
+      });
+    }
+
+    const overlayEl = document.getElementById('dialog-overlay');
+    if (overlayEl) {
+      overlayEl.addEventListener('click', e => { if (e.target === overlayEl) closeDialog(); });
+    }
+    
+    // Init Page Details
+    const footerYearEl = document.getElementById('footer-year');
+    if (footerYearEl) {
+      footerYearEl.textContent = new Date().getFullYear();
+    }
+    // fetchTelemetry() disabled — WaZWeather v4 self-contained IIFE handles all data fetching
+
+    // Smooth scroll navigation to specific WaZWeather snap cards
+    function scrollToWazCard(targetId) {
+      const targetCard = document.getElementById(targetId);
+      if (targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    // Scroll snap handler removed
+
+    // Live clock is now driven by the IIFE inside #wazeecha-telemetry (waz-clock)
+    // --- GATEWAY PORTAL MANAGEMENT ---
+    let activePortalId = 'split';
+    
+    function revealPath(path) {
+      const wrap = document.getElementById('split-wrapper');
+      if (path === 'database') {
+        wrap.className = 'theme-split split-triggered-left';
+      } else {
+        wrap.className = 'theme-split split-triggered-right';
+      }
+      
+      // waz-dots visibility is handled by the section display itself (fixed pos)
+
+      // Fade in the transition view after a short delay
+      setTimeout(() => {
+        const portal = document.getElementById('portal-split');
+        portal.classList.add('hidden-gateway');
+        
+        const viewId = path === 'database' ? 'pwa-catalog' : 'wazeecha-telemetry';
+        document.getElementById(viewId).classList.add('active');
+        
+        // Ensure scroll brings the new section into view
+        document.getElementById(viewId).scrollIntoView({ behavior: 'smooth' });
+      }, 600);
+      
+      playMechanicalClick();
+    }
+    
+    function resetActiveGateway() {
+      // Redirect back to primary portal domain
+      window.location.href = 'https://dondlingergc.com';
+    }
+    
+    function playMechanicalClick() {
+      // Audio removed per user request
+    }
+
+
+  
+    const mainContainer = document.querySelector('main');
+    const scrollTrack = document.querySelector('.dashboard-grid');
+    const walkBg = document.getElementById('walkthrough-bg');
+
+    window.addEventListener('wheel', (e) => {
+      const portal = document.getElementById('portal-split');
+      const telemetry = document.getElementById('wazeecha-telemetry');
+      if (portal.classList.contains('hidden-gateway') && telemetry.classList.contains('active')) {
+          e.preventDefault();
+          scrollTrack.scrollLeft += e.deltaY;
+          if (walkBg) {
+              walkBg.style.transform = `translateX(${-scrollTrack.scrollLeft * 0.2}px)`;
+          }
+      }
+    }, { passive: false });
+
+    // --- WAZEECHA WEATHER PUSH NOTIFICATION SYSTEM ---
+    const BACKEND_URL = ""; // Empty string forces relative paths natively
+    const vapidPublicKey = "BMb36GOhjyJJzODjpDxXhmv7PZxyR-e2miXbuOakZESk83z-TgtgobvOXYIWGkgaDTREY9A5XcaXDTBfWQToHOM";
+    let swReg = null;
+    let isSubscribed = false;
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    async function initWeatherPush() {
+      const btn = document.getElementById('btn-weather-push');
+      const status = document.getElementById('weather-push-status');
+      
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Notifications Unsupported";
+          btn.style.borderColor = "var(--accent-pour)";
+        }
+        if (status) {
+          status.innerHTML = "💡 iOS setup: Add to Home Screen (Share -> Add to Home Screen) and open as standalone PWA.";
+        }
+        return;
+      }
+
+      try {
+        swReg = await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+        const subscription = await swReg.pushManager.getSubscription();
+        isSubscribed = !!subscription;
+        updateWeatherPushUI(subscription);
+      } catch (err) {
+        console.error("Failed to init weather push SW:", err);
+        if (btn) btn.textContent = "Error Loading Service Worker";
+      }
+    }
+
+    function updateWeatherPushUI(subscription) {
+      const btn = document.getElementById('btn-weather-push');
+      const status = document.getElementById('weather-push-status');
+      
+      if (!btn) return;
+
+      if (subscription) {
+        isSubscribed = true;
+        btn.textContent = "Disable Alerts";
+        btn.style.background = "var(--accent-info)";
+        btn.style.color = "var(--bg-obsidian)";
+        if (status) {
+          status.innerHTML = `<span style="color: var(--accent-tap); font-size:1rem;">✓ Alerts armed for Lake Wazeecha.</span><br><span style="font-size:0.75rem; color:#888;">Notifications active · Powered by Cloudflare Edge</span>`;
+        }
+      } else {
+        isSubscribed = false;
+        btn.textContent = "Enable Weather Alerts";
+        btn.style.background = "transparent";
+        btn.style.color = "var(--text-white)";
+        if (status) status.textContent = "Not subscribed";
+      }
+    }
+
+    window.initWeatherPush = initWeatherPush;
+    window.wazGetLocalStorage = (key) => localStorage.getItem(key);
+    window.wazSetLocalStorage = (key, value) => localStorage.setItem(key, value);
+    window.toggleWeatherPush = toggleWeatherPush;
+    async function toggleWeatherPush() {
+      const btn = document.getElementById('btn-weather-push');
+      const status = document.getElementById('weather-push-status');
+      if (!swReg) return;
+
+      if (isSubscribed) {
+        const subscription = await swReg.pushManager.getSubscription();
+        if (subscription) {
+          if (status) status.textContent = "Unsubscribing from server...";
+          try {
+            await fetch(`${BACKEND_URL}/unsubscribe`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(subscription)
+            });
+          } catch (e) {
+            console.warn("Failed to notify backend of unsubscription:", e);
+          }
+          await subscription.unsubscribe();
+          updateWeatherPushUI(null);
+        }
+      } else {
+        if (btn) btn.textContent = "Requesting permission...";
+        
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission !== 'granted') {
+            if (status) status.textContent = "Permission denied.";
+            if (btn) btn.textContent = "Enable Weather Alerts";
+            return;
+          }
+
+          const convertedKey = urlBase64ToUint8Array(vapidPublicKey);
+          const subscription = await swReg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedKey
+          });
+          
+          if (status) status.textContent = "Registering with alert server...";
+          try {
+            const subJson = subscription.toJSON();
+            const payload = {
+              ...subJson,
+              preferences: {
+                river: document.getElementById('pref-river-alerts').checked,
+                aqi: document.getElementById('pref-aqi-alerts').checked,
+                weather: document.getElementById('pref-weather-alerts').checked
+              }
+            };
+            const res = await fetch(`${BACKEND_URL}/subscribe`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+              const text = await res.text();
+              throw new Error(`Server rejected subscription: ${res.status} ${text}`);
+            }
+          } catch (e) {
+            console.warn("Failed to register subscription with backend:", e);
+            throw e; // re-throw so we catch it below and reset UI
+          }
+
+          updateWeatherPushUI(subscription);
+        } catch (err) {
+          console.error("Subscription failed:", err);
+          if (status) status.textContent = "Subscription failed: " + err.message;
+          if (btn) btn.textContent = "Enable Weather Alerts";
+        }
+      }
+    }
+
+    function checkDeepLink() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hash = window.location.hash;
+      
+      const queryMode = urlParams.get('mode');
+      if (queryMode && ['fishing', 'lake', 'construction', 'family'].includes(queryMode)) {
+        currentMode = queryMode;
+        localStorage.setItem('waz_weather_mode', queryMode);
+      }
+
+      if (urlParams.get('view') === 'telemetry' || hash === '#wazeecha-telemetry') {
+        revealPath('telemetry');
+      }
+
+      // Sync selector active button highlights
+      document.querySelectorAll('.persona-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const activeBtn = document.getElementById('btn-mode-' + currentMode);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    // Initialize check on load
+    window.addEventListener('DOMContentLoaded', () => {
+      initWeatherPush();
+      checkDeepLink();
+
+      // BUG-05: Auto-hide scroll indicator when last card is visible
+      const scrollBtn = document.getElementById('scroll-indicator');
+      const swipeCards = document.querySelectorAll('#wazeecha-telemetry .swipe-card');
+      const lastCard = swipeCards[swipeCards.length - 1];
+      if (scrollBtn && lastCard) {
+        new IntersectionObserver(entries => {
+          scrollBtn.style.display = entries[0].isIntersecting ? 'none' : 'flex';
+        }, { threshold: 0.5 }).observe(lastCard);
+      }
+    });
+</script>
+
+<div id="blazor-app" style="display:none; position:fixed; inset:0; z-index:100000; background:#12141c; overflow-y:auto; overflow-x:hidden;"></div>
+
+<script src="_framework/blazor.webassembly.66stpp682q.js"></script>
+
+<script>
+window.openPersonalization = function() {
+    const el = document.getElementById('blazor-app');
+    if (el) {
+        el.style.display = 'block';
+        if (window.location.pathname !== '/personalization') {
+            window.history.pushState(null, '', '/personalization');
+        }
+    }
+}
+window.closePersonalization = function() {
+    const el = document.getElementById('blazor-app');
+    if (el) {
+        el.style.display = 'none';
+        if (window.location.pathname === '/personalization') {
+            window.history.pushState(null, '', '/');
+        }
+    }
+}
+
+// Automatically open on load if URL is /personalization
+if (window.location.pathname === '/personalization') {
+    window.openPersonalization();
+}
+</script>
+</body></html>

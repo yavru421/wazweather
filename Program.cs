@@ -6,7 +6,16 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<WaZWeather.Pages.Personalization>("#blazor-app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+using Microsoft.AspNetCore.Components.WebAssembly.Http;
+
+builder.Services.AddScoped(sp => 
+{
+    var handler = new DefaultBrowserOptionsMessageHandler(new HttpClientHandler())
+    {
+        DefaultBrowserRequestCredentials = BrowserRequestCredentials.Include
+    };
+    return new HttpClient(handler) { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
+});
 
 await builder.Build().RunAsync();
 

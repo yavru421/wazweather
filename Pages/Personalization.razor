@@ -175,7 +175,7 @@
                 await JSRuntime.InvokeVoidAsync("wazSetLocalStorage", "waz_user_uuid", uuid);
             }
 
-            var response = await Http.GetAsync($"/api/preferences?uuid={uuid}");
+            var response = await Http.GetAsync($"https://personalization.dondlingergc.com/api/settings");
             if (response.IsSuccessStatusCode)
             {
                 var prefs = await response.Content.ReadFromJsonAsync<UserPreferences>();
@@ -250,7 +250,7 @@
                 theme_preference = themePreference
             };
 
-            var response = await Http.PostAsJsonAsync("/api/preferences", payload);
+            var response = await Http.PostAsJsonAsync("https://personalization.dondlingergc.com/api/settings", payload);
             
             if (response.IsSuccessStatusCode)
             {
