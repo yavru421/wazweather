@@ -17,9 +17,5 @@ binding = "IDENTITY_DB"
 database_name = "dondlingergc-identity-db"
 database_id = "1128e99a-70e1-458c-b0b7-d548a10a5533"
 
-[[kv_namespaces]]
-binding = "USER_SETTINGS_KV"
-id = "e57bd65d-c663-455b-86d9-f5ebba66c98a"
-
 [triggers]
 crons = ["* * * * *"]
