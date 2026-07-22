@@ -12,5 +12,9 @@ binding = "waz_analytics"
 database_name = "waz-analytics"
 database_id = "38d497a4-5a97-41c4-b89c-1ba47a0dea4f"
 
+[[kv_namespaces]]
+binding = "USER_SETTINGS_KV"
+id = "e57bd65d-c663-455b-86d9-f5ebba66c98a"
+
 [triggers]
 crons = ["* * * * *"]

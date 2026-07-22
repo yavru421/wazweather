@@ -107,9 +107,77 @@ function pushHistory(history = [], value, maxLen = 4) {
   return updated.slice(-maxLen);
 }
 
+// Step 3 Helper: Convert cookie value to a hex string key for KV
+async function hashToken(token) {
+  const msgUint8 = new TextEncoder().encode(token);                           
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);           
+  const hashArray = Array.from(new Uint8Array(hashBuffer));                     
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function getCookie(cookieHeader, name) {
+  if (!cookieHeader) return null;
+  const cookies = cookieHeader.split(";");
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith(name + "=")) {
+      return cookie.substring(name.length + 1);
+    }
+  }
+  return null;
+}
+
+class SettingsInjector {
+  constructor(settings) {
+    this.settings = settings;
+  }
+  element(element) {
+    const settingsStr = JSON.stringify(this.settings);
+    element.append(
+      `<script id="__WAZ_STATE__">window.__USER_SETTINGS__ = ${settingsStr};</script>`,
+      { html: true }
+    );
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // Intercept html page requests
+    const isWazweatherPage = url.pathname === "/" || url.pathname === "/personalization" || url.pathname.startsWith("/wazweather");
+    if (isWazweatherPage && request.method === "GET") {
+      try {
+        const assetRequest = (url.pathname === "/personalization") ? new Request(new URL("/index.html", request.url), request) : request;
+        const assetResponse = await env.ASSETS.fetch(assetRequest);
+        const contentType = assetResponse.headers.get("content-type") || "";
+        const isHtml = contentType.includes("text/html");
+
+        if (isHtml) {
+          let userSettings = { theme: "Dark", units: "F", defaultZip: "54494", username: "Guest" };
+          try {
+            const cookieHeader = request.headers.get("Cookie");
+            const dgcSession = getCookie(cookieHeader, "dgc-session");
+            if (dgcSession && env.USER_SETTINGS_KV) {
+              const hashedSession = await hashToken(dgcSession);
+              const cached = await env.USER_SETTINGS_KV.get(hashedSession, { type: "json" });
+              if (cached) {
+                userSettings = cached;
+              }
+            }
+          } catch (e) {
+            console.error("KV/Cookie error:", e.message);
+          }
+
+          return new HTMLRewriter()
+            .on("head", new SettingsInjector(userSettings))
+            .transform(assetResponse);
+        }
+        return assetResponse;
+      } catch (err) {
+        console.error("Asset fetch/rewrite failed:", err.message);
+      }
+    }
     
     // Extract Edge Data
     const cf = request.cf || {};

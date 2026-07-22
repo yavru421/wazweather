@@ -170,21 +170,26 @@
     private string? _notificationError;
     private NotificationModel? _notification;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        try
-        {
-            uuid = await JSRuntime.InvokeAsync<string>("wazGetLocalStorage", "waz_user_uuid");
-            if (string.IsNullOrEmpty(uuid))
-            {
-                uuid = Guid.NewGuid().ToString();
-                await JSRuntime.InvokeVoidAsync("wazSetLocalStorage", "waz_user_uuid", uuid);
-            }
+        // Placeholders initialization
+        isLoading = true;
+    }
 
-            var response = await Http.GetAsync($"https://personalization.dondlingergc.com/api/settings");
-            if (response.IsSuccessStatusCode)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
             {
-                var prefs = await response.Content.ReadFromJsonAsync<UserPreferences>();
+                uuid = await JSRuntime.InvokeAsync<string>("wazGetLocalStorage", "waz_user_uuid");
+                if (string.IsNullOrEmpty(uuid))
+                {
+                    uuid = Guid.NewGuid().ToString();
+                    await JSRuntime.InvokeVoidAsync("wazSetLocalStorage", "waz_user_uuid", uuid);
+                }
+
+                var prefs = await JSRuntime.InvokeAsync<UserPreferences>("eval", "window.__USER_SETTINGS__");
                 if (prefs != null)
                 {
                     username = prefs.username ?? "";
@@ -193,14 +198,15 @@
                     themePreference = prefs.theme_preference ?? "Dark";
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading preferences: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading preferences from edge state: {ex.Message}");
+            }
+            finally
+            {
+                isLoading = false;
+                StateHasChanged();
+            }
         }
     }
 
