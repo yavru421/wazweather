@@ -3078,7 +3078,14 @@ Check live hydrology & weather flow: ${shareUrl}`;
 
 <div id="blazor-app" style="display:none; position:fixed; inset:0; z-index:100000; background:#12141c; overflow-y:auto; overflow-x:hidden;"></div>
 
-<script src="_framework/blazor.webassembly.66stpp682q.js"></script>
+<script src="_framework/blazor.webassembly.66stpp682q.js" autostart="false"></script>
+<script>
+  Blazor.start({
+    loadBootResource: function (type, name, defaultUri, integrity) {
+      return defaultUri;
+    }
+  });
+</script>
 
 <script>
 window.openPersonalization = function() {
