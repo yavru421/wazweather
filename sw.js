@@ -32,7 +32,7 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Network-first strategy: always try network, fall back to cache for HTML
+// Network-first strategy for navigation requests (HTML), bypassing SW cache for HTML so Edge Worker HTMLRewriter always fires
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
@@ -47,22 +47,33 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Check if navigation request (HTML document)
+  const isNavigation = event.request.mode === 'navigate' || 
+                       (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'));
+
+  if (isNavigation) {
+    // ALWAYS fetch navigation requests from network first so Cloudflare Edge HTMLRewriter injects dynamic state
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // Offline fallback: serve cached index.html
+        return caches.match('/index.html');
+      })
+    );
+    return;
+  }
+
+  // Cache-first for static framework assets (_framework, wasm, css, images)
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Cache successful same-origin responses
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(response => {
         if (response && response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
-      })
-      .catch(() => {
-        // Offline fallback: serve from cache
-        return caches.match(event.request).then(cached => {
-          return cached || caches.match('/index.html');
-        });
-      })
+      });
+    })
   );
 });
 

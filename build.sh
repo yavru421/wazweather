@@ -10,6 +10,9 @@ echo "Copying published Blazor assets to wwwroot..."
 cp -R ./publish_temp/wwwroot/_framework ./wwwroot/
 cp ./publish_temp/wwwroot/WaZWeather.styles.css ./wwwroot/ || true
 cp ./publish_temp/wwwroot/index.html ./wwwroot/
+
+# Strip strict integrity block from importmap to prevent SRI blocking across Cloudflare compression
+sed -i 's/"integrity": {[^}]*}//g' ./wwwroot/index.html || true
 cp ./publish_temp/wwwroot/service-worker-assets.js ./wwwroot/ || true
 
 echo "Allowing Wrangler to upload compiled assets..."

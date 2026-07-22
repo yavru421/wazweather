@@ -128,13 +128,15 @@ function getCookie(cookieHeader, name) {
 }
 
 class SettingsInjector {
-  constructor(settings) {
+  constructor(settings, session) {
     this.settings = settings;
+    this.session = session;
   }
   element(element) {
     const settingsStr = JSON.stringify(this.settings);
+    const sessionStr = JSON.stringify(this.session);
     element.append(
-      `<script id="__WAZ_STATE__">window.__USER_SETTINGS__ = ${settingsStr};</script>`,
+      `<script id="__EDGE_STATE__">window.__USER_SETTINGS__ = ${settingsStr}; window.__USER_SESSION__ = ${sessionStr};</script>`,
       { html: true }
     );
   }
@@ -155,22 +157,26 @@ export default {
 
         if (isHtml) {
           let userSettings = { theme: "Dark", units: "F", defaultZip: "54494", username: "Guest" };
+          let userSession = null;
           try {
             const cookieHeader = request.headers.get("Cookie");
             const dgcSession = getCookie(cookieHeader, "dgc-session");
-            if (dgcSession && env.USER_SETTINGS_KV) {
-              const hashedSession = await hashToken(dgcSession);
-              const cached = await env.USER_SETTINGS_KV.get(hashedSession, { type: "json" });
-              if (cached) {
-                userSettings = cached;
+            if (dgcSession && env.IDENTITY_DB) {
+              const claims = await verifyJwt(dgcSession);
+              if (claims) {
+                userSession = { email: claims.email, sub: claims.sub, tier: claims.subscription_tier };
+                const row = await env.IDENTITY_DB.prepare("SELECT settings_json FROM user_settings WHERE user_id = ?").bind(claims.sub).first();
+                if (row && row.settings_json) {
+                  userSettings = JSON.parse(row.settings_json);
+                }
               }
             }
           } catch (e) {
-            console.error("KV/Cookie error:", e.message);
+            console.error("D1/Cookie state error:", e.message);
           }
 
           return new HTMLRewriter()
-            .on("head", new SettingsInjector(userSettings))
+            .on("head", new SettingsInjector(userSettings, userSession))
             .transform(assetResponse);
         }
         return assetResponse;
