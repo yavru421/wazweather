@@ -262,34 +262,40 @@
                 theme_preference = themePreference
             };
 
-            var response = await Http.PostAsJsonAsync("https://personalization.dondlingergc.com/api/settings", payload);
-            
-            if (response.IsSuccessStatusCode)
+            // Attempt Cloud Sync via Personalization SSO API with credentials
+            bool syncedToCloud = false;
+            try
             {
-                showSuccess = true;
-                // Optional: apply theme changes via JS Interop immediately
-                if (themePreference == "OLED")
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://personalization.dondlingergc.com/api/settings");
+                request.Content = JsonContent.Create(new { settings = payload });
+                request.SetBrowserRequestCredentials(Microsoft.AspNetCore.Components.WebAssembly.Http.BrowserRequestCredentials.Include);
+                var response = await Http.SendAsync(request);
+                if (response.IsSuccessStatusCode)
                 {
-                    await JSRuntime.InvokeVoidAsync("document.body.style.setProperty", "background-color", "#000000");
-                }
-                else
-                {
-                    await JSRuntime.InvokeVoidAsync("document.body.style.setProperty", "background-color", "#12141c");
+                    syncedToCloud = true;
                 }
             }
-            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            catch (Exception ex)
             {
-                errorMessage = "Username is already taken. Please choose another.";
+                Console.WriteLine($"Cloud sync notice: {ex.Message}");
+            }
+
+            // Always persist locally (Zero Liability Architecture)
+            await JSRuntime.InvokeVoidAsync("wazSetLocalStorage", "waz_user_prefs", System.Text.Json.JsonSerializer.Serialize(payload));
+            
+            showSuccess = true;
+            if (themePreference == "OLED")
+            {
+                await JSRuntime.InvokeVoidAsync("document.body.style.setProperty", "background-color", "#000000");
             }
             else
             {
-                var errorResult = await response.Content.ReadAsStringAsync();
-                errorMessage = "Failed to save: " + errorResult;
+                await JSRuntime.InvokeVoidAsync("document.body.style.setProperty", "background-color", "#12141c");
             }
         }
         catch (Exception ex)
         {
-            errorMessage = "An error occurred while saving.";
+            errorMessage = "An error occurred while saving: " + ex.Message;
             Console.WriteLine(ex.Message);
         }
         finally
