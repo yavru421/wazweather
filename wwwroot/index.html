@@ -32,7 +32,7 @@
 .ri-body{padding:72px 18px 36px;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
 .ri-source{display:flex;justify-content:space-between;align-items:center;}
 .ri-source-lbl{color:#0a84ff;font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;}
-#waz-updated{color:#98989d;font-size:1.1rem;}
+#waz-updated{color:#9ca3af;font-size:1.1rem;}
 
 /* Countdown hero */
 .ri-countdown-hero{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04));border:1px solid rgba(59,130,246,.25);border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;}
@@ -251,12 +251,44 @@
       <div class="ri-sun-item"><div style="text-align:right;"><div class="ri-sun-lbl">Sunset</div><div class="ri-sun-val" id="waz-sunset">--:--</div></div><span style="font-size:1.2rem;">🌇</span></div>
     </div>
 
-    <!-- Personalization Button -->
+    <!-- Personalization Button & SSO Gate State -->
     <div style="margin-top: 14px; pointer-events: auto;">
-      <button onclick="openPersonalization()" style="width: 100%; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 13px; padding: 14px; color: #ffffff; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Personalize Settings
-      </button>
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          var settings = window.__USER_SETTINGS__;
+          if (settings && settings.theme) {
+            var theme = settings.theme.toLowerCase();
+            var section = document.getElementById("wazeecha-telemetry");
+            var overviewCard = document.getElementById("waz-overview");
+            if (theme === 'light') {
+              if (section) section.style.background = '#f8fafc';
+              if (overviewCard) overviewCard.style.background = 'radial-gradient(ellipse at 30% 0%, #e2e8f0 0%, #cbd5e1 100%)';
+              document.body.style.color = '#0f172a';
+            } else if (theme === 'neon' || theme === 'cyberpunk') {
+              if (section) section.style.background = '#030014';
+              if (overviewCard) overviewCard.style.background = 'radial-gradient(ellipse at 30% 0%, #2e0854 0%, #030014 65%)';
+              document.body.style.color = '#00f0ff';
+            } else if (theme === 'emerald' || theme === 'green') {
+              if (section) section.style.background = '#022c22';
+              if (overviewCard) overviewCard.style.background = 'radial-gradient(ellipse at 30% 0%, #065f46 0%, #022c22 65%)';
+            }
+          }
+          var session = window.__USER_SESSION__;
+          var btn = document.getElementById("waz-personalization-gate-btn");
+          var label = document.getElementById("waz-personalization-gate-label");
+          if (session && session.sub) {
+            if (label) label.textContent = "ACCOUNT: " + session.email + " (" + (session.tier || "FREE").toUpperCase() + ")";
+            if (btn) {
+              btn.style.borderColor = "rgba(57,255,20,0.4)";
+              btn.style.background = "rgba(57,255,20,0.1)";
+            }
+          }
+        });
+      </script>
+      <a id="waz-personalization-gate-btn" href="https://personalization.dondlingergc.com" style="width: 100%; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 13px; padding: 14px; color: #ffffff; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; box-sizing: border-box;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span id="waz-personalization-gate-label">🔒 LOGIN WITH DGC ACCOUNT</span>
+      </a>
     </div>
   </div>
 </div>
